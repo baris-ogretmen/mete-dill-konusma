@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#5b5bd6">
+<title>Mete · Dil & Konuşma Robotu</title>
+<style>
+:root{--bg:#f3f5fb;--card:#fff;--ink:#1e293b;--mut:#64748b;--pri:#5b5bd6;--pri-s:#eef0ff;--ok:#16a34a;--ok-s:#dcfce7;--y:#b45309;--y-s:#fef3c7;--bad:#dc2626;--bad-s:#fee2e2;--line:#e5e7ef;--r:18px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:rgba(243,245,251,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top b{display:block;font-size:17px}.top small{color:var(--mut)}
+.live{font-size:12px;color:var(--ok);background:var(--ok-s);padding:5px 10px;border-radius:99px;font-weight:700;white-space:nowrap;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:14px 16px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.05)}
+h3{margin:0 0 10px;font-size:17px}
+.sub{margin:18px 4px 10px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.mut{color:var(--mut);font-size:14px}
+p{margin:6px 0}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fbfcff}
+textarea{resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row input[type=number]{width:84px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:14px;padding:12px 16px;background:var(--pri);color:#fff;font-weight:600;margin:4px 0;text-align:center}
+.btn.ghost{background:var(--pri-s);color:var(--pri)}
+.btn.danger{background:var(--bad-s);color:var(--bad)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.big{width:100%;padding:16px;font-size:17px;margin-top:14px}
+.btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.5}
+.file input{display:none}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.nav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 0;color:var(--mut);border-radius:12px;max-width:140px;margin:0 auto}
+.nav span{font-size:21px}.nav small{font-size:10.5px;font-weight:700}
+.nav .on{color:var(--pri);background:var(--pri-s)}
+.hero{background:linear-gradient(135deg,#5b5bd6,#8b5cf6);color:#fff}
+.hero .mut{color:#e0e7ff}
+.garage{display:flex;align-items:center;gap:14px}
+.bot{font-size:64px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.parts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.part{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;filter:grayscale(1);opacity:.4}
+.part.on{filter:none;opacity:1;background:rgba(255,255,255,.3)}
+.nx{height:8px;background:rgba(255,255,255,.25);border-radius:9px;overflow:hidden;margin-top:10px}.nx i{display:block;height:100%;background:#fde047;border-radius:9px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stats div{background:var(--bg);border-radius:12px;padding:10px 4px;text-align:center}.stats b{display:block;font-size:20px}.stats small{font-size:11px;color:var(--mut)}
+.node{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:12px;margin:0 0 10px;box-shadow:0 1px 2px rgba(15,23,42,.05),0 4px 14px rgba(15,23,42,.05);width:88%;border:0;text-align:left}
+.node.r{margin-left:12%}
+.node b{display:block}.node small{color:var(--mut)}
+.bub{position:relative;width:54px;height:54px;border-radius:50%;flex:none;background:conic-gradient(var(--c,var(--pri)) calc(var(--p)*1%),#e5e7ef 0)}
+.bub span{position:absolute;inset:5px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:24px}
+.node.tamam .bub{--c:var(--ok)}.node.bekliyor{opacity:.75}
+.steps{margin:0;padding-left:20px}.steps li{margin:6px 0}
+#modal{position:fixed;inset:0;z-index:160;background:rgba(15,23,42,.45);display:none;align-items:flex-end;justify-content:center}
+#modal.on{display:flex}
+.mbox{background:#fff;width:100%;max-width:680px;max-height:90vh;overflow:auto;border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
+@media(min-width:760px){#modal{align-items:center}.mbox{border-radius:22px}}
+.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.wchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.wc{border:1px solid var(--line);background:#fbfcff;border-radius:99px;padding:6px 10px;display:inline-flex;align-items:center;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:8px 12px;border-radius:99px;border:1px dashed #cbd2e3;color:var(--mut);font-size:14px;background:#fff}.chip.on{border:1px solid var(--pri);background:var(--pri-s);color:var(--pri);font-weight:600}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.sbtn{border:2px solid var(--line);background:#fff;border-radius:14px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;font-weight:800;font-size:22px}
+.sbtn small{font-size:16px;font-weight:400}.sbtn.on{border-color:var(--pri);background:var(--pri-s);color:var(--pri)}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#1e293b;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:300;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#busy{position:fixed;inset:0;z-index:250;background:rgba(255,255,255,.92);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-weight:600;text-align:center;padding:24px}
+#busy.on{display:flex}
+.pbar{width:min(80vw,320px);height:10px;border-radius:9px;background:#e5e7ef;overflow:hidden}.pbar i{display:block;height:100%;width:0;background:var(--pri);transition:width .2s}
+.spin{font-size:56px;animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-6deg)}}
+.mood,.rate{display:flex;gap:8px}.mood button,.rate button{flex:1;border:1px solid var(--line);background:#fbfcff;border-radius:12px;padding:10px;font-size:22px}.rate button{font-size:16px;font-weight:700}.mood .on,.rate .on{border-color:var(--pri);background:var(--pri-s);color:var(--pri)}
+.urow{display:flex;align-items:center;gap:8px;margin:6px 0}.urow label{margin:0;flex:1;color:var(--ink);font-weight:500;display:flex;gap:8px;align-items:center;font-size:15px}.urow input{width:auto}.urow select{width:auto;padding:6px 8px;font-size:13px}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}
+.rf{width:100%;border:0;border-radius:14px;background:#fff;min-height:420px;display:block}
+.pv{position:relative}.pv img{width:100%;border-radius:10px;margin-top:10px;background:#f8fafc;min-height:200px;display:block}
+.it{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.it>div{flex:1;min-width:0}.it small{color:var(--mut);display:block}
+.it .ic{font-size:26px}
+.tg{display:flex;gap:10px;align-items:center;color:var(--ink);font-weight:500;font-size:15px}.tg input{width:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;gap:4px}.seg button{flex:1;border:0;background:none;border-radius:9px;padding:9px 4px;font-weight:700;color:var(--mut)}.seg .on{background:#fff;color:var(--pri);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.drop{border:2px dashed #c7cdf0;border-radius:16px;padding:22px 12px;text-align:center;background:#fafbff;cursor:pointer;display:block}
+.drop b{display:block;font-size:17px;color:var(--pri)}.drop.hov{background:var(--pri-s);border-color:var(--pri)}
+.scard{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.sL{width:52px;height:52px;flex:none;border-radius:14px;background:var(--pri-s);color:var(--pri);font-size:28px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sbar{height:12px;border-radius:8px;background:#eceef5;overflow:hidden;margin:6px 0 2px}.sbar i{display:block;height:100%;border-radius:8px}
+.cnt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.cnt button{border:0;border-radius:16px;padding:16px 4px;font-weight:800;font-size:18px}
+.cnt .g{background:var(--ok-s);color:var(--ok)}.cnt .y{background:var(--y-s);color:var(--y)}.cnt .n{background:#f1f5f9;color:var(--mut)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.gal button{border:0;padding:0;background:#f1f5f9;border-radius:12px;overflow:hidden;aspect-ratio:3/4}.gal img{width:100%;height:100%;object-fit:cover;display:block}
+.recrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.recrow>div{flex:1;min-width:0}.recrow small{display:block;color:var(--mut)}
+.recrow button{border:0;background:var(--pri-s);color:var(--pri);border-radius:10px;width:40px;height:40px;font-size:18px}
+.recrow .st.on{background:#fef3c7}
+.goal{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}.goal>div{flex:1}.goal small{color:var(--mut)}
+.badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--pri-s);color:var(--pri)}.badge.ok{background:var(--ok-s);color:var(--ok)}
+/* ===== ÇOCUK EKRANI ===== */
+.kid{position:fixed;inset:0;z-index:40;background:linear-gradient(160deg,#eef2ff,#ecfdf5);display:flex;flex-direction:column;overflow:auto;user-select:none;-webkit-user-select:none}
+.kbar{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 6px;gap:8px}
+.lock{width:48px;height:48px;border-radius:14px;border:0;background:rgba(255,255,255,.6);font-size:20px;opacity:.45;transition:transform 1.2s,opacity .3s;touch-action:none}
+.lock.hold{transform:scale(1.35);opacity:1;background:#fde68a}
+.kst{font-size:22px;font-weight:800;background:#fff;padding:6px 16px;border-radius:99px;box-shadow:0 3px 0 #dfe3f3}
+.ksnd{font-size:15px;font-weight:800;background:#fff;padding:6px 12px;border-radius:99px;color:var(--pri);box-shadow:0 3px 0 #dfe3f3}
+.kb{width:48px;height:48px;border:0;border-radius:14px;background:#fff;font-size:24px;box-shadow:0 3px 0 #dfe3f3}
+.kmain{flex:1;display:flex;flex-direction:column;align-items:center;gap:16px;padding:8px 14px calc(24px + env(safe-area-inset-bottom))}
+.khello{display:flex;align-items:center;gap:14px;background:#fff;border-radius:24px;padding:14px 20px;box-shadow:0 4px 0 #dfe3f3;width:min(100%,720px);border:0;text-align:left}
+.kro{font-size:60px;animation:bob 2.4s ease-in-out infinite}
+.khello b{font-size:24px;display:block}.khello small{color:var(--mut);font-size:15px}
+.ktiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;width:min(100%,720px)}
+.ktile{position:relative;border:0;background:#fff;border-radius:24px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 5px 0 #dfe3f3}
+.kti{font-size:52px}.ktn{font-weight:700;font-size:16px}
+.ktile em{position:absolute;top:8px;right:8px;font-style:normal;font-size:11px;font-weight:800;background:var(--pri);color:#fff;padding:3px 8px;border-radius:99px}
+.ktile.now{outline:4px solid #fbbf24}
+.ktile.done{opacity:.55}.ktile.done em{background:var(--ok)}
+.kq{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
+.kbig{width:72px;height:72px;border-radius:50%;border:0;background:#fff;font-size:34px;box-shadow:0 4px 0 #dfe3f3}
+.dots{display:flex;gap:6px;flex-wrap:wrap}.dots i{width:14px;height:14px;border-radius:50%;background:#cbd5e1}.dots i.on{background:#22c55e}
+.kopts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.kcard{position:relative;width:min(29vw,180px);aspect-ratio:1;border:0;border-radius:26px;background:#fff;font-size:clamp(46px,14vw,100px);box-shadow:0 6px 0 #dfe3f3;display:flex;align-items:center;justify-content:center}
+.kcard:active{transform:translateY(4px);box-shadow:0 2px 0 #dfe3f3}
+.kcard.tgt{outline:6px solid #fbbf24}
+.kcard .cap{position:absolute;bottom:6px;left:0;right:0;font-size:15px;font-weight:700;color:var(--mut)}
+.hint{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08);box-shadow:0 0 0 8px #fde68a}}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.rg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(92vw,400px,52vh);background:#c7d2fe;padding:6px;border-radius:18px}
+.rc{aspect-ratio:1;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,7vw,40px)}
+.rc.w{background:#94a3b8}.rc.t{background:#fef9c3}
+.prog{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:46px;align-items:center;background:#fff;border-radius:16px;padding:6px 10px;width:min(92vw,400px)}
+.pc{font-size:24px;border-radius:8px;padding:0 2px}.pc.on{background:#bbf7d0}.pc.bad{background:#fecaca}
+.pad{display:grid;grid-template-columns:repeat(3,74px);gap:10px}
+.pad button{height:74px;border:0;border-radius:20px;background:#fff;font-size:34px;box-shadow:0 5px 0 #dfe3f3}
+.pad .go{background:#22c55e;box-shadow:0 5px 0 #15803d}.pad .del{background:#fee2e2}
+.pad button:disabled{opacity:.4}
+.pz{display:grid;gap:5px;width:min(84vw,360px,50vh);background:#c7d2fe;padding:5px;border-radius:16px}
+.pz img{width:100%;display:block;border-radius:8px;border:3px solid transparent}
+.pz img.sel{border-color:#f59e0b;transform:scale(.93)}.pz img.ok{border-color:#86efac}
+.pzprev{font-size:46px;background:#fff;border-radius:16px;padding:2px 12px}
+.hE{font-size:clamp(90px,22vw,150px);line-height:1}
+.hs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.hb{border:0;border-radius:18px;padding:14px 20px;font-size:30px;font-weight:800;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.18);transition:transform .2s}
+.hb.c0{background:#6366f1}.hb.c1{background:#f97316}.hb.c2{background:#10b981}.hb.c3{background:#ec4899}
+.hb.lit{transform:scale(1.22) translateY(-6px)}
+.kbtn{border:0;border-radius:20px;padding:16px 22px;font-size:19px;font-weight:800;background:var(--pri);color:#fff;box-shadow:0 5px 0 #3f3fb0;min-width:220px}
+.kbtn.alt{background:#fff;color:var(--pri);box-shadow:0 5px 0 #dfe3f3}
+.slots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.slot{width:min(24vw,116px);aspect-ratio:1;border-radius:22px;border:3px dashed #a5b4fc;display:flex;align-items:center;justify-content:center;font-size:clamp(40px,12vw,70px);background:rgba(255,255,255,.5);position:relative}.slot small{position:absolute;top:4px;left:8px;font-size:14px;font-weight:800;color:#6366f1}
+.slot.f{border-style:solid;background:#fff}
+.kdone{font-size:20px;font-weight:800;background:#dcfce7;border-radius:20px;padding:14px 20px;text-align:center}
+.kgar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.kgar span{font-size:28px;opacity:.22;filter:grayscale(1)}.kgar span.on{opacity:1;filter:none}
+/* drill */
+.track{display:flex;gap:4px;width:min(94vw,640px);background:#fff;border-radius:18px;padding:6px;box-shadow:0 4px 0 #dfe3f3;position:relative}
+.track i{flex:1;height:40px;border-radius:10px;background:#eef0f6;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px}
+.track i.g{background:#bbf7d0}.track i.y{background:#fde68a}.track i.n{background:#e2e8f0}.track i.cur{outline:3px solid #6366f1}
+.track i.end{background:#e0e7ff}
+.dcard{background:#fff;border-radius:30px;box-shadow:0 8px 0 #dfe3f3;padding:18px 24px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:min(86vw,360px);border:0}
+.dE{font-size:clamp(90px,24vw,170px);line-height:1.05}
+.dW{font-size:clamp(28px,7vw,46px);font-weight:800;letter-spacing:.02em;text-align:center}
+.dW .hl{color:#e11d48;text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:6px}
+.syl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.syl span{font-size:clamp(46px,12vw,80px);font-weight:900;background:linear-gradient(135deg,#6366f1,#ec4899);color:#fff;border-radius:22px;padding:6px 22px}
+.tbar{position:sticky;bottom:0;display:flex;gap:8px;width:min(96vw,640px);background:rgba(255,255,255,.95);border-radius:20px;padding:8px;box-shadow:0 -2px 14px rgba(15,23,42,.08);margin-top:auto}
+.tbar button{flex:1;border:0;border-radius:14px;padding:12px 4px;font-weight:800;font-size:15px}
+.tbar .g{background:var(--ok-s);color:var(--ok)}.tbar .y{background:var(--y-s);color:var(--y)}.tbar .n{background:#f1f5f9;color:var(--mut)}
+.tbar .rec{flex:0 0 56px;background:#fee2e2;color:#dc2626;font-size:20px}.tbar .rec.on{background:#dc2626;color:#fff;animation:pulse 1s infinite}
+.tlab{font-size:11px;color:var(--mut);font-weight:700;text-align:center;width:100%}
+.train{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.train button{border:0;background:#fff;border-radius:18px;padding:10px 14px;font-size:30px;box-shadow:0 5px 0 #dfe3f3;white-space:nowrap}
+.mpwrap{position:relative;display:flex;gap:min(10vw,80px);justify-content:center;align-items:center;margin-top:20px}
+.mpbot{font-size:64px;transition:transform .7s cubic-bezier(.5,1.6,.5,1)}
+.mode2{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+#sp{position:fixed;inset:0;z-index:80;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;padding:16px}
+#sp.on{display:flex}
+.spbox{background:#fff;border-radius:28px;padding:22px;width:min(100%,460px);text-align:center}
+.spE{font-size:92px;line-height:1.1}.spW{font-size:30px;font-weight:800;margin:6px 0 10px}
+.spW .hl{color:#e11d48}
+.say{border:0;background:var(--pri-s);color:var(--pri);border-radius:99px;padding:10px 18px;font-weight:700}
+.sprow{display:grid;grid-template-columns:repeat(3,1fr) 56px;gap:8px;margin-top:16px}
+.sprow button{border:0;border-radius:16px;padding:14px 4px;font-weight:700;font-size:14px}
+.sprow .g{background:var(--ok-s);color:var(--ok)}.sprow .y{background:var(--y-s);color:var(--y)}.sprow .n{background:#f1f5f9;color:var(--mut)}.sprow .rec{background:#fee2e2;color:#dc2626;font-size:20px}.sprow .rec.on{background:#dc2626;color:#fff}
+.sph{font-size:12px;color:var(--mut);margin-top:10px}
+#cel{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(255,255,255,.82);pointer-events:none}
+#cel.on{display:flex}#cel b{font-size:120px;animation:pop .6s}#cel p{font-size:24px;font-weight:800;text-align:center;padding:0 20px}
+#cel.calm b{animation:none}
+@keyframes pop{0%{transform:scale(.2)}70%{transform:scale(1.2)}}
+.calm *,.calm{animation:none!important;transition:none!important}
+/* ===== YAZI TAHTASI ===== */
+#board{position:fixed;inset:0;z-index:120;background:#e9ecf5;display:none;flex-direction:column;touch-action:none;user-select:none;-webkit-user-select:none}
+#board.on{display:flex}
+.btool{display:flex;align-items:center;gap:6px;padding:calc(6px + env(safe-area-inset-top)) 8px 6px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow-x:auto;flex:none;-webkit-overflow-scrolling:touch}
+.btool button{flex:none;border:0;background:#f1f5f9;border-radius:12px;min-width:44px;height:44px;font-size:20px;padding:0 8px}
+.btool button.on{background:var(--pri-s);outline:2px solid var(--pri)}
+.btool .sw{width:34px;min-width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #cbd5e1}
+.btool .sw.on{outline:3px solid var(--ink)}
+.btool .sz i{display:inline-block;border-radius:50%;background:var(--ink)}
+.btool .sep{width:1px;height:28px;background:var(--line);flex:none}
+.btool b{white-space:nowrap;font-size:14px;max-width:200px;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+@media(max-width:600px){.btool b{display:none}}
+.btool .save{background:var(--ok);color:#fff;font-weight:800;font-size:15px;padding:0 14px}
+.bstage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:8px}
+.bpage{position:relative;background:#fff;box-shadow:0 6px 30px rgba(15,23,42,.18);border-radius:4px;overflow:hidden}
+.bpage img,.bpage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bpage img{object-fit:fill;pointer-events:none}
+.bnote{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;font-size:13px;padding:6px 12px;border-radius:99px;opacity:.85;pointer-events:none;white-space:nowrap}
+.qrbox{display:flex;justify-content:center;padding:10px;background:#fff}
+.code{font-size:34px;font-weight:900;letter-spacing:.2em;text-align:center;color:var(--pri)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="board"></div>
+<div id="modal" onclick="if(event.target===this)closeModal()"></div>
+<div id="sp"></div>
+<div id="cel"><b></b><p></p></div>
+<div id="busy"><div class="spin">🤖</div><span></span><div class="pbar"><i></i></div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* ================== TEMEL ================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const jsq=s=>String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
+const Q=s=>esc(jsq(s));
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const ri=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=ri(i+1);[b[i],b[j]]=[b[j],b[i]]}return b};
+const fmtD=d=>new Date(d).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+const fmtS=d=>new Date(d).toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+const dayN=d=>new Date(d).toLocaleDateString('tr-TR',{weekday:'long'});
+const dISO=d=>new Date(d).toLocaleDateString('sv-SE');
+const fn=s=>String(s).replace(/[^\p{L}\p{N}]+/gu,'_');
+const nl=s=>s.replace(/\n/g,'<br>');
+const low=s=>String(s||'').trim().toLocaleLowerCase('tr');
+const pct=(a,b)=>b?Math.round(100*a/b):null;
+
+const LS='mete_dk_v2',LS1='mete_dilkonusma_v1';
+const PARTS=['👀 Göz','🦾 Kol','🦿 Bacak','📡 Anten','🔋 Pil','⚙️ Dişli','💡 Işık','🚀 Roket','🎨 Boya','👑 Taç','🛞 Teker','🧲 Mıknatıs','🛰️ Uydu','🎧 Kulaklık','🌈 Gökkuşağı'];
+const STAR_PER=10;
+const COLORS={'kırmızı':'#ef4444','mavi':'#3b82f6','sarı':'#facc15','yeşil':'#22c55e','turuncu':'#f97316','mor':'#a855f7','pembe':'#ec4899','kahverengi':'#a16207','siyah':'#1f2937','beyaz':'#f1f5f9'};
+
+/* ---- Kelime bankası (resimli, hedef ses konumu otomatik bulunur) ---- */
+const WB_RAW='🤖robot 🖼️resim 🚀roket 📻radyo 🚗araba 🍪kurabiye 🍐armut 🦒zürafa 🐓horoz 🍒kiraz 🥚yumurta 🪁uçurtma ❄️kar 🫑biber 🍬şeker 🚚tır 🔑anahtar 💧su ⌚saat 🪑sandalye 🐌salyangoz 🥯simit 🐿️sincap 🥛süt 🧼sabun 🎂pasta 🫘fasulye 📮posta 😷maske 🚌otobüs 🍍ananas 🎾tenis 🌵kaktüs 👒şapka ☂️şemsiye 🍾şişe ⚡şimşek 🏰şato 🥄kaşık 🫏eşek ☀️güneş 🐦kuş 🔥ateş 🪨taş 🦷diş 🐱kedi ✏️kalem 🚪kapı 📖kitap 🐶köpek 🍰kek 🪣kova 🐢kaplumbağa 🚲bisiklet 🍞ekmek ✂️makas 🍫çikolata ✈️uçak 🦆ördek 🌸çiçek 🐔tavuk 🍂yaprak 🐟balık 🍓çilek 👶bebek 👁️göz 🚢gemi 👓gözlük 🎸gitar 🌹gül 🦏gergedan 💻bilgisayar 🦘kanguru 🦩flamingo 🍋limon 💡lamba 🌷lale 🍎elma ☁️bulut 🤡palyaço 🦅kartal 🍯bal ✋el 👅dil 🎒çanta 🍵çay 🍴çatal 🔨çekiç 🧦çorap 🔺üçgen 🔪bıçak 🐐keçi 🌳ağaç 🥕havuç 🗡️kılıç 🧥ceket 👛cüzdan 🧙cadı 🐣civciv 🪟cam 🐞böcek 🕷️örümcek 🌙ay ⚽top 🐰tavşan 📱telefon 🚂tren 🧂tuz 🥔patates 📦kutu 📎ataç 🐴at 🩳şort 🍅domates 🥁davul 🌊deniz 🍦dondurma 🦖dinozor 👴dede 🐘fil 🐭fare 🔦fener 🖌️fırça 🏺vazo ⛴️vapur 🧳valiz 🔩vida 🍈kavun 📺televizyon 🏠ev 🦓zebra 🔔zil 🫒zeytin 🎲zar 🛷kızak 🫛bezelye 🍇üzüm 🐑kuzu 🪿kaz 🧊buz 🐷domuz ⭐yıldız 🌧️yağmur 🐍yılan 🐻ayı 🦶ayak 👟ayakkabı 🛶kayık 🧸oyuncak 🧀peynir 🍔hamburger 🎁hediye 🚁helikopter ☕kahve 🐙ahtapot 🍕pizza 🦜papağan 🐧penguen 🎈balon 🐸kurbağa 🍽️tabak 🦋kelebek 🎃kabak 🍌muz 🕯️mum 🍄mantar 🐒maymun 🌽mısır 🚛kamyon 🐼panda 🦁aslan 🧽sünger 🐛tırtıl 🥒salatalık 🍉karpuz 🐄inek 🐮buzağı 🚜traktör 🛁küvet 🪥fırça 🌻ayçiçeği 🦊tilki 🐺kurt 🦉baykuş 🐝arı 🍩çörek 🥜fıstık 🎤mikrofon 🧩yapboz 🪀yoyo 🛴scooter';
+const WB=(()=>{const seen=new Set();return WB_RAW.split(/\s+/).map(t=>{const m=t.match(/^(\P{L}+)(\p{L}+)$/u);return m?{e:m[1],w:m[2]}:null}).filter(x=>x&&!seen.has(x.w)&&seen.add(x.w))})();
+
+/* ---- Hedef sesler ---- */
+const SOUNDS={r:{e:'🏍️',iso:'rrrr',cue:'Motor sesi: rrrrr'},s:{e:'🐍',iso:'ssss',cue:'Yılan sesi: sssss'},'ş':{e:'🤫',iso:'şşşş',cue:'Sessiz ol: şşşşş'},z:{e:'🐝',iso:'zzzz',cue:'Arı sesi: zzzzz'},k:{e:'🥁',iso:'k k k',cue:'Tık tık: k k k'},g:{e:'🐸',iso:'g g g',cue:'Kurbağa: g g g'},l:{e:'👅',iso:'llll',cue:'Dil yukarıda: lllll'},'ç':{e:'🚂',iso:'ç ç ç',cue:'Tren: çuf çuf, ç ç ç'},c:{e:'🐤',iso:'c c c',cue:'Civciv: cik cik, c c c'},t:{e:'⏰',iso:'t t t',cue:'Saat: tik tak, t t t'},d:{e:'🥁',iso:'d d d',cue:'Davul: dum dum, d d d'},f:{e:'🌬️',iso:'ffff',cue:'Rüzgâr: fffff'},v:{e:'🏎️',iso:'vvvv',cue:'Yarış arabası: vvvvv'},y:{e:'🎉',iso:'y y y',cue:'Yaşasın: y y y'},p:{e:'🫧',iso:'p p p',cue:'Balon patladı: p p p'},b:{e:'🏀',iso:'b b b',cue:'Top sekiyor: b b b'},m:{e:'😋',iso:'mmmm',cue:'Çok lezzetli: mmmmm'},n:{e:'🎶',iso:'nnnn',cue:'Şarkı: nnnnn'},h:{e:'🪟',iso:'hhhh',cue:'Cama hohla: hhhhh'}};
+const SKEYS=Object.keys(SOUNDS);
+const LV={izole:'Ses',hece:'Hece',kelime:'Kelime',cumle:'Cümle',konusma:'Konuşma'};
+const LVK=Object.keys(LV);
+const POS={bas:'Başta',orta:'Ortada',son:'Sonda',karisik:'Karışık'};
+const PROCESSES=['Önleşme (k→t, g→d)','Duraklaşma (s→t, ş→t, z→d)','Kayma (r→y, r→l)','Son ses düşürme','Hece düşürme','Ünsüz kümesi sadeleştirme','Ötümlüleşme / ötümsüzleşme','Benzeşme (asimilasyon)','Sızıcı değişimi (ş→s, z→s)','Arkalaşma (t→k)'];
+const SOUND_TIP={r:'Dil ucu üst dişlerin arkasında; "motor sesi" oyunu oynayın: rrr.',s:'Dişler kapalı, gülümseyerek "yılan sesi" yapın: sss.','ş':'Dudaklar öne yuvarlak, "sessiz ol" işareti: şşş.',z:'Dişler kapalı, "arı sesi": zzz. Boğaza el koyup titreşimi hissedin.',k:'Dilin arkası yukarıda; dil ucu alt dişlerin arkasında kalsın: k-k-k.',g:'"k" gibi ama sesli: g-g-g. Kurbağa oyunu.',l:'Dil ucu üst dişlerin arkasına değsin: lll.','ç':'"Tren sesi": çuf çuf. Dudaklar hafif öne.',c:'"Civciv sesi": cik cik.',t:'Dil ucu üst dişlerin arkasında: tik tak.',d:'Davul çalarken: dum dum.',f:'Üst dişler alt dudağa değsin, üfleyin: fff.',v:'"f" gibi ama sesli: vvv yarış arabası.',y:'"Yaşasın!" diye zıplayın: y.',p:'Dudaklar kapanıp patlasın: p p p (balon).',b:'Dudaklarla top sektirin: b b b.',m:'"Mmm, lezzetli!" dudaklar kapalı.',n:'Dil ucu yukarıda, burundan: nnn.',h:'Cama hohlayın: hhh.'};
+const CARRIER=['Bu bir {w}.','{w} nerede?','Robot {w} buldu.','Ben {w} istiyorum.','Benim {w} var.'];
+
+/* ---- Minimal çiftler ---- */
+const MP=[
+ {c:'k–t',p:'Önleşme',a:['💪','kas'],b:['🥣','tas']},{c:'k–t',p:'Önleşme',a:['🍰','kek'],b:['☝️','tek']},{c:'k–t',p:'Önleşme',a:['🐦','kuş'],b:['⌨️','tuş']},
+ {c:'s–t',p:'Duraklaşma',a:['💇','saç'],b:['👑','taç']},{c:'ş–t',p:'Duraklaşma',a:['🍢','şiş'],b:['🧵','tiş']},
+ {c:'ş–s',p:'Sızıcı değişimi',a:['🪨','taş'],b:['🥣','tas']},{c:'ş–s',p:'Sızıcı değişimi',a:['🍢','şiş'],b:['🌫️','sis']},{c:'ş–s',p:'Sızıcı değişimi',a:['🧣','şal'],b:['🛶','sal']},
+ {c:'r–y',p:'Kayma',a:['💛','sarı'],b:['🔢','sayı']},{c:'r–y',p:'Kayma',a:['🖤','kara'],b:['🪨','kaya']},{c:'r–l',p:'Kayma',a:['🩹','yara'],b:['👅','yala']},
+ {c:'son ses',p:'Son ses düşürme',a:['🏰','kale'],b:['✏️','kalem']},{c:'son ses',p:'Son ses düşürme',a:['💧','su'],b:['🤫','sus']},
+ {c:'k–g',p:'Ötümlüleşme',a:['💪','kol'],b:['⚽','gol']},{c:'k–g',p:'Ötümlüleşme',a:['🪿','kaz'],b:['⛽','gaz']},
+ {c:'c–ç',p:'Ötümlüleşme',a:['🪟','cam'],b:['🌲','çam']},{c:'s–z',p:'Ötümlüleşme',a:['🧽','sil'],b:['🔔','zil']},{c:'t–d',p:'Ötümlüleşme',a:['🍳','tava'],b:['⚖️','dava']}
+].filter(p=>p.b[1]!=='tiş');
+
+const BASE_SEQ=[[{e:'🥚',t:'yumurta'},{e:'🐣',t:'civciv'},{e:'🐔',t:'tavuk'}],[{e:'🌱',t:'tohum'},{e:'🌿',t:'filiz'},{e:'🌳',t:'ağaç'}],[{e:'🧦',t:'çorap giy'},{e:'👟',t:'ayakkabı giy'},{e:'🚶',t:'dışarı çık'}],[{e:'🧼',t:'elleri sabunla'},{e:'🚿',t:'suyla yıka'},{e:'🧻',t:'kurula'}],[{e:'🍞',t:'ekmek al'},{e:'🧈',t:'tereyağı sür'},{e:'😋',t:'ye'}]];
+const ACTS={drill:{n:'Ses Robotu',i:'🔋',d:'Hedef ses tekrarları'},minimal:{n:'Minimal Çift',i:'🎯',d:'Fonolojik ayırt etme'},robot:{n:'Kod Yolu',i:'🤖',d:'Kodla, ulaş, söyle'},puzzle:{n:'Yapboz',i:'🧩',d:'Tamamla, söyle'},hece:{n:'Hece Treni',i:'🚂',d:'Hece farkındalığı'},ilkses:{n:'İlk Ses Dedektifi',i:'🔍',d:'İlk sesi bul'},sira:{n:'Sıralama',i:'🔢',d:'Önce–sonra, cümle'},dinle:{n:'Dinle-Bul',i:'👂',d:'Kelime anlama'},yazi:{n:'Yazı Tahtası',i:'✍️',d:'Harfi yaz'}};
+const ROUNDS={drill:10,minimal:6,robot:4,puzzle:3,hece:5,ilkses:5,sira:3,dinle:5};
+const ST={bekliyor:'Bekliyor',calisiliyor:'Çalışılıyor',tamam:'Tamamlandı'};
+const RES={'+':{t:'Doğru',i:'✅',c:'g'},'~':{t:'İpucuyla',i:'🟡',c:'y'},'-':{t:'Henüz değil',i:'⏳',c:'n'}};
+
+const DEF={v:2,settings:{student:'Mete',parent:'Sinan Bey',teacher:'Barış Öğretmen',keys:'',model:'gemini-2.5-flash',method:'',sound:true,calm:false,rate:0.85,penOnly:false},
+ profile:{about:'Konuşabiliyor. Artikülasyon ve fonolojik süreç çalışıyoruz. Renkleri biliyor; algoritma, robotik kodlama ve yapbozu çok seviyor. Henüz okumuyor.',sounds:{},processes:[],goals:[]},
+ cfg:{s:'',lvl:'kelime',pos:'karisik'},books:[],units:[],sessions:[],current:null,stars:0,parts:0,schedule:['drill','minimal','robot','hece','puzzle','yazi'],works:[],recs:[],weeks:{},customWords:[]};
+
+function migrate(o){const d=JSON.parse(JSON.stringify(DEF));const S2=Object.assign(d,o,{settings:Object.assign(d.settings,o.settings||{}),profile:Object.assign(d.profile,o.profile||{}),cfg:Object.assign(d.cfg,o.cfg||{})});
+ if(!o.v){S2.v=2;if(o.pdfPages){S2.books=[{id:'b1',name:o.pdfName||'Kitap',pages:o.pdfPages,type:'pdf',key:'pdf',added:Date.now()}];S2.units.forEach(u=>u.bookId='b1')}
+  S2.sessions.forEach(s=>{s.trials=s.trials||[];s.works=s.works||[];s.recs=s.recs||[]});S2.schedule=DEF.schedule.slice();delete S2.pdfName;delete S2.pdfPages}
+ (S2.sessions||[]).forEach(s=>{s.trials=s.trials||[];s.works=s.works||[];s.recs=s.recs||[];s.log=s.log||[]});
+ if(S2.current){S2.current.trials=S2.current.trials||[];S2.current.works=S2.current.works||[];S2.current.recs=S2.current.recs||[]}
+ S2.schedule=S2.schedule.filter(a=>ACTS[a]);if(!S2.schedule.length)S2.schedule=DEF.schedule.slice();return S2}
+function load(){try{const r=localStorage.getItem(LS);if(r)return migrate(JSON.parse(r));const r1=localStorage.getItem(LS1);if(r1)return migrate(JSON.parse(r1))}catch(e){}return migrate({v:2})}
+let S=load();
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('Kaydedilemedi: depolama dolu olabilir — Ayarlar › Yedek al')}}
+
+let view='ana',child=null,dersUnit='',pvPage=1,pvBook='',repMode='hafta',repWeek='',repSel=null,spItem=null,spNext=null,pend=null,keyIx=0;
+const PDFS={};
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),3000)}
+function busy(m,p){const b=$('#busy');if(m){b.querySelector('span').textContent=m;b.querySelector('.pbar').style.display=p==null?'none':'block';b.querySelector('.pbar i').style.width=(p||0)+'%';b.classList.add('on')}else b.classList.remove('on')}
+function modal(h){$('#modal').innerHTML=`<div class="mbox">${h}</div>`;$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+function celebrate(msg,big){const c=$('#cel');c.classList.toggle('calm',!!S.settings.calm);c.querySelector('b').textContent=big||'🎉';c.querySelector('p').textContent=msg;c.classList.add('on');say(msg);clearTimeout(c._h);c._h=setTimeout(()=>c.classList.remove('on'),2300)}
+function loadJs(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)&&loadJs[src])return res();const s=document.createElement('script');s.src=src;s.onload=()=>{loadJs[src]=1;res()};s.onerror=()=>rej(new Error('Kütüphane yüklenemedi (internet bağlantısı?)'));document.head.appendChild(s)})}
+
+/* ================== SES (TTS) ================== */
+let trVoice=null;
+function pickVoice(){try{const vs=speechSynthesis.getVoices();trVoice=vs.find(v=>/^tr[-_]TR/i.test(v.lang))||vs.find(v=>/^tr/i.test(v.lang))||null}catch(e){}}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function mkU(t,r){const u=new SpeechSynthesisUtterance(t);u.lang='tr-TR';u.rate=r||S.settings.rate||0.85;if(trVoice)u.voice=trVoice;return u}
+function say(t,r){if(!S.settings.sound||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();speechSynthesis.speak(mkU(t,r))}catch(e){}}
+function sayQ(arr,each,done,i){i=i||0;if(!S.settings.sound||!('speechSynthesis' in window)){done&&done();return}if(i===0)speechSynthesis.cancel();if(i>=arr.length){done&&done();return}each&&each(i);const u=mkU(arr[i]);let f=false;const nx=()=>{if(f)return;f=true;setTimeout(()=>sayQ(arr,each,done,i+1),350)};u.onend=nx;setTimeout(nx,2600);speechSynthesis.speak(u)}
+
+/* ================== HECE & SES KONUMU ================== */
+const VOW='aeıioöuüâîû';
+function hece(w){const s=[...low(w)];const vi=[];s.forEach((c,i)=>{if(VOW.includes(c))vi.push(i)});if(vi.length<2)return[w];const cuts=[];for(let k=1;k<vi.length;k++){const a=vi[k-1],b=vi[k];cuts.push(b-a-1<=0?b:b-1)}const out=[];let st=0;cuts.forEach(c=>{out.push(s.slice(st,c).join(''));st=c});out.push(s.slice(st).join(''));return out.filter(Boolean)}
+const heceOf=w=>String(w).trim().split(/\s+/).flatMap(hece);
+function posOf(w,s){const l=low(w);const r=new Set();if(!s||!l.includes(s))return r;if(l.startsWith(s))r.add('bas');if(l.endsWith(s))r.add('son');for(let i=1;i<l.length-1;i++)if(l[i]===s)r.add('orta');return r}
+function hlWord(w,s){if(!s)return esc(w);return [...String(w)].map(c=>low(c)===s?`<span class="hl">${esc(c)}</span>`:esc(c)).join('')}
+function sylls(s){const V='aeıiouöü';const cv=[...V].map(v=>s+v),vc=[...V].map(v=>v+s),vcv=['a','e','i','o','u'].map(v=>v+s+v);return {cv,vc,vcv}}
+
+/* ================== VERİ YARDIMCILARI ================== */
+function activeSounds(){return SKEYS.filter(k=>S.profile.sounds[k]&&S.profile.sounds[k].on)}
+function curCfg(){const c=Object.assign({},S.cfg);const act=activeSounds();if(!c.s||!SOUNDS[c.s])c.s=act[0]||'';return c}
+function curUnit(){return child&&S.units.find(u=>u.id===child.u)}
+function allWords(){const extra=[];S.units.forEach(u=>(u.words||[]).forEach(x=>extra.push({w:x.w,e:x.e,c:x.c})));(S.customWords||[]).forEach(x=>extra.push(x));const seen=new Set();return extra.concat(WB).filter(x=>x&&x.w&&!x.w.includes(' ')&&!seen.has(x.w)&&seen.add(x.w))}
+function poolFor(s,pos){const all=allWords();if(!s)return all;const list=all.filter(x=>{const p=posOf(x.w,s);return pos&&pos!=='karisik'?p.has(pos):p.size>0});return list}
+function unitWordsOr(n){const u=curUnit();const ws=u&&u.words&&u.words.length>=3?u.words:null;const s=child&&child.cfg&&child.cfg.s;let base=ws?ws:poolFor(s,'karisik');if(base.length<n)base=base.concat(WB);return shuffle(base).slice(0,n)}
+function seqOf(u){return u&&u.seq&&u.seq.length?u.seq:BASE_SEQ}
+function allTrials(){return S.sessions.flatMap(s=>s.trials||[]).concat(S.current?S.current.trials:[])}
+function allLogs(){return S.sessions.flatMap(s=>s.log||[]).concat(S.current?S.current.log:[])}
+function unitProg(u){if(u.status==='tamam')return 100;const ws=(u.words||[]).map(w=>w.w);if(!ws.length)return u.status==='calisiliyor'?10:0;const said=new Set();allTrials().forEach(t=>{if(t.r==='+')said.add(t.w)});allLogs().forEach(l=>{if(l.sp==='soyledi')said.add(l.w)});return Math.round(100*ws.filter(w=>said.has(w)).length/ws.length)}
+function emojiOf(w){const lw=low(w);const f=allWords().find(x=>x.w===lw);if(f)return f.e;for(const p of MP){if(p.a[1]===lw)return p.a[0];if(p.b[1]===lw)return p.b[0]}const p=lw.split(' ');if(p.length>1){for(const x of p){const g=allWords().find(y=>y.w===x);if(g)return g.e}}return '💬'}
+function ensureSession(){if(!S.current){S.current={id:uid(),start:Date.now(),date:new Date().toISOString(),log:[],trials:[],unitIds:[],done:[],stars:0,mood:'',att:0,notes:'',home:'',pages:'',letter:'',works:[],recs:[]};save()}return S.current}
+function logIt(a,w,ok,extra){const c=ensureSession();const u=child&&child.u||'';c.log.push(Object.assign({t:Date.now(),a,u,w,ok},extra||{}));if(u&&!c.unitIds.includes(u))c.unitIds.push(u);save()}
+function addTrial(r,w,g,cfg){const c=ensureSession();cfg=cfg||(child&&child.cfg)||curCfg();c.trials.push({t:Date.now(),s:cfg.s||'',lvl:cfg.lvl||'kelime',pos:cfg.pos||'karisik',w:low(w),r,g:g||'masa',u:child&&child.u||''});const u=child&&child.u;if(u&&!c.unitIds.includes(u))c.unitIds.push(u);save()}
+function addStar(n){const b=Math.min(PARTS.length,Math.floor(S.stars/STAR_PER));S.stars+=n;ensureSession().stars+=n;const a=Math.min(PARTS.length,Math.floor(S.stars/STAR_PER));S.parts=a;save();if(a>b)setTimeout(()=>celebrate('Yeni robot parçası: '+PARTS[a-1].split(' ')[1]+'!',PARTS[a-1].split(' ')[0]),1300)}
+function tint(hex,k){k=k==null?.78:k;const n=parseInt(hex.slice(1),16);const r=n>>16&255,g=n>>8&255,b=n&255;const m=x=>Math.round(x+(255-x)*k);return `rgb(${m(r)},${m(g)},${m(b)})`}
+function accColor(a){return a==null?'#cbd5e1':a>=80?'#16a34a':a>=50?'#d97706':'#6366f1'}
+
+/* ---- Hafta hesapları ---- */
+function weekKey(d){const x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return dISO(x)}
+function weekRange(wk){const a=new Date(wk+'T12:00:00');const b=new Date(a);b.setDate(a.getDate()+6);return [a,b]}
+function weekLabel(wk){const [a,b]=weekRange(wk);return `${fmtS(a)} – ${fmtD(b)}`}
+function addWeeks(wk,n){const a=new Date(wk+'T12:00:00');a.setDate(a.getDate()+7*n);return dISO(a)}
+function sessionsAll(){return S.sessions.concat(S.current?[S.current]:[])}
+function sessionsOfWeek(wk){return sessionsAll().filter(s=>weekKey(s.date)===wk)}
+function weeksList(){const set=new Set(sessionsAll().map(s=>weekKey(s.date)));set.add(weekKey(Date.now()));return [...set].sort().reverse()}
+function soundStats(trials){const by={};trials.forEach(t=>{if(!t.s)return;const o=by[t.s]||(by[t.s]={n:0,p:0,y:0,m:0,lv:{},ps:{},words:{}});o.n++;if(t.r==='+')o.p++;else if(t.r==='~')o.y++;else o.m++;const l=o.lv[t.lvl]||(o.lv[t.lvl]={n:0,p:0});l.n++;if(t.r==='+')l.p++;if(t.lvl==='kelime'||t.lvl==='cumle'){const q=o.ps[t.pos]||(o.ps[t.pos]={n:0,p:0});q.n++;if(t.r==='+')q.p++}});Object.values(by).forEach(o=>{o.acc=pct(o.p,o.n);o.cueAcc=pct(o.p+o.y,o.n)});return by}
+function sessData(s){const L=s.log||[];const T=s.trials||[];const words={};const rank={'+':3,'~':2,'-':1};T.forEach(t=>{if(!t.w||t.lvl==='izole'||t.lvl==='hece')return;if(!words[t.w]||rank[t.r]>rank[words[t.w]])words[t.w]=t.r});L.forEach(l=>{if(!l.sp)return;const r=l.sp==='soyledi'?'+':l.sp==='yardim'?'~':'-';if(!words[l.w]||rank[r]>rank[words[l.w]])words[l.w]=r});
+ const acts={};L.forEach(l=>{const a=acts[l.a]||(acts[l.a]={ok:0,tr:0});if(l.ok)a.ok++;else a.tr++});T.forEach(t=>{if(t.g&&t.g!=='masa'){const a=acts[t.g]||(acts[t.g]={ok:0,tr:0});if(t.r==='+')a.ok++;else a.tr++}});
+ const units=(s.unitIds||[]).map(id=>S.units.find(u=>u.id===id)).filter(Boolean);const mins=s.end?Math.max(1,Math.round((s.end-s.start)/60000)):null;return{words,acts,units,mins,snd:soundStats(T),n:T.length,p:T.filter(t=>t.r==='+').length}}
+function paStats(logs){const o={};const add=(k,ok)=>{const x=o[k]||(o[k]={n:0,ok:0});x.n++;if(ok)x.ok++};logs.forEach(l=>{if(l.a==='hece')add('hece',l.ok);else if(l.a==='ilkses')add('ilkses',l.ok);else if(l.a==='mpd')add('mpd',l.ok);else if(l.a==='mps')add('mps',l.ok)});return o}
+const PA_N={hece:'🚂 Hece sayma',ilkses:'🔍 İlk sesi bulma',mpd:'👂 Minimal çift — dinleyip ayırt etme',mps:'🗣️ Minimal çift — söyleyip anlaşılma'};
+function weekData(wk){const ss=sessionsOfWeek(wk).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));const T=ss.flatMap(s=>s.trials||[]);const L=ss.flatMap(s=>s.log||[]);const prevT=sessionsOfWeek(addWeeks(wk,-1)).flatMap(s=>s.trials||[]);
+ const snd=soundStats(T),prev=soundStats(prevT);const words={};const rank={'+':3,'~':2,'-':1};ss.forEach(s=>Object.entries(sessData(s).words).forEach(([w,r])=>{if(!words[w]||rank[r]>rank[words[w]])words[w]=r}));
+ const acts={};ss.forEach(s=>Object.entries(sessData(s).acts).forEach(([k,v])=>{const a=acts[k]||(acts[k]={ok:0,tr:0});a.ok+=v.ok;a.tr+=v.tr}));
+ const mins=ss.reduce((a,s)=>a+(s.end?Math.max(1,Math.round((s.end-s.start)/60000)):0),0);const units=[...new Set(ss.flatMap(s=>s.unitIds||[]))].map(id=>S.units.find(u=>u.id===id)).filter(Boolean);
+ const works=S.works.filter(w=>weekKey(w.date)===wk);const recs=S.recs.filter(r=>weekKey(r.date)===wk);
+ return {wk,ss,T,L,snd,prev,words,acts,mins,units,works,recs,pa:paStats(L),n:T.length,p:T.filter(t=>t.r==='+').length,y:T.filter(t=>t.r==='~').length,stars:ss.reduce((a,s)=>a+(s.stars||0),0)}}
+function trend(s,n){n=n||8;const wk=weekKey(Date.now());const out=[];for(let i=n-1;i>=0;i--){const k=addWeeks(wk,-i);const T=sessionsOfWeek(k).flatMap(x=>x.trials||[]).filter(t=>t.s===s);out.push({wk:k,acc:T.length?pct(T.filter(t=>t.r==='+').length,T.length):null,n:T.length})}return out}
+function trendUpTo(s,wk,n){n=n||8;const out=[];for(let i=n-1;i>=0;i--){const k=addWeeks(wk,-i);const T=sessionsOfWeek(k).flatMap(x=>x.trials||[]).filter(t=>t.s===s);out.push({wk:k,acc:T.length?pct(T.filter(t=>t.r==='+').length,T.length):null,n:T.length})}return out}
+function spark(tr,w,h,col){w=w||220;h=h||56;const pts=tr.map((t,i)=>t.acc==null?null:[8+i*(w-16)/Math.max(1,tr.length-1),h-8-(t.acc/100)*(h-16)]);const segs=[];let cur=[];pts.forEach(p=>{if(p)cur.push(p);else if(cur.length){segs.push(cur);cur=[]}});if(cur.length)segs.push(cur);const last=pts.filter(Boolean).pop();
+ return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;max-width:100%"><line x1="8" x2="${w-8}" y1="${h-8-(80/100)*(h-16)}" y2="${h-8-(80/100)*(h-16)}" stroke="#16a34a" stroke-dasharray="3 4" stroke-width="1" opacity=".5"/><line x1="8" x2="${w-8}" y1="${h-8}" y2="${h-8}" stroke="#e5e7ef"/>${segs.map(sg=>sg.length>1?`<polyline points="${sg.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="${col||'#5b5bd6'}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`:'').join('')}${pts.map(p=>p?`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${p===last?5:3.5}" fill="${p===last?(col||'#5b5bd6'):'#fff'}" stroke="${col||'#5b5bd6'}" stroke-width="2"/>`:'').join('')}</svg>`}
+
+/* ================== DEPOLAMA (IndexedDB) ================== */
+let _db=null;
+function idb(){if(_db)return Promise.resolve(_db);return new Promise((res,rej)=>{const r=indexedDB.open('mete_dk',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>{_db=r.result;res(_db)};r.onerror=()=>rej(r.error)})}
+async function idbSet(k,v){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error||new Error('Depolama dolu'))})}
+async function idbGet(k){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction('f','readonly');const r=tx.objectStore('f').get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbDel(k){const db=await idb();return new Promise(res=>{const tx=db.transaction('f','readwrite');tx.objectStore('f').delete(k);tx.oncomplete=()=>res();tx.onerror=()=>res()})}
+const blobToData=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b)});
+async function dataToBlob(d){return (await fetch(d)).blob()}
+
+/* ================== KİTAPLAR (PDF + fotoğraf) ================== */
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+async function ensurePdfjs(){if(window.pdfjsLib)return;await loadJs(PDFJS);pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+const bookOf=id=>S.books.find(b=>b.id===id);
+async function getPdf(b){if(PDFS[b.id])return PDFS[b.id];await ensurePdfjs();let buf=null;try{buf=await idbGet(b.key)}catch(e){}if(!buf)return null;PDFS[b.id]=await pdfjsLib.getDocument({data:new Uint8Array(buf.slice(0)),isEvalSupported:false}).promise;return PDFS[b.id]}
+async function pageImg(bookId,n,w,q){const b=bookOf(bookId);if(!b)throw new Error('Kitap bulunamadı');if(b.type==='img'){const arr=PDFS[b.id]||(PDFS[b.id]=await idbGet(b.key));if(!arr||!arr[n-1])throw new Error('Sayfa bulunamadı');return arr[n-1]}
+ const pdf=await getPdf(b);if(!pdf)throw new Error('PDF cihazda bulunamadı, Kitap sekmesinden yeniden yükle');const p=await pdf.getPage(n);const v0=p.getViewport({scale:1});const v=p.getViewport({scale:(w||1000)/v0.width});const c=document.createElement('canvas');c.width=Math.round(v.width);c.height=Math.round(v.height);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);await p.render({canvasContext:g,viewport:v}).promise;return c.toDataURL('image/jpeg',q||.75)}
+function fileSize(n){return n>1048576?(n/1048576).toFixed(1)+' MB':Math.round(n/1024)+' KB'}
+async function addBookFiles(files){files=[...(files||[])];if(!files.length)return;const pdfs=files.filter(f=>/pdf/i.test(f.type)||/\.pdf$/i.test(f.name));const imgs=files.filter(f=>/^image\//.test(f.type));for(const f of pdfs)await addPdf(f);if(imgs.length)await addImgBook(imgs);render()}
+async function addPdf(f){busy(`“${f.name}” okunuyor… (${fileSize(f.size)})`,5);try{if(f.size>250*1048576)throw new Error('Dosya çok büyük ('+fileSize(f.size)+'). PDF\'i parçalara böl ya da sayfaların fotoğrafını yükle.');
+ const buf=await f.arrayBuffer();busy('PDF kütüphanesi hazırlanıyor…',20);await ensurePdfjs();busy('Sayfalar sayılıyor…',35);const task=pdfjsLib.getDocument({data:new Uint8Array(buf.slice(0)),isEvalSupported:false});task.onProgress=p=>{if(p.total)busy('PDF açılıyor…',35+Math.round(40*p.loaded/p.total))};const pdf=await task.promise;
+ const id=uid();const b={id,name:f.name.replace(/\.pdf$/i,''),pages:pdf.numPages,type:'pdf',key:'book:'+id,added:Date.now(),size:f.size};busy('Cihaza kaydediliyor…',85);let stored=true;try{await idbSet(b.key,buf)}catch(e){stored=false}
+ PDFS[id]=pdf;S.books.push(b);pvBook=id;pvPage=1;save();toast(`✅ ${pdf.numPages} sayfa yüklendi${stored?'':' (cihaza kaydedilemedi — sadece bu oturumda açık)'}`)}catch(e){toast('PDF açılamadı: '+(e.message||e)+(String(e.message).includes('password')?' (şifreli PDF)':''))}finally{busy(false)}}
+async function shrinkImg(f,max){max=max||1400;const url=URL.createObjectURL(f);try{const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Görsel açılamadı: '+f.name));i.src=url});const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.8)}finally{URL.revokeObjectURL(url)}}
+async function addImgBook(files){const name=prompt('Bu fotoğraflar için kitap adı:','Kitap sayfaları '+fmtS(Date.now()))||'Fotoğraflı kitap';files.sort((a,b)=>a.name.localeCompare(b.name,'tr',{numeric:true}));const arr=[];try{for(let i=0;i<files.length;i++){busy(`Fotoğraf ${i+1}/${files.length} hazırlanıyor…`,Math.round(100*i/files.length));arr.push(await shrinkImg(files[i]))}const id=uid();const b={id,name,pages:arr.length,type:'img',key:'book:'+id,added:Date.now()};try{await idbSet(b.key,arr)}catch(e){toast('Cihaza kaydedilemedi')}PDFS[id]=arr;S.books.push(b);pvBook=id;pvPage=1;save();toast(`✅ ${arr.length} sayfa eklendi`)}catch(e){toast(e.message)}finally{busy(false)}}
+async function appendPhotos(bookId,files){const b=bookOf(bookId);if(!b||b.type!=='img')return;const arr=(PDFS[b.id]||await idbGet(b.key)||[]).slice();files=[...files];try{for(let i=0;i<files.length;i++){busy(`Fotoğraf ${i+1}/${files.length}…`,Math.round(100*i/files.length));arr.push(await shrinkImg(files[i]))}await idbSet(b.key,arr);PDFS[b.id]=arr;b.pages=arr.length;save();render()}catch(e){toast(e.message)}finally{busy(false)}}
+async function delBook(id){const b=bookOf(id);if(!b||!confirm(`“${b.name}” silinsin mi? (Üniteler kalır)`))return;await idbDel(b.key);delete PDFS[id];S.books=S.books.filter(x=>x.id!==id);if(pvBook===id)pvBook='';save();render()}
+
+/* ================== GEMINI ================== */
+const im=d=>({inline_data:{mime_type:'image/jpeg',data:d.split(',')[1]}});
+async function gemini(parts){const keys=String(S.settings.keys||'').split(/\s+/).filter(Boolean);if(!keys.length)throw new Error('Ayarlar sekmesinden Gemini API anahtarı ekle');let last;for(let t=0;t<keys.length;t++){const ix=(keyIx+t)%keys.length;try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(S.settings.model||'gemini-2.5-flash')}:generateContent?key=${encodeURIComponent(keys[ix])}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:{temperature:.6,responseMimeType:'application/json'}})});const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));keyIx=(ix+1)%keys.length;const txt=((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[]).map(p=>p.text||'').join('');return JSON.parse(txt.replace(/^\s*```(json)?/i,'').replace(/```\s*$/,'').trim())}catch(e){last=e}}throw last}
+async function testKey(){busy('Bağlantı test ediliyor…');try{const r=await gemini([{text:'Sadece şu JSON\'u döndür: {"ok":true}'}]);toast(r.ok?'✅ Gemini bağlantısı çalışıyor':'Yanıt geldi ama beklenmedik')}catch(e){toast('❌ '+e.message)}finally{busy(false)}}
+function ctx(){const s=S.settings,p=S.profile;const snd=activeSounds().map(k=>`/${k}/ (${LV[(p.sounds[k]||{}).lvl||'kelime']} düzeyi)`).join(', ');return `Öğrenci: ${s.student}. Otizmli. ${p.about||''} Hedef sesler: ${snd||'belirlenmedi'}. Fonolojik süreçler: ${(p.processes||[]).join(', ')||'belirtilmedi'}.${s.method?' Öğretmenin yöntem notları: '+s.method:''}`}
+
+/* ================== AI: ÜNİTE & ETKİNLİK ================== */
+async function aiUnits(bookId){const b=bookOf(bookId);if(!b)return;const a=Math.max(1,+$('#tocA').value||1),z=Math.min(+$('#tocB').value||6,b.pages);if(z<a)return toast('Sayfa aralığı hatalı');if(z-a>9)return toast('En fazla 10 sayfa seç');busy('İçindekiler okunuyor…');try{const parts=[{text:`Bu görseller bir dil ve konuşma eğitim kitabının ilk sayfaları (kapak/içindekiler). ${ctx()}\nKitabın ünite/konu listesini çıkar. Kitap toplam ${b.pages} sayfa; sayfa numaralarını dosyadaki sayfa sırası olarak ver (kitaptaki numara farklıysa kaymayı tahmin et). Sadece şu JSON'u döndür:\n{"uniteler":[{"baslik":"...","ikon":"tek emoji","baslangic":1,"bitis":5,"hedef":"bu ünitenin kısa dil-konuşma hedefi"}]}`}];for(let i=a;i<=z;i++)parts.push(im(await pageImg(bookId,i,1100)));const r=await gemini(parts);const arr=r.uniteler||[];if(!arr.length)throw new Error('Ünite bulunamadı');arr.forEach(x=>S.units.push({id:uid(),bookId,title:String(x.baslik||'Ünite'),icon:x.ikon||'📘',from:+x.baslangic||1,to:+x.bitis||+x.baslangic||1,goal:x.hedef||'',words:[],seq:[],sent:[],home:'',status:'bekliyor'}));save();toast(arr.length+' ünite eklendi');render()}catch(e){toast('AI hatası: '+e.message)}finally{busy(false)}}
+function actPrompt(u){const snd=activeSounds();return `Görseller bir dil ve konuşma kitabının "${u.title}" ünitesine ait sayfalar${u.goal?' (hedef: '+u.goal+')':''}. ${ctx()}\nBu sayfalardaki hedef kelime ve kavramlardan etkinlik içeriği üret.${snd.length?` Mümkün olduğunca hedef sesleri (${snd.join(', ')}) farklı konumlarda (başta, ortada, sonda) içeren kelimeler seç.`:''} Kelimeler somut ve TEK bir emoji ile net gösterilebilir olmalı. Sadece şu JSON'u döndür:\n{"hedef":"kısa hedef","kelimeler":[{"kelime":"elma","emoji":"🍎","renk":"kırmızı"}],"siralamalar":[[{"emoji":"🥚","ifade":"yumurta"},{"emoji":"🐣","ifade":"civciv"},{"emoji":"🐔","ifade":"tavuk"}]],"cumleler":["iki-üç kelimelik hedef cümle"],"ev":"ailenin evde 5 dakikada oynayabileceği kısa oyun"}\nKurallar: 10-14 tek kelimelik kelime; 2-4 adet 3 adımlı önce-sonra sıralaması; 3-5 cümle. "renk" sadece nesnenin tipik rengi belliyse ve şu listedense: kırmızı, mavi, sarı, yeşil, turuncu, mor, pembe, kahverengi, siyah, beyaz.`}
+function applyAi(u,r){const ws=(r.kelimeler||[]).filter(k=>k&&k.kelime&&k.emoji).map(k=>({w:low(k.kelime),e:String(k.emoji).trim(),c:COLORS[low(k.renk)]?low(k.renk):''}));if(ws.length)u.words=ws;const sq=(r.siralamalar||[]).filter(a=>Array.isArray(a)&&a.length>=3).map(a=>a.slice(0,4).map(x=>({e:x.emoji||'❓',t:String(x.ifade||'')})));if(sq.length)u.seq=sq;if(Array.isArray(r.cumleler))u.sent=r.cumleler.map(String);if(r.ev)u.home=String(r.ev);if(!u.goal&&r.hedef)u.goal=String(r.hedef)}
+async function aiActs(id,bulk){const u=S.units.find(x=>x.id===id);if(!u)return false;const b=bookOf(u.bookId);if(!bulk&&!b&&!confirm('Bu ünitenin kitabı yüklü değil. Sadece başlığa göre üretilsin mi?'))return false;if(!bulk)busy(`“${u.title}” için etkinlikler hazırlanıyor…`);try{const parts=[{text:actPrompt(u)}];if(b){const a=Math.max(1,u.from|0),z=Math.min(b.pages,Math.max(u.to|0,a));const step=Math.max(1,Math.ceil((z-a+1)/8));for(let p=a;p<=z;p+=step)parts.push(im(await pageImg(b.id,p,1000)))}applyAi(u,await gemini(parts));save();if(!bulk){toast('Etkinlikler hazır');openUnit(id)}return true}catch(e){toast('AI hatası: '+e.message);return false}finally{if(!bulk)busy(false)}}
+async function aiAll(){const list=S.units.filter(u=>!u.words||u.words.length<3);if(!list.length)return toast('Tüm ünitelerin etkinlikleri hazır');let ok=0;for(let i=0;i<list.length;i++){busy(`${i+1}/${list.length} · ${list[i].title}`,Math.round(100*i/list.length));if(await aiActs(list[i].id,true))ok++}busy(false);toast(`${ok} ünite için etkinlik üretildi`);render()}
+
+/* ================== SES KAYDI ================== */
+const REC={mr:null,timer:null};
+function recUI(){document.querySelectorAll('.rec').forEach(b=>b.classList.toggle('on',!!REC.mr))}
+async function recToggle(meta){if(REC.mr){try{REC.mr.stop()}catch(e){}return}
+ if(!navigator.mediaDevices||!window.MediaRecorder)return toast('Bu tarayıcı ses kaydını desteklemiyor (Safari/Chrome güncel olmalı)');let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){return toast('Mikrofon izni verilmedi'+(location.protocol==='file:'?' — sistemi internetteki sitenden aç':''))}
+ const mime=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg'].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||'';let mr;try{mr=new MediaRecorder(stream,mime?{mimeType:mime}:undefined)}catch(e){stream.getTracks().forEach(t=>t.stop());return toast('Kayıt başlatılamadı')}
+ const chunks=[];const t0=Date.now();const m=Object.assign({},meta||{});mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+ mr.onstop=async()=>{clearTimeout(REC.timer);stream.getTracks().forEach(t=>t.stop());REC.mr=null;recUI();if(!chunks.length)return;const blob=new Blob(chunks,{type:mr.mimeType||mime||'audio/mp4'});const id=uid();try{await idbSet('rec:'+id,blob)}catch(e){return toast('Kayıt cihaza yazılamadı')}const c=ensureSession();S.recs.unshift({id,date:new Date().toISOString(),w:low(m.w||''),s:m.s||'',lvl:m.lvl||'',sid:c.id,star:false,dur:Math.round((Date.now()-t0)/1000),type:blob.type});c.recs.push(id);save();toast('🎙️ Ses kaydedildi'+(m.w?': '+m.w:''));if(!child&&view==='kayit')render()};
+ REC.mr=mr;mr.start();recUI();say('');REC.timer=setTimeout(()=>{try{mr.stop()}catch(e){}},12000)}
+let _aud=null;
+async function playRec(id){try{const b=await idbGet('rec:'+id);if(!b)return toast('Kayıt bulunamadı');if(_aud){_aud.pause();URL.revokeObjectURL(_aud.src)}_aud=new Audio(URL.createObjectURL(b));await _aud.play()}catch(e){toast('Çalınamadı: '+e.message)}}
+function starRec(id){const r=S.recs.find(x=>x.id===id);if(r){r.star=!r.star;save();render();toast(r.star?'⭐ Veli raporuna eklenecek':'Rapordan çıkarıldı')}}
+async function delRec(id){if(!confirm('Kayıt silinsin mi?'))return;S.recs=S.recs.filter(x=>x.id!==id);S.sessions.concat(S.current?[S.current]:[]).forEach(s=>s.recs=(s.recs||[]).filter(x=>x!==id));await idbDel('rec:'+id);save();render()}
+function recRow(r){return `<div class="recrow"><button onclick="playRec('${r.id}')">▶️</button><div><b>${esc(emojiOf(r.w))} ${esc(r.w||'Serbest kayıt')}</b><small>${fmtS(r.date)} · ${r.s?'/'+esc(r.s)+'/ · ':''}${esc(LV[r.lvl]||'')} · ${r.dur||'?'} sn</small></div><button class="st ${r.star?'on':''}" onclick="starRec('${r.id}')" title="Rapora ekle">${r.star?'⭐':'☆'}</button><button onclick="delRec('${r.id}')">🗑️</button></div>`}
+
+/* ================== ÖĞRETMEN EKRANLARI ================== */
+const TABS=[['ana','🏠','Ana'],['kitap','📘','Kitap'],['ders','🎮','Ders'],['kayit','📝','Kayıt'],['rapor','📨','Rapor'],['ayar','⚙️','Ayarlar']];
+function go(v){view=v;render();window.scrollTo(0,0)}
+function render(){if(child){if(!S.current)ensureSession();return renderChild()}const V={ana:vAna,kitap:vKitap,ders:vDers,kayit:vKayit,rapor:vRapor,ayar:vAyar};$('#app').innerHTML=`<div class="top"><div><b>🤖 ${esc(S.settings.student)} · Dil & Konuşma</b><small>⭐ ${S.stars} · ${S.sessions.length} ders · ${activeSounds().map(s=>'/'+s+'/').join(' ')||'hedef ses seçilmedi'}</small></div>${S.current?'<span class="live" onclick="go(\'kayit\')">● Ders açık</span>':''}</div><main>${V[view]()}</main><nav class="nav">${TABS.map(t=>`<button class="${view===t[0]?'on':''}" onclick="go('${t[0]}')"><span>${t[1]}</span><small>${t[2]}</small></button>`).join('')}</nav>`;if(view==='kitap'&&pvBook)showPage();if(view==='rapor')fillReport()}
+
+function vAna(){const st=S.settings;const nxt=S.parts>=PARTS.length?100:Math.round(100*(S.stars%STAR_PER)/STAR_PER);const W=weekData(weekKey(Date.now()));const act=activeSounds();
+let h=`<section class="card hero"><div class="garage"><div class="bot">🤖</div><div style="flex:1"><b style="font-size:18px">${esc(st.student)}'in Robotu</b><div class="mut">⭐ ${S.stars} yıldız · ${S.parts}/${PARTS.length} parça</div><div class="nx"><i style="width:${nxt}%"></i></div></div></div><div class="parts">${PARTS.map((p,i)=>`<div class="part ${i<S.parts?'on':''}">${p.split(' ')[0]}</div>`).join('')}</div></section>
+<section class="card"><h3>📅 Bu hafta</h3><div class="stats"><div><b>${W.ss.length}</b><small>Ders</small></div><div><b>${W.n}</b><small>Ses denemesi</small></div><div><b>${W.n?'%'+pct(W.p,W.n):'—'}</b><small>Doğru</small></div><div><b>${W.works.length+W.recs.length}</b><small>Çalışma+kayıt</small></div></div><div class="grid2"><button class="btn big" onclick="go('ders')">🎮 Derse başla</button><button class="btn big ghost" onclick="repMode='hafta';repWeek='';go('rapor')">📨 Haftalık rapor</button></div></section>`;
+h+=`<section class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🎯 Hedef sesler</h3><button class="btn ghost sm" onclick="openProfile()">✏️ Düzenle</button></div>`;
+if(!act.length)h+=`<p class="mut">Önce çalışacağımız sesleri seç (ör. /r/, /s/, /k/). Oyunlar, raporlar ve ev ödevleri bunlara göre şekillenir.</p><button class="btn" onclick="openProfile()">🎯 Hedef sesleri seç</button>`;
+else h+=act.map(s=>{const tr=trend(s,8);const o=W.snd[s];const pv=W.prev[s];const a=o?o.acc:null;const d=o&&pv&&pv.n?a-pv.acc:null;return `<div class="scard"><div class="sL">${esc(s.toLocaleUpperCase('tr'))}</div><div style="flex:1;min-width:0"><b>/${esc(s)}/ · ${esc(LV[S.profile.sounds[s].lvl||'kelime'])} düzeyi</b><div class="sbar"><i style="width:${a||0}%;background:${accColor(a)}"></i></div><small class="mut">${o?`Bu hafta %${a} doğru · ${o.n} deneme${d!=null?` · ${d>=0?'▲':'▼'} ${Math.abs(d)} puan`:''}`:'Bu hafta henüz deneme yok'}</small></div><div style="width:120px;flex:none">${spark(tr,120,44,accColor(a))}</div></div>`}).join('');
+h+=`</section>`;
+const G=S.profile.goals||[];h+=`<section class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🏁 Hedeflerimiz</h3><button class="btn ghost sm" onclick="openProfile()">➕</button></div>${G.length?G.map(g=>`<div class="goal"><span>${g.st==='tamam'?'✅':'🎯'}</span><div>${esc(g.t)}<br><small>${g.st==='tamam'?'Ulaşıldı':'Devam ediyor'}</small></div></div>`).join(''):'<p class="mut">Örn: “/k/ sesini kelime başında %80 doğrulukla söyler.”</p>'}</section>`;
+if(!S.books.length&&!act.length)h+=`<section class="card"><h3>Nasıl başlarız?</h3><ol class="steps"><li><b>🎯 Hedef sesler</b>i ve fonolojik süreçleri seç.</li><li><b>Kitap</b> → PDF'leri ya da sayfa fotoğraflarını yükle.</li><li><b>Ders</b> → çocuk ekranını aç: Ses Robotu, Minimal Çift, Kod Yolu, Hece Treni…</li><li>Her denemeyi <b>✅ / 🟡 / ⏳</b> ile işaretle, önemli anları <b>🎙️</b> kaydet.</li><li>Kitap sayfasına <b>✍️ yazı tahtasında</b> yazın; tablet/tahta canlı bağlanır.</li><li>Hafta sonunda <b>📨 Rapor</b> → ${esc(st.parent)}'e grafikli, sesli veli paneli gönder.</li></ol></section>`;
+if(S.units.length)h+=`<div class="sub">Kitap yolculuğu</div>`+S.units.map((u,i)=>{const p=unitProg(u);return `<button class="node ${u.status} ${i%2?'r':''}" onclick="openUnit('${u.id}')"><div class="bub" style="--p:${p}"><span>${esc(u.icon||'📘')}</span></div><div><b>${i+1}. ${esc(u.title)}</b><small>${ST[u.status]} · %${p}${(u.words||[]).length?'':' · etkinlik yok'}</small></div></button>`}).join('');
+return h}
+
+function openProfile(){const p=S.profile;const act=activeSounds();
+modal(`<h3>🎯 ${esc(S.settings.student)} · Profil ve hedefler</h3><label>Öğrenci hakkında (AI ve rapor bunu kullanır)</label><textarea rows="3" oninput="S.profile.about=this.value;save()">${esc(p.about)}</textarea>
+<label>Hedef sesler (dokun: seç/çıkar)</label><div class="sgrid">${SKEYS.map(k=>`<button class="sbtn ${p.sounds[k]&&p.sounds[k].on?'on':''}" onclick="togSound('${k}')">${esc(k.toLocaleUpperCase('tr'))}<small>${SOUNDS[k].e}</small></button>`).join('')}</div>
+${act.length?`<label>Her sesin şu anki çalışma düzeyi</label>${act.map(k=>`<div class="urow"><label><b style="font-size:20px;width:30px">/${esc(k)}/</b> ${esc(SOUNDS[k].cue)}</label><select onchange="S.profile.sounds['${k}'].lvl=this.value;save()">${LVK.map(l=>`<option value="${l}" ${(p.sounds[k].lvl||'kelime')===l?'selected':''}>${LV[l]}</option>`).join('')}</select></div>`).join('')}`:''}
+<label>Gözlenen fonolojik süreçler</label>${PROCESSES.map((x,i)=>`<div class="urow"><label><input type="checkbox" ${p.processes.includes(x)?'checked':''} onchange="togProc(${i},this.checked)"> ${esc(x)}</label></div>`).join('')}
+<label>Hedefler</label><div id="goals">${goalsHTML()}</div><div class="row"><input id="gNew" placeholder="örn. /r/ sesini kelime başında %80 doğru söyler" style="flex:1"><button class="btn" onclick="addGoal()">Ekle</button></div>
+<div class="mbtns"><button class="btn" onclick="closeModal();render()">✅ Tamam</button><button class="btn ghost" onclick="suggestGoals()">✨ Hedef öner</button></div>`)}
+function goalsHTML(){return (S.profile.goals||[]).map(g=>`<div class="goal"><button class="btn sm ${g.st==='tamam'?'ok':'ghost'}" onclick="togGoal('${g.id}')">${g.st==='tamam'?'✅':'🎯'}</button><div>${esc(g.t)}<br><small>${fmtS(g.date)}</small></div><button class="btn sm danger" onclick="delGoal('${g.id}')">✕</button></div>`).join('')}
+function togSound(k){const p=S.profile;p.sounds[k]=p.sounds[k]||{on:false,lvl:'kelime'};p.sounds[k].on=!p.sounds[k].on;if(p.sounds[k].on&&!S.cfg.s)S.cfg.s=k;if(!p.sounds[k].on&&S.cfg.s===k)S.cfg.s=activeSounds()[0]||'';save();openProfile()}
+function togProc(i,on){const x=PROCESSES[i],a=S.profile.processes;const j=a.indexOf(x);if(on&&j<0)a.push(x);if(!on&&j>=0)a.splice(j,1);save()}
+function addGoal(){const t=$('#gNew').value.trim();if(!t)return;S.profile.goals.push({id:uid(),t,st:'devam',date:new Date().toISOString()});save();$('#goals').innerHTML=goalsHTML();$('#gNew').value=''}
+function togGoal(id){const g=S.profile.goals.find(x=>x.id===id);if(g){g.st=g.st==='tamam'?'devam':'tamam';g.done=g.st==='tamam'?new Date().toISOString():null;save();$('#goals').innerHTML=goalsHTML()}}
+function delGoal(id){S.profile.goals=S.profile.goals.filter(x=>x.id!==id);save();$('#goals').innerHTML=goalsHTML()}
+function suggestGoals(){const act=activeSounds();if(!act.length)return toast('Önce hedef ses seç');act.forEach(k=>{const l=S.profile.sounds[k].lvl||'kelime';const t=l==='izole'?`/${k}/ sesini tek başına, model olmadan 10 denemede 8 doğru üretir.`:l==='hece'?`/${k}/ sesini hecelerde (${sylls(k).cv.slice(0,3).join(', ')}) %80 doğrulukla üretir.`:l==='kelime'?`/${k}/ sesini kelime başında, ortasında ve sonunda %80 doğrulukla söyler.`:l==='cumle'?`/${k}/ sesli kelimeleri kısa cümle içinde %80 doğrulukla söyler.`:`/${k}/ sesini serbest konuşmada çoğunlukla doğru kullanır.`;if(!S.profile.goals.some(g=>g.t===t))S.profile.goals.push({id:uid(),t,st:'devam',date:new Date().toISOString()})});(S.profile.processes||[]).slice(0,2).forEach(p=>{const t=`${p.split(' (')[0]} sürecini minimal çift çalışmalarında %80 oranında ayırt eder ve doğru üretir.`;if(!S.profile.goals.some(g=>g.t===t))S.profile.goals.push({id:uid(),t,st:'devam',date:new Date().toISOString()})});save();$('#goals').innerHTML=goalsHTML();toast('Hedefler eklendi — düzenleyebilirsin')}
+
+function openUnit(id){const u=S.units.find(x=>x.id===id);if(!u)return;const p=unitProg(u);const b=bookOf(u.bookId);
+modal(`<h3>${esc(u.icon||'📘')} ${esc(u.title)}</h3><p class="mut">${b?esc(b.name)+' · ':''}Sayfa ${u.from}–${u.to} · ${ST[u.status]} · %${p}</p>${u.goal?`<p><b>Hedef:</b> ${esc(u.goal)}</p>`:''}
+<div class="wchips">${(u.words||[]).map(w=>`<button class="wc" onclick="say('${Q(w.w)}')">${esc(w.e)} ${esc(w.w)}</button>`).join('')||'<span class="mut">Henüz kelime yok — AI ile üret ya da düzenle. (Şimdilik hedef ses kelime bankası kullanılır.)</span>'}</div>
+${(u.sent||[]).length?`<p><b>Hedef cümleler:</b> ${u.sent.map(esc).join(' · ')}</p>`:''}${u.home?`<p><b>🏠 Ev oyunu:</b> ${esc(u.home)}</p>`:''}
+<div class="mbtns"><button class="btn" onclick="dersUnit='${u.id}';closeModal();go('ders')">🎮 Bu üniteyle ders</button><button class="btn ghost" onclick="aiActs('${u.id}')">✨ AI ile etkinlik üret</button><button class="btn ghost" onclick="editUnit('${u.id}')">✏️ Düzenle</button>${b?`<button class="btn ghost" onclick="pvBook='${b.id}';pvPage=${u.from|0};closeModal();go('kitap')">📄 Sayfalara git</button>`:''}</div>`)}
+function editUnit(id){const u=id?S.units.find(x=>x.id===id):{id:'',bookId:pvBook||(S.books[0]&&S.books[0].id)||'',title:'',icon:'📘',from:pvPage||1,to:pvPage||1,goal:'',words:[],seq:[],sent:[],home:'',status:'bekliyor'};
+modal(`<h3>${id?'Üniteyi düzenle':'Yeni ünite'}</h3><div class="grid2"><div><label>Başlık</label><input id="eT" value="${esc(u.title)}"></div><div><label>İkon (emoji)</label><input id="eI" value="${esc(u.icon||'')}"></div></div><label>Kitap</label><select id="eB"><option value="">—</option>${S.books.map(b=>`<option value="${b.id}" ${b.id===u.bookId?'selected':''}>${esc(b.name)}</option>`).join('')}</select><div class="grid2"><div><label>Başlangıç sayfası</label><input id="eF" type="number" value="${u.from}"></div><div><label>Bitiş sayfası</label><input id="eE" type="number" value="${u.to}"></div></div><label>Durum</label><select id="eS">${Object.keys(ST).map(k=>`<option value="${k}" ${u.status===k?'selected':''}>${ST[k]}</option>`).join('')}</select><label>Hedef</label><input id="eG" value="${esc(u.goal)}"><label>Kelimeler — her satır: emoji kelime</label><textarea id="eW" rows="6" placeholder="🍎 elma">${esc((u.words||[]).map(w=>`${w.e} ${w.w}`).join('\n'))}</textarea><label>Sıralamalar — her satır: 🥚 yumurta | 🐣 civciv | 🐔 tavuk</label><textarea id="eQ" rows="3">${esc((u.seq||[]).map(s=>s.map(x=>x.e+' '+x.t).join(' | ')).join('\n'))}</textarea><label>Hedef cümleler</label><textarea id="eC" rows="3">${esc((u.sent||[]).join('\n'))}</textarea><label>Ev oyunu</label><textarea id="eH" rows="2">${esc(u.home||'')}</textarea><div class="mbtns"><button class="btn" onclick="saveUnit('${u.id}')">💾 Kaydet</button>${id?`<button class="btn danger" onclick="delUnit('${u.id}')">🗑️ Sil</button>`:`<button class="btn ghost" onclick="closeModal()">Vazgeç</button>`}</div>`)}
+function saveUnit(id){const t=$('#eT').value.trim();if(!t)return toast('Başlık gerekli');let u=S.units.find(x=>x.id===id);if(!u){u={id:uid(),status:'bekliyor'};S.units.push(u)}u.title=t;u.icon=$('#eI').value.trim()||'📘';u.bookId=$('#eB').value;u.from=+$('#eF').value||1;u.to=Math.max(+$('#eE').value||u.from,u.from);u.status=$('#eS').value;u.goal=$('#eG').value.trim();
+u.words=$('#eW').value.split('\n').map(l=>{const tk=l.trim().split(/\s+/);if(tk.length<2)return null;return{e:tk[0],w:low(tk.slice(1).join(' ')),c:''}}).filter(Boolean);
+u.seq=$('#eQ').value.split('\n').map(l=>l.split('|').map(p=>{const tk=p.trim().split(/\s+/);return{e:tk[0],t:tk.slice(1).join(' ')}}).filter(x=>x.e&&x.t)).filter(s=>s.length>=2);
+u.sent=$('#eC').value.split('\n').map(s=>s.trim()).filter(Boolean);u.home=$('#eH').value.trim();save();closeModal();render();toast('Kaydedildi')}
+function delUnit(id){if(!confirm('Bu ünite silinsin mi?'))return;S.units=S.units.filter(u=>u.id!==id);save();closeModal();render()}
+
+/* ---- Kitap ---- */
+function dropOn(e,on){e.preventDefault();e.currentTarget.classList.toggle('hov',on)}
+function dropFiles(e){e.preventDefault();e.currentTarget.classList.remove('hov');addBookFiles(e.dataTransfer.files)}
+function vKitap(){const b=bookOf(pvBook);let h=`<section class="card"><h3>📚 Kitaplar</h3><label class="drop file" ondragover="dropOn(event,true)" ondragleave="dropOn(event,false)" ondrop="dropFiles(event)"><b>📥 PDF ya da sayfa fotoğrafı ekle</b><span class="mut">Dokun ve seç (birden çok dosya olur) · bilgisayarda sürükle-bırak</span><input type="file" multiple accept="application/pdf,.pdf,image/*" onchange="addBookFiles(this.files);this.value=''"></label>
+<p class="mut" style="margin-top:10px">💡 Yükleme takılırsa: çok büyük taranmış PDF'ler telefonda ağır açılır. PDF'i bölerek yükle ya da çalışacağın sayfaların fotoğrafını çek — fotoğraflar otomatik küçültülür ve hızlı açılır. Dosyalar bu cihazda kalır, internete gönderilmez (sadece AI üretiminde seçili sayfalar Gemini'ye gider).</p>
+${S.books.map(x=>`<div class="it"><span class="ic">${x.type==='pdf'?'📕':'🖼️'}</span><div><b>${esc(x.name)}</b><small>${x.pages} sayfa${x.size?' · '+fileSize(x.size):''}</small></div><button class="btn sm ${x.id===pvBook?'':'ghost'}" onclick="pvBook='${x.id}';pvPage=1;render()">${x.id===pvBook?'Açık':'Aç'}</button>${x.type==='img'?`<label class="btn sm ghost file">📷+<input type="file" multiple accept="image/*" onchange="appendPhotos('${x.id}',this.files)"></label>`:''}<button class="btn sm danger" onclick="delBook('${x.id}')">🗑️</button></div>`).join('')}</section>`;
+if(b)h+=`<section class="card"><h3>📄 ${esc(b.name)}</h3><div class="row"><button class="btn ghost" onclick="pvGo(-1)">◀</button><input id="pvN" type="number" value="${pvPage}" onchange="pvPage=+this.value;showPage()"><span class="mut">/ ${b.pages}</span><button class="btn ghost" onclick="pvGo(1)">▶</button></div><div class="grid2" style="margin-top:6px"><button class="btn" onclick="openBookBoard('${b.id}',pvPage)">✍️ Bu sayfada yaz</button><button class="btn ghost" onclick="openBookBoard('${b.id}',pvPage,true)">📡 Tahta/tablete yansıt</button></div><div class="pv"><img id="pv" alt="Sayfa yükleniyor…" onclick="openBookBoard('${b.id}',pvPage)"></div></section>
+<section class="card"><h3>✨ Üniteleri AI ile çıkar</h3><p class="mut">İçindekiler sayfalarının aralığını seç; AI üniteleri ve sayfa aralıklarını bulsun.</p><div class="row"><input id="tocA" type="number" value="1" min="1"><span>–</span><input id="tocB" type="number" value="${Math.min(6,b.pages)}" min="1"><button class="btn" onclick="aiUnits('${b.id}')">Çıkar</button></div></section>`;
+h+=`<section class="card"><h3>Üniteler (${S.units.length})</h3>${S.units.map(u=>`<div class="it"><span class="ic">${esc(u.icon||'📘')}</span><div><b>${esc(u.title)}</b><small>s. ${u.from}–${u.to} · ${(u.words||[]).length} kelime · ${ST[u.status]}</small></div><button class="btn sm ghost" onclick="openUnit('${u.id}')">Aç</button></div>`).join('')}<div class="row" style="margin-top:8px"><button class="btn ghost" onclick="editUnit()">➕ Elle ünite ekle</button>${S.units.length?'<button class="btn ghost" onclick="aiAll()">✨ Eksiklerin hepsine üret</button>':''}</div></section>
+<section class="card"><h3>➕ Kendi kelimelerim</h3><p class="mut">Kitapta olup bankada olmayan kelimeler: her satır “emoji kelime”. Oyunlarda hedef sese göre otomatik kullanılır.</p><textarea rows="4" placeholder="🧃 meyve suyu&#10;🦔 kirpi" onchange="saveCustom(this.value)">${esc((S.customWords||[]).map(x=>x.e+' '+x.w).join('\n'))}</textarea></section>`;return h}
+function saveCustom(v){S.customWords=v.split('\n').map(l=>{const tk=l.trim().split(/\s+/);return tk.length>=2?{e:tk[0],w:low(tk.slice(1).join(' '))}:null}).filter(Boolean);save();toast(S.customWords.length+' kelime kaydedildi')}
+async function showPage(){const img=$('#pv');const b=bookOf(pvBook);if(!img||!b)return;pvPage=Math.min(Math.max(1,pvPage|0),b.pages);const n=$('#pvN');if(n)n.value=pvPage;try{img.src=await pageImg(b.id,pvPage,900,.8)}catch(e){img.alt=e.message}}
+function pvGo(d){pvPage+=d;showPage()}
+
+/* ---- Ders ---- */
+function cfgChips(){const c=curCfg();const act=activeSounds();const list=act.length?act:SKEYS;return `<label>Hedef ses</label><div class="chips">${list.map(k=>`<button class="chip ${c.s===k?'on':''}" onclick="S.cfg.s='${k}';save();render()">/${esc(k)}/ ${SOUNDS[k].e}</button>`).join('')}</div>${act.length?'':'<p class="mut">⚠️ Profilde hedef ses seçilmedi — 🏠 Ana › Hedef sesler.</p>'}
+<label>Düzey</label><div class="seg">${LVK.map(l=>`<button class="${c.lvl===l?'on':''}" onclick="S.cfg.lvl='${l}';save();render()">${LV[l]}</button>`).join('')}</div>
+<label>Kelimedeki yeri</label><div class="seg">${Object.keys(POS).map(p=>`<button class="${c.pos===p?'on':''}" onclick="S.cfg.pos='${p}';save();render()">${POS[p]}</button>`).join('')}</div>`}
+function vDers(){const opts=S.units.map(u=>`<option value="${u.id}" ${u.id===dersUnit?'selected':''}>${esc((u.icon||'')+' '+u.title)}</option>`).join('');const sch=S.schedule.map((a,i)=>`<button class="chip on" onclick="schToggle('${a}')">${i+1}. ${ACTS[a].i} ${ACTS[a].n}</button>`).join('');const off=Object.keys(ACTS).filter(a=>!S.schedule.includes(a)).map(a=>`<button class="chip" onclick="schToggle('${a}')">+ ${ACTS[a].i} ${ACTS[a].n}</button>`).join('');const c=curCfg();const pool=c.s?poolFor(c.s,c.pos):[];
+return `<section class="card"><h3>🎮 Bugünkü ders</h3>${cfgChips()}${c.s?`<p class="mut" style="margin-top:8px">${SOUNDS[c.s].e} ${esc(SOUNDS[c.s].cue)} · bu ayarla <b>${pool.length}</b> resimli kelime var${pool.length?': '+pool.slice(0,8).map(x=>x.e).join(' '):''}</p>`:''}
+<label>Ünite (isteğe bağlı — Dinle-Bul ve Sıralama için)</label><select onchange="dersUnit=this.value"><option value="">Kelime bankası</option>${opts}</select>
+<label>Görsel program — sırayla (dokun: çıkar/ekle)</label><div class="chips">${sch}${off}</div><p class="mut" style="margin-top:10px">${esc(S.settings.student)} bunu resimli “ŞİMDİ → SONRA” programı olarak görür; geçişler öngörülebilir olur.</p><button class="btn big" onclick="startChild()">🚀 Çocuk ekranını aç</button><div class="grid2"><button class="btn ghost" onclick="openLetterBoard()">✍️ Harf yazma tahtası</button><button class="btn ghost" onclick="openBlankBoard()">⬜ Boş yazı tahtası</button></div></section>
+<section class="card"><h3>👩‍🏫 Öğretmen için</h3><ul class="steps"><li>Çocuk ekranından çıkmak için sol üstteki <b>🔒</b>'e <b>1 saniye basılı tut</b>.</li><li>Her denemede altta: <b>✅ Doğru · 🟡 İpucuyla · ⏳ Henüz</b>. Veli raporundaki yüzdeler buradan gelir.</li><li><b>🎙️</b> o anki söyleyişi kaydeder. ⭐ ile işaretlediklerin veli panelinde dinlenebilir (önce/sonra).</li><li><b>Minimal Çift › Söyle</b>: ${esc(S.settings.student)} hedef kelimeyi söyler, sen <i>duyduğun</i> resme dokunursun; robot oraya gider. Yanlış giderse “robot anlamadı” — doğal geri bildirim.</li><li>Yazı tahtasında <b>📡</b> ile QR çıkar: tablet ya da akıllı tahta okutunca aynı sayfada canlı yazarsınız.</li></ul></section>`}
+function schToggle(a){const i=S.schedule.indexOf(a);if(i>=0){if(S.schedule.length<2)return toast('En az bir etkinlik kalmalı');S.schedule.splice(i,1)}else S.schedule.push(a);save();render()}
+function startChild(){const c=ensureSession();const u=S.units.find(x=>x.id===dersUnit);if(u){if(u.status==='bekliyor')u.status='calisiliyor';if(!c.unitIds.includes(u.id))c.unitIds.push(u.id);if(!c.home&&u.home)c.home=u.home}child={u:u?u.id:'',act:null,st:null,cfg:curCfg()};save();render();say('Merhaba '+S.settings.student+'! Hadi başlayalım.')}
+
+/* ---- Kayıt ---- */
+let qc={w:''};
+function vKayit(){const c=S.current;let h='';if(c){const d=sessData(c);const W=Object.values(d.words);
+h+=`<section class="card"><h3>📝 Açık ders · ${fmtD(c.date)}</h3><div class="stats"><div><b>${d.n}</b><small>Deneme</small></div><div><b>${d.n?'%'+pct(d.p,d.n):'—'}</b><small>Doğru</small></div><div><b>${W.filter(v=>v==='+').length}</b><small>Doğru kelime</small></div><div><b>⭐${c.stars}</b><small>Yıldız</small></div></div>
+${Object.entries(d.snd).map(([s,o])=>`<div class="scard"><div class="sL">${esc(s.toLocaleUpperCase('tr'))}</div><div style="flex:1"><div class="sbar"><i style="width:${o.acc||0}%;background:${accColor(o.acc)}"></i></div><small class="mut">✅ ${o.p} · 🟡 ${o.y} · ⏳ ${o.m} — %${o.acc} doğru, ipucuyla %${o.cueAcc}</small></div></div>`).join('')}
+</section><section class="card"><h3>⚡ Hızlı sayaç <span class="mut">(kitapla masa başı çalışırken)</span></h3>${cfgChips()}<label>Kelime (isteğe bağlı)</label><input value="${esc(qc.w)}" oninput="qc.w=this.value" placeholder="örn. robot"><div class="cnt"><button class="g" onclick="qTrial('+')">✅ Doğru</button><button class="y" onclick="qTrial('~')">🟡 İpucu</button><button class="n" onclick="qTrial('-')">⏳ Henüz</button></div><div class="row" style="justify-content:space-between;margin-top:8px"><button class="btn ghost sm rec" onclick="recToggle({w:qc.w,s:curCfg().s,lvl:curCfg().lvl})">🎙️ Kaydet</button><button class="btn ghost sm" onclick="qUndo()">↩️ Son denemeyi geri al</button></div></section>
+<section class="card"><h3>🧾 Ders notu</h3><label>Kitapta çalışılan sayfalar</label><input value="${esc(c.pages)}" placeholder="örn. 12-15" oninput="S.current.pages=this.value;save()">
+${S.units.length?`<label>Çalışılan üniteler ve durumu</label>${S.units.map(u=>`<div class="urow"><label><input type="checkbox" ${c.unitIds.includes(u.id)?'checked':''} onchange="kUnit('${u.id}',this.checked)"> ${esc((u.icon||'')+' '+u.title)}</label><select onchange="kStat('${u.id}',this.value)">${Object.keys(ST).map(k=>`<option value="${k}" ${u.status===k?'selected':''}>${ST[k]}</option>`).join('')}</select></div>`).join('')}`:''}
+<label>${esc(S.settings.student)} bugün nasıldı?</label><div class="mood">${['😊','😐','😟'].map(m=>`<button class="${c.mood===m?'on':''}" onclick="S.current.mood='${m}';save();render()">${m}</button>`).join('')}</div>
+<label>Dikkat / katılım</label><div class="rate">${[1,2,3,4,5].map(n=>`<button class="${c.att===n?'on':''}" onclick="S.current.att=${n};save();render()">${n}</button>`).join('')}</div>
+<label>Öğretmen notu (veliye)</label><textarea rows="3" oninput="S.current.notes=this.value;save()" placeholder="Bugün neler oldu, neye iyi tepki verdi…">${esc(c.notes)}</textarea>
+<label>Evde yapılacaklar</label><textarea rows="2" oninput="S.current.home=this.value;save()">${esc(c.home)}</textarea>
+<button class="btn big" onclick="endSession()">✅ Dersi bitir</button><div class="row" style="justify-content:space-between"><button class="btn ghost" onclick="startChild()">🎮 Çocuk ekranına dön</button><button class="btn danger" onclick="cancelSession()">İptal</button></div></section>`}
+else h+=`<section class="card"><h3>📝 Açık ders yok</h3><p class="mut">Çocuk ekranını açınca ders kaydı otomatik başlar. Kitaptan masa başı çalışacaksan elle aç; hızlı sayaçla denemeleri say.</p><button class="btn big" onclick="ensureSession();render()">➕ Dersi başlat</button></section>`;
+const recs=S.recs.slice(0,30);h+=`<section class="card"><h3>🎙️ Ses kayıtları (${S.recs.length})</h3><p class="mut">⭐ işaretlediklerin veli panelinde dinlenir. Aynı kelimenin ilk kaydı “önce” olarak otomatik eklenir.</p>${recs.map(recRow).join('')||'<p class="mut">Henüz kayıt yok.</p>'}</section>`;
+h+=`<section class="card"><h3>✍️ Yazı çalışmaları (${S.works.length})</h3><div class="gal" id="gal">${S.works.slice(0,24).map(w=>`<button onclick="openWork('${w.id}')"><img data-work="${w.id}" alt=""></button>`).join('')}</div>${S.works.length?'':'<p class="mut">Yazı tahtasında 💾 ile kaydedilen sayfalar burada.</p>'}</section>`;
+if(S.sessions.length)h+=`<div class="sub">Geçmiş dersler</div><section class="card">${S.sessions.map(s=>{const d=sessData(s);return `<div class="srow"><div><b>${fmtD(s.date)}</b> ${s.mood||''}<div class="mut">${Object.keys(d.snd).map(k=>'/'+k+'/ %'+d.snd[k].acc).join(' · ')||d.units.map(u=>esc(u.title)).join(', ')||'Genel'}</div></div><button class="btn ghost sm" onclick="repSel='${s.id}';repMode='ders';go('rapor')">Rapor</button></div>`}).join('')}</section>`;setTimeout(fillThumbs,0);return h}
+async function fillThumbs(){for(const img of document.querySelectorAll('img[data-work]')){if(img.src)continue;try{const d=await idbGet('work:'+img.dataset.work);if(d)img.src=d.th||d.img}catch(e){}}}
+async function openWork(id){const w=S.works.find(x=>x.id===id);const d=await idbGet('work:'+id);if(!w||!d)return toast('Bulunamadı');modal(`<h3>✍️ ${esc(w.title)}</h3><p class="mut">${fmtD(w.date)}</p><img src="${d.img}" style="width:100%;border-radius:12px;border:1px solid var(--line)"><div class="mbtns"><button class="btn ghost" onclick="shareWork('${id}')">📤 Paylaş</button><button class="btn danger" onclick="delWork('${id}')">🗑️ Sil</button></div>`)}
+async function shareWork(id){const d=await idbGet('work:'+id);const b=await dataToBlob(d.img);offerShare(b,`${fn(S.settings.student)}_yazi_${dISO(Date.now())}.jpg`,'image/jpeg')}
+async function delWork(id){if(!confirm('Silinsin mi?'))return;S.works=S.works.filter(x=>x.id!==id);sessionsAll().forEach(s=>s.works=(s.works||[]).filter(x=>x!==id));await idbDel('work:'+id);save();closeModal();render()}
+function qTrial(r){addTrial(r,qc.w,'masa',curCfg());toast(RES[r].i+' '+RES[r].t+(qc.w?' · '+qc.w:''));render()}
+function qUndo(){const c=S.current;if(c&&c.trials.length){c.trials.pop();save();render();toast('Geri alındı')}}
+function kUnit(id,on){const c=S.current;if(on&&!c.unitIds.includes(id))c.unitIds.push(id);if(!on)c.unitIds=c.unitIds.filter(x=>x!==id);save()}
+function kStat(id,v){const u=S.units.find(x=>x.id===id);if(u){u.status=v;save()}}
+function endSession(){const c=S.current;if(!c)return;c.end=Date.now();S.sessions.unshift(c);S.current=null;save();repSel=c.id;repMode='ders';go('rapor');toast('Ders kaydedildi — rapor hazır')}
+function cancelSession(){if(!confirm('Açık ders silinsin mi? (Kazanılan yıldızlar geri alınır)'))return;S.stars=Math.max(0,S.stars-(S.current.stars||0));S.parts=Math.min(PARTS.length,Math.floor(S.stars/STAR_PER));S.current=null;save();render()}
+
+/* ---- Ayarlar ---- */
+function vAyar(){const s=S.settings;const f=(k,l,ph)=>`<label>${l}</label><input value="${esc(s[k])}" placeholder="${esc(ph||'')}" oninput="S.settings.${k}=this.value;save()">`;
+return `<section class="card"><h3>👤 Kişiler</h3>${f('student','Öğrenci')}${f('parent','Veli')}${f('teacher','Öğretmen')}<button class="btn ghost" style="margin-top:10px" onclick="openProfile()">🎯 Profil, hedef sesler, süreçler</button></section>
+<section class="card"><h3>🔑 Gemini</h3><label>API anahtarları (her satıra bir tane — sırayla kullanılır)</label><textarea rows="3" oninput="S.settings.keys=this.value;save()" placeholder="AIza…">${esc(s.keys)}</textarea>${f('model','Model','gemini-2.5-flash')}<button class="btn ghost" onclick="testKey()">🔌 Bağlantıyı test et</button></section>
+<section class="card"><h3>🎬 Yöntem notları</h3><p class="mut">Videodaki çalışma yöntemini buraya yaz (ör. “önce ayna karşısında izole ses, 10 tekrar; sonra hece…”). AI etkinlik, mektup ve ev planı üretirken buna uyar.</p><textarea rows="5" oninput="S.settings.method=this.value;save()">${esc(s.method)}</textarea></section>
+<section class="card"><h3>🧩 Çocuk ekranı ve tahta</h3><label class="tg"><input type="checkbox" ${s.sound?'checked':''} onchange="S.settings.sound=this.checked;save()"> Sesli yönergeler</label><label class="tg"><input type="checkbox" ${s.calm?'checked':''} onchange="S.settings.calm=this.checked;save()"> Sakin mod (hareketli animasyon yok)</label><label class="tg"><input type="checkbox" ${s.penOnly?'checked':''} onchange="S.settings.penOnly=this.checked;save()"> Yazı tahtasında sadece kalem (iPad avuç içi dokunuşunu yok say)</label><label>Konuşma hızı</label><input type="range" min="0.6" max="1.1" step="0.05" value="${s.rate||0.85}" onchange="S.settings.rate=+this.value;save();say('Merhaba '+S.settings.student)"></section>
+<section class="card"><h3>💾 Yedek</h3><p class="mut">Tam yedek; ses kayıtları ve yazı çalışmaları dahil. Kitap dosyaları dahil değildir, yeni cihazda yeniden yükle.</p><div class="row"><button class="btn ghost" onclick="exportData()">📤 Yedeği al</button><label class="btn ghost file">📥 Yedek yükle<input type="file" accept=".json,application/json" onchange="importData(this.files[0])"></label></div><button class="btn danger" onclick="resetAll()">Tüm verileri sil</button></section>`}
+async function exportData(){busy('Yedek hazırlanıyor…');try{const media={};for(const w of S.works){const d=await idbGet('work:'+w.id);if(d)media['work:'+w.id]=d}for(const r of S.recs){const b=await idbGet('rec:'+r.id);if(b)media['rec:'+r.id]=await blobToData(b)}offerShare(new Blob([JSON.stringify({state:S,media})],{type:'application/json'}),`${fn(S.settings.student)}_DilKonusma_Yedek_${dISO(Date.now())}.json`,'application/json')}catch(e){toast('Yedek alınamadı: '+e.message)}finally{busy(false)}}
+async function importData(f){if(!f)return;try{const o=JSON.parse(await f.text());const st=o.state||o;if(!st||!Array.isArray(st.sessions))throw new Error('Geçersiz yedek');if(!confirm('Mevcut veriler yedektekiyle değiştirilsin mi?'))return;S=migrate(st);if(o.media)for(const [k,v] of Object.entries(o.media)){await idbSet(k,k.startsWith('rec:')?await dataToBlob(v):v)}save();render();toast('Yedek yüklendi')}catch(e){toast('Yedek okunamadı: '+e.message)}}
+function resetAll(){if(!confirm('TÜM dersler, kayıtlar, kitaplar ve ayarlar silinecek. Emin misin?'))return;S=migrate({v:2});save();try{_db&&_db.close();_db=null;indexedDB.deleteDatabase('mete_dk')}catch(e){}for(const k in PDFS)delete PDFS[k];render()}
+
+/* ---- Paylaşım ---- */
+function offerShare(blob,name,type){pend=new File([blob],name,{type});modal(`<h3>✅ Hazır</h3><p class="mut">${esc(name)} · ${fileSize(blob.size)}</p><div class="mbtns"><button class="btn" onclick="doShare()">📤 Paylaş (WhatsApp…)</button><button class="btn ghost" onclick="doDownload()">⬇️ İndir</button></div>`)}
+async function doShare(){if(!pend)return;if(navigator.canShare&&navigator.canShare({files:[pend]})){try{await navigator.share({files:[pend]});closeModal()}catch(e){if(e.name!=='AbortError')toast('Paylaşılamadı — İndir\'i dene')}}else doDownload()}
+function doDownload(){if(!pend)return;const a=document.createElement('a');a.href=URL.createObjectURL(pend);a.download=pend.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+function copyText(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Metin kopyalandı — WhatsApp\'a yapıştır')).catch(()=>prompt('Kopyala:',t))}
+
+/* ================== RAPORLAR ================== */
+const REP_CSS=`.rep{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;max-width:820px;margin:0 auto;padding:22px;background:#fff;line-height:1.5;font-size:15px}
+.rep *{box-sizing:border-box}
+.rep .hd{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,#5b5bd6,#8b5cf6 60%,#ec4899);color:#fff;border-radius:22px;padding:20px 22px;position:relative;overflow:hidden}
+.rep .hd:after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.12)}
+.rep .rb{font-size:58px;line-height:1}.rep h1{font-size:22px;margin:0;line-height:1.25}.rep .hd p{margin:4px 0 0;opacity:.92}
+.rep .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.rep .kp div{background:#f3f5fb;border-radius:14px;padding:12px 4px;text-align:center}.rep .kp b{display:block;font-size:22px}.rep .kp small{color:#64748b;font-size:12px}
+.rep .sec{border:1px solid #e5e7ef;border-radius:18px;padding:14px 16px;margin:12px 0;break-inside:avoid}
+.rep h2{font-size:16px;margin:0 0 10px}.rep p{margin:4px 0}
+.rep .lt{background:#fdf4ff;border-color:#f5d0fe}.rep .hm{background:#f0fdf4;border-color:#bbf7d0}.rep .fc{background:#eff6ff;border-color:#bfdbfe}
+.rep .ws{display:flex;flex-wrap:wrap;gap:6px}.rep .w{border-radius:99px;padding:5px 11px;font-size:14px;background:#f1f5f9;border:0;font:inherit;color:inherit}.rep .w.p{background:#dcfce7}.rep .w.y{background:#fef3c7}
+.rep .lg,.rep .m{color:#64748b;font-size:13px}
+.rep .as{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rep .a{background:#f8fafc;border-radius:12px;padding:8px 10px;font-size:14px}.rep .a span{display:block;color:#64748b;font-size:12px}
+.rep .pr{display:grid;grid-template-columns:1fr 110px 44px;gap:8px;align-items:center;font-size:14px;margin:6px 0}.rep .bar{height:10px;background:#e5e7ef;border-radius:9px;overflow:hidden}.rep .bar i{display:block;height:100%;background:#22c55e;border-radius:9px}
+.rep .snd{display:grid;grid-template-columns:64px 1fr 230px;gap:14px;align-items:center;padding:12px 0;border-top:1px solid #eef0f5}.rep .snd:first-of-type{border-top:0}
+.rep .L{width:64px;height:64px;border-radius:18px;background:#eef0ff;color:#5b5bd6;font-size:34px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.rep .big{font-size:26px;font-weight:800}.rep .dl{font-size:13px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px}.rep .up{background:#dcfce7;color:#15803d}.rep .dn{background:#fee2e2;color:#b91c1c}
+.rep .hb{height:14px;background:#eceef5;border-radius:9px;overflow:hidden;margin:6px 0}.rep .hb i{display:block;height:100%;border-radius:9px}
+.rep .ch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rep .ch span{font-size:12px;background:#f1f5f9;border-radius:99px;padding:3px 9px}
+.rep .gal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.rep .gal figure{margin:0}.rep .gal img{width:100%;border-radius:10px;border:1px solid #e5e7ef;display:block;aspect-ratio:3/4;object-fit:cover;background:#f8fafc}.rep .gal figcaption{font-size:11px;color:#64748b;text-align:center}
+.rep table{width:100%;border-collapse:collapse;font-size:14px}.rep td,.rep th{padding:7px 6px;border-bottom:1px solid #eef0f5;text-align:left;vertical-align:top}.rep th{color:#64748b;font-weight:600;font-size:12px}
+.rep .plan{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.rep .day{background:#fff;border:1px solid #d1fae5;border-radius:14px;padding:10px}.rep .day b{display:block}.rep .day .e{font-size:24px;letter-spacing:2px}.rep .day small{display:block;color:#64748b;font-size:12px;margin-top:4px}
+.rep .day label{display:flex;gap:6px;align-items:center;font-size:13px;margin-top:6px;color:#15803d;font-weight:700}
+.rep .rec{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #eef0f5;flex-wrap:wrap}.rep .rec:first-of-type{border-top:0}.rep .rec b{min-width:120px}.rep .rec audio{height:36px;max-width:100%}.rep .rec small{color:#64748b;display:block}
+.rep .goal{display:flex;gap:8px;padding:5px 0}
+.rep .ft{text-align:center;color:#64748b;font-size:12px;margin-top:18px}
+.rep .cta{display:block;width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:800;background:#22c55e;color:#fff;margin-top:10px;cursor:pointer}
+@media(max-width:620px){.rep{padding:12px}.rep .snd{grid-template-columns:52px 1fr}.rep .snd .sp{grid-column:1/-1}.rep .L{width:52px;height:52px;font-size:28px}.rep .kp{grid-template-columns:repeat(2,1fr)}.rep .gal{grid-template-columns:repeat(3,1fr)}.rep .as{grid-template-columns:1fr}}
+@media print{.rep .cta,.rep audio{display:none}}`;
+const wrapDoc=(t,inner,script)=>`<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(t)}</title><style>body{margin:0;background:#f3f5fb}${REP_CSS}</style></head><body>${inner}${script?`<script>${script}<\/script>`:''}</body></html>`;
+const RI={'+':'✅','~':'🟡','-':'⏳'};
+const GAME_N=Object.assign({},Object.fromEntries(Object.entries(ACTS).map(([k,v])=>[k,v.i+' '+v.n])),{mpd:'🎯 Minimal Çift (dinle)',mps:'🎯 Minimal Çift (söyle)',masa:'📖 Kitapla masa başı'});
+const wkObj=wk=>S.weeks[wk]||(S.weeks[wk]={letter:'',focus:'',note:'',homeDays:null,plan:null});
+const HOME_GAMES=['Kart çevirme: resmi çevir, adını söyle, kartı kazan','Robot gibi söyle: önce hece hece, sonra bütün','Saklambaç: resmi saklayın, bulunca adını söylesin','Ayna oyunu: aynanın karşısında birlikte söyleyin','Zıpla-söyle: her zıplayışta bir kelime','Kutudan çek: kutudan çıkan resmin adını söylesin','Lego kuleleri: her doğru söyleyişte bir parça ekleyin'];
+function makePlan(wk){const W=weekData(wk);const act=activeSounds();const sounds=act.length?act:Object.keys(W.snd);const items=[];const seen=new Set();const push=x=>{if(x&&x.w&&!seen.has(x.w)){seen.add(x.w);items.push({w:x.w,e:x.e||emojiOf(x.w)})}};
+ W.T.filter(t=>t.r!=='+'&&t.lvl!=='izole'&&t.lvl!=='hece'&&t.w&&!t.w.includes(' ')).forEach(t=>push({w:t.w}));W.T.filter(t=>t.r==='+'&&t.w&&!t.w.includes(' ')&&t.lvl!=='izole'&&t.lvl!=='hece').forEach(t=>push({w:t.w}));
+ sounds.forEach(s=>shuffle(poolFor(s,'karisik')).slice(0,10).forEach(push));if(items.length<10)shuffle(WB).slice(0,10).forEach(push);
+ const days=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];const plan=days.map((d,i)=>({d,g:HOME_GAMES[i%HOME_GAMES.length],items:[0,1,2,3,4].map(k=>items[(i*3+k)%items.length])}));wkObj(wk).plan=plan;save();return plan}
+
+async function worksOf(list,n){const out=[];for(const w of list.slice(0,n||8)){try{const d=await idbGet('work:'+w.id);if(d)out.push({w,src:d.th||d.img})}catch(e){}}return out}
+async function recsForReport(wk){const W=weekData(wk);let list=W.recs.filter(r=>r.star);if(!list.length)list=W.recs.slice(0,4);const out=[];for(const r of list.slice(0,8)){const b=await idbGet('rec:'+r.id);if(!b)continue;let first=null;if(r.w){const older=S.recs.filter(x=>x.w===r.w&&x.id!==r.id&&new Date(x.date)<new Date(r.date)&&weekKey(x.date)!==wk).sort((a,b)=>new Date(a.date)-new Date(b.date))[0];if(older){const ob=await idbGet('rec:'+older.id);if(ob)first={r:older,src:await blobToData(ob)}}}out.push({r,src:await blobToData(b),first})}return out}
+
+function sndBlock(s,o,pv,tr){const d=o&&pv&&pv.n?o.acc-pv.acc:null;const lv=Object.entries(o.lv).map(([k,v])=>`<span>${esc(LV[k]||k)}: %${pct(v.p,v.n)} (${v.n})</span>`).join('');const ps=Object.entries(o.ps).filter(([k])=>k!=='karisik').map(([k,v])=>`<span>${esc(POS[k])}: %${pct(v.p,v.n)}</span>`).join('');
+ return `<div class="snd"><div class="L">${esc(s.toLocaleUpperCase('tr'))}</div><div><div><span class="big">%${o.acc}</span> doğru${d!=null?`<span class="dl ${d>=0?'up':'dn'}">${d>=0?'▲':'▼'} ${Math.abs(d)} puan</span>`:''}</div><div class="hb" style="background:linear-gradient(90deg,${accColor(o.acc)} ${o.acc}%,#eceef5 ${o.acc}%)"></div><div class="m">✅ ${o.p} doğru · 🟡 ${o.y} ipucuyla · ⏳ ${o.m} henüz · ipucuyla birlikte %${o.cueAcc}</div><div class="ch">${lv}${ps}</div></div><div class="sp">${spark(tr,230,64,accColor(o.acc))}<div class="m" style="text-align:center">Son 8 hafta · kesikli çizgi = %80 hedef</div></div></div>`}
+function wordsHTML(words,interactive){const E=Object.entries(words).sort((a,b)=>({'+':0,'~':1,'-':2}[a[1]]-{'+':0,'~':1,'-':2}[b[1]]));if(!E.length)return '<p class="m">Bu dönemde kelime kaydı yok.</p>';return `<div class="ws">${E.map(([w,r])=>interactive?`<button class="w ${r==='+'?'p':r==='~'?'y':''}" data-say="${esc(w)}">${esc(emojiOf(w))} ${esc(w)} ${RI[r]}</button>`:`<span class="w ${r==='+'?'p':r==='~'?'y':''}">${esc(emojiOf(w))} ${esc(w)} ${RI[r]}</span>`).join('')}</div><p class="lg" style="margin-top:8px">✅ Kendi başına doğru · 🟡 İpucuyla doğru · ⏳ Çalışıyoruz${interactive?' · Kelimeye dokununca sesli okunur':''}</p>`}
+function actsHTML(acts){const E=Object.entries(acts).filter(([a])=>GAME_N[a]);return E.length?`<div class="as">${E.map(([a,v])=>`<div class="a"><b>${GAME_N[a]}</b><span>${v.ok} başarılı${v.tr?' · '+v.tr+' deneme daha':''}</span></div>`).join('')}</div>`:''}
+function paHTML(pa){const E=Object.entries(pa);return E.length?E.map(([k,v])=>`<div class="pr"><span>${PA_N[k]}</span><div class="bar"><i style="width:${pct(v.ok,v.n)}%;background:${accColor(pct(v.ok,v.n))}"></i></div><b>%${pct(v.ok,v.n)}</b></div>`).join('')+'<p class="m">Sesleri duyup ayırt etme ve kelimeyi parçalarına ayırma becerileri, doğru konuşmanın temelidir.</p>':''}
+function progHTML(){return S.units.map(u=>{const p=unitProg(u);return `<div class="pr"><span>${esc(u.icon||'📘')} ${esc(u.title)}</span><div class="bar"><i style="width:${p}%"></i></div><b>%${p}</b></div>`}).join('')}
+function goalsRep(){const G=S.profile.goals||[];return G.length?G.map(g=>`<div class="goal"><span>${g.st==='tamam'?'✅':'🎯'}</span><span>${esc(g.t)}${g.st==='tamam'&&g.done?` <span class="m">— ${fmtS(g.done)} ulaşıldı</span>`:''}</span></div>`).join(''):''}
+function footHTML(){const st=S.settings;return `<div class="ft">🤖 Robot garajı: ${PARTS.slice(0,S.parts).map(p=>p.split(' ')[0]).join(' ')||'ilk parça yolda!'} · Toplam ⭐ ${S.stars}<br>${esc(st.teacher)} · Dil & Konuşma Özel Ders Takip Sistemi</div>`}
+
+async function weekInner(wk,mode){const st=S.settings,W=weekData(wk),o=wkObj(wk);const I=mode==='html';const plan=o.plan||makePlan(wk);const works=await worksOf(W.works,8);const recs=I?await recsForReport(wk):[];
+ const sounds=Object.keys(W.snd).sort((a,b)=>SKEYS.indexOf(a)-SKEYS.indexOf(b));const moods=W.ss.map(s=>s.mood).filter(Boolean).join(' ');const att=W.ss.filter(s=>s.att);const attAvg=att.length?(att.reduce((a,s)=>a+s.att,0)/att.length).toFixed(1):null;
+ const tips=[...new Set((sounds.length?sounds:activeSounds()).map(s=>SOUND_TIP[s]).filter(Boolean))].slice(0,3);
+ let h=`<div class="rep"><div class="hd"><div class="rb">🤖</div><div><h1>${esc(st.student)} · Haftalık Dil & Konuşma Raporu</h1><p>📅 ${weekLabel(wk)} · ${esc(st.teacher)}</p></div></div>
+ <div class="kp"><div><b>${W.ss.length}</b><small>Ders</small></div><div><b>${W.mins?W.mins+' dk':'—'}</b><small>Toplam süre</small></div><div><b>${W.n}</b><small>Ses denemesi</small></div><div><b>${W.n?'%'+pct(W.p,W.n):'—'}</b><small>Doğru söyleyiş</small></div></div>`;
+ if(o.letter)h+=`<div class="sec lt"><h2>💌 Sevgili ${esc(st.parent)},</h2><p>${nl(esc(o.letter))}</p></div>`;
+ if(sounds.length)h+=`<div class="sec"><h2>🎯 Hedef seslerde gelişim</h2>${sounds.map(s=>sndBlock(s,W.snd[s],W.prev[s],trendUpTo(s,wk,8))).join('')}</div>`;
+ const pa=paHTML(W.pa);if(pa)h+=`<div class="sec"><h2>🧠 Ses farkındalığı (fonolojik beceriler)</h2>${pa}</div>`;
+ h+=`<div class="sec"><h2>🗣️ Bu hafta çalıştığımız kelimeler</h2>${wordsHTML(W.words,I)}</div>`;
+ const ac=actsHTML(W.acts);if(ac)h+=`<div class="sec"><h2>🎮 Oyunlaştırılmış etkinlikler</h2>${ac}<p class="m" style="margin-top:8px">${esc(st.student)}'in sevdiği robotik kodlama ve yapboz oyunlarının içine ses çalışmalarını yerleştiriyoruz; her doğru söyleyiş robotuna enerji veriyor.</p></div>`;
+ if(works.length)h+=`<div class="sec"><h2>✍️ Bu haftanın yazı çalışmaları</h2><div class="gal">${works.map(x=>`<figure><img src="${x.src}" alt=""><figcaption>${esc(x.w.title)} · ${fmtS(x.w.date)}</figcaption></figure>`).join('')}</div></div>`;
+ if(I&&recs.length)h+=`<div class="sec"><h2>🎧 ${esc(st.student)}'in sesinden</h2>${recs.map(x=>`<div class="rec"><b>${esc(emojiOf(x.r.w))} ${esc(x.r.w||'Kayıt')}<small>${fmtS(x.r.date)}${x.r.s?' · /'+esc(x.r.s)+'/':''}</small></b>${x.first?`<div><small>İlk kayıt · ${fmtS(x.first.r.date)}</small><audio controls preload="none" src="${x.first.src}"></audio></div><div><small>Bu hafta</small><audio controls preload="none" src="${x.src}"></audio></div>`:`<audio controls preload="none" src="${x.src}"></audio>`}</div>`).join('')}<p class="m">Kulaklıkla dinlemenizi öneririm. “İlk kayıt” ile karşılaştırınca gelişimi duyabilirsiniz.</p></div>`;
+ else if(!I&&W.recs.length)h+=`<div class="sec"><h2>🎧 Ses kayıtları</h2><p>Bu hafta ${W.recs.length} ses kaydı alındı. Dinlemek için interaktif veli panelini açın.</p></div>`;
+ if(W.ss.length)h+=`<div class="sec"><h2>📅 Ders günlüğü</h2><table><tr><th>Gün</th><th>Çalışılan</th><th>Doğru</th><th></th></tr>${W.ss.map(s=>{const d=sessData(s);return `<tr><td><b>${dayN(s.date)}</b><br><span class="m">${fmtS(s.date)}${d.mins?' · '+d.mins+' dk':''}</span></td><td>${Object.keys(d.snd).map(k=>'/'+esc(k)+'/').join(' ')||''} ${d.units.map(u=>esc(u.title)).join(', ')}${s.pages?`<br><span class="m">Sayfa ${esc(s.pages)}</span>`:''}${s.notes?`<br><span class="m">${esc(s.notes)}</span>`:''}</td><td>${d.n?'%'+pct(d.p,d.n):'—'}</td><td>${s.mood||''}${s.att?' '+s.att+'/5':''}</td></tr>`}).join('')}</table>${moods||attAvg?`<p class="m" style="margin-top:6px">Ruh hali: ${moods||'—'}${attAvg?` · Ortalama dikkat/katılım: ${attAvg}/5`:''}</p>`:''}</div>`;
+ const gr=goalsRep();if(gr)h+=`<div class="sec"><h2>🏁 Hedeflerimiz</h2>${gr}</div>`;
+ const pr=progHTML();if(pr)h+=`<div class="sec"><h2>📈 Kitap ilerlemesi</h2>${pr}</div>`;
+ if(o.note)h+=`<div class="sec"><h2>📝 Öğretmen notu</h2><p>${nl(esc(o.note))}</p></div>`;
+ h+=`<div class="sec hm"><h2>🏠 Evde 5 dakika — haftalık plan</h2><p class="m">Her gün oyun gibi 5 dakika yeter. Doğru söyleyince coşkuyla övün; hatalı söyleyişte düzeltmek yerine doğru hâlini sakin ve net tekrar edin (“Evet, <b>r</b>obot!”).</p>${tips.map(t=>`<p>💡 ${esc(t)}</p>`).join('')}<div class="plan" style="margin-top:10px">${plan.map((d,i)=>`<div class="day"><b>${esc(d.d)}</b><div class="e">${d.items.map(x=>esc(x.e)).join('')}</div>${I?`<div class="ws" style="margin-top:4px">${d.items.map(x=>`<button class="w" data-say="${esc(x.w)}">${esc(x.w)}</button>`).join('')}</div>`:`<small>${d.items.map(x=>esc(x.w)).join(', ')}</small>`}<small>🎲 ${esc(d.g)}</small>${I?`<label><input type="checkbox" data-day="${i}"> Bugün çalıştık</label>`:''}</div>`).join('')}</div>${I?`<textarea id="vnote" placeholder="Öğretmene notunuz (isteğe bağlı)…" style="width:100%;margin-top:10px;border:1px solid #d1fae5;border-radius:12px;padding:10px;font:inherit" rows="2"></textarea><button class="cta" id="vsend">📤 Ev çalışmamızı öğretmene bildir</button>`:''}${o.homeDays!=null?`<p class="m" style="margin-top:8px">Geçen hafta evde ${o.homeDays}/7 gün çalışıldı — teşekkürler! 💚</p>`:''}</div>`;
+ if(o.focus)h+=`<div class="sec fc"><h2>➡️ Gelecek hafta odağımız</h2><p>${nl(esc(o.focus))}</p></div>`;
+ return h+footHTML()+'</div>'}
+function panelScript(wk){const st=S.settings;return `(function(){var K='veli_${wk}';var tr=null;function pv(){try{var v=speechSynthesis.getVoices();tr=v.find(function(x){return /^tr/i.test(x.lang)})||null}catch(e){}}if(window.speechSynthesis){pv();speechSynthesis.onvoiceschanged=pv}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-say]');if(!b||!window.speechSynthesis)return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(b.getAttribute('data-say'));u.lang='tr-TR';u.rate=.8;if(tr)u.voice=tr;speechSynthesis.speak(u)});
+var s={};try{s=JSON.parse(localStorage.getItem(K)||'{}')}catch(e){}document.querySelectorAll('[data-day]').forEach(function(c){c.checked=!!s[c.getAttribute('data-day')];c.onchange=function(){s[c.getAttribute('data-day')]=c.checked;try{localStorage.setItem(K,JSON.stringify(s))}catch(e){}}});
+var b=document.getElementById('vsend');if(b)b.onclick=function(){var days=[];document.querySelectorAll('[data-day]').forEach(function(c){if(c.checked)days.push(c.closest('.day').querySelector('b').textContent)});var n=(document.getElementById('vnote')||{}).value||'';var t=${JSON.stringify('🏠 '+st.student+' · ev çalışması ('+weekLabel(wk)+')')}+'\\n✅ Çalıştığımız günler ('+days.length+'/7): '+(days.join(', ')||'—')+(n?'\\n📝 '+n:'');if(navigator.share){navigator.share({text:t}).catch(function(){})}else{location.href='https://wa.me/?text='+encodeURIComponent(t)}}})();`}
+
+function sessInner(s){const st=S.settings,d=sessData(s);const sounds=Object.keys(d.snd);
+ return `<div class="rep"><div class="hd"><div class="rb">🤖</div><div><h1>${esc(st.student)}'in Dil & Konuşma Dersi</h1><p>${fmtD(s.date)}${d.mins?' · '+d.mins+' dk':''} · ${esc(st.teacher)}</p></div></div>
+<div class="kp"><div><b>${s.mood||'—'}</b><small>Ruh hali</small></div><div><b>${s.att?s.att+'/5':'—'}</b><small>Dikkat</small></div><div><b>${d.n?'%'+pct(d.p,d.n):'—'}</b><small>Doğru söyleyiş</small></div><div><b>⭐${s.stars||0}</b><small>Yıldız</small></div></div>
+${s.letter?`<div class="sec lt"><h2>💌 Sevgili ${esc(st.parent)},</h2><p>${nl(esc(s.letter))}</p></div>`:''}
+${sounds.length?`<div class="sec"><h2>🎯 Hedef sesler</h2>${sounds.map(k=>{const o=d.snd[k];return `<div class="pr"><span><b>/${esc(k)}/</b> · ${Object.keys(o.lv).map(l=>LV[l]).join(', ')}</span><div class="bar"><i style="width:${o.acc}%;background:${accColor(o.acc)}"></i></div><b>%${o.acc}</b></div><p class="m">✅ ${o.p} · 🟡 ${o.y} · ⏳ ${o.m}</p>`}).join('')}</div>`:''}
+${d.units.length||s.pages?`<div class="sec"><h2>📘 Kitap</h2>${d.units.map(u=>`<p>${esc(u.icon||'📘')} <b>${esc(u.title)}</b>${u.goal?' — '+esc(u.goal):''}</p>`).join('')}${s.pages?`<p class="m">Sayfalar: ${esc(s.pages)}</p>`:''}</div>`:''}
+${actsHTML(d.acts)?`<div class="sec"><h2>🎮 Etkinlikler</h2>${actsHTML(d.acts)}</div>`:''}
+<div class="sec"><h2>🗣️ Kelimeler</h2>${wordsHTML(d.words)}</div>
+${s.notes&&!s.letter?`<div class="sec"><h2>📝 Öğretmen notu</h2><p>${nl(esc(s.notes))}</p></div>`:''}
+${s.home?`<div class="sec hm"><h2>🏠 Evde birlikte</h2><p>${nl(esc(s.home))}</p></div>`:''}${footHTML()}</div>`}
+function allInner(){const st=S.settings;const T=allTrials();const snd=soundStats(T);const best={},rank={'+':3,'~':2,'-':1};S.sessions.forEach(s=>Object.entries(sessData(s).words).forEach(([w,r])=>{if(!best[w]||rank[r]>rank[best[w]])best[w]=r}));const first=S.sessions.length?S.sessions[S.sessions.length-1].date:Date.now();
+ return `<div class="rep"><div class="hd"><div class="rb">🤖</div><div><h1>${esc(st.student)} · Genel Gelişim Raporu</h1><p>${fmtD(first)} – ${fmtD(Date.now())} · ${esc(st.teacher)}</p></div></div>
+<div class="kp"><div><b>${S.sessions.length}</b><small>Ders</small></div><div><b>${T.length}</b><small>Ses denemesi</small></div><div><b>${T.length?'%'+pct(T.filter(t=>t.r==='+').length,T.length):'—'}</b><small>Doğru</small></div><div><b>⭐${S.stars}</b><small>Yıldız</small></div></div>
+${Object.keys(snd).length?`<div class="sec"><h2>🎯 Seslerde gelişim</h2>${Object.keys(snd).map(s=>sndBlock(s,snd[s],null,trend(s,12))).join('')}</div>`:''}
+${paHTML(paStats(allLogs()))?`<div class="sec"><h2>🧠 Ses farkındalığı</h2>${paHTML(paStats(allLogs()))}</div>`:''}
+${goalsRep()?`<div class="sec"><h2>🏁 Hedeflerimiz</h2>${goalsRep()}</div>`:''}
+${progHTML()?`<div class="sec"><h2>📈 Kitap ilerlemesi</h2>${progHTML()}</div>`:''}
+<div class="sec"><h2>🗣️ Tüm kelimeler</h2>${wordsHTML(best)}</div>
+<div class="sec"><h2>📅 Dersler</h2><table><tr><th>Tarih</th><th>Sesler</th><th>Doğru</th><th></th></tr>${S.sessions.map(s=>{const d=sessData(s);return `<tr><td>${fmtD(s.date)}</td><td>${Object.keys(d.snd).map(k=>'/'+esc(k)+'/').join(' ')||'—'}</td><td>${d.n?'%'+pct(d.p,d.n):'—'}</td><td>${s.mood||''}</td></tr>`}).join('')}</table></div>${footHTML()}</div>`}
+
+function weekText(wk){const st=S.settings,W=weekData(wk),o=wkObj(wk);const L=[`🤖 *${st.student}* · Haftalık Dil & Konuşma Raporu`,`📅 ${weekLabel(wk)}`,'',`📚 ${W.ss.length} ders${W.mins?' · '+W.mins+' dk':''} · 🗣️ ${W.n} ses denemesi${W.n?' · %'+pct(W.p,W.n)+' doğru':''}`];
+ Object.entries(W.snd).forEach(([s,x])=>{const pv=W.prev[s];const d=pv&&pv.n?x.acc-pv.acc:null;L.push(`🎯 /${s}/: %${x.acc} doğru${d!=null?` (${d>=0?'▲':'▼'}${Math.abs(d)})`:''}`)});const ok=Object.entries(W.words).filter(x=>x[1]==='+').map(x=>x[0]);if(ok.length)L.push('','✅ Doğru söyledikleri: '+ok.slice(0,15).join(', '));
+ if(o.letter)L.push('',o.letter);if(o.focus)L.push('','➡️ Gelecek hafta: '+o.focus);const plan=o.plan||makePlan(wk);L.push('','🏠 Evde her gün 5 dk: '+plan[0].items.map(x=>x.e+' '+x.w).join(', ')+' …');L.push('','— '+st.teacher);return L.join('\n')}
+function sessText(s){const st=S.settings,d=sessData(s);const L=[`🤖 ${st.student} · Dil & Konuşma Dersi`,`📅 ${fmtD(s.date)}${d.mins?' · '+d.mins+' dk':''}`];if(s.mood||s.att)L.push(`${s.mood||''} ${s.att?'Dikkat '+s.att+'/5':''}`.trim());Object.entries(d.snd).forEach(([k,o])=>L.push(`🎯 /${k}/: %${o.acc} doğru (${o.n} deneme)`));const ok=Object.entries(d.words).filter(x=>x[1]==='+').map(x=>x[0]);if(ok.length)L.push('✅ Doğru söyledikleri: '+ok.join(', '));if(s.pages)L.push('📄 Sayfalar: '+s.pages);if(s.letter)L.push('',s.letter);else if(s.notes)L.push('','📝 '+s.notes);if(s.home)L.push('','🏠 Evde: '+s.home);L.push('','— '+st.teacher);return L.join('\n')}
+
+/* ---- Rapor ekranı ---- */
+const curSess=()=>S.sessions.find(x=>x.id===repSel)||S.sessions[0];
+function vRapor(){const seg=`<div class="seg">${[['hafta','📅 Haftalık'],['ders','📝 Ders'],['genel','📈 Genel']].map(([k,t])=>`<button class="${repMode===k?'on':''}" onclick="repMode='${k}';render()">${t}</button>`).join('')}</div>`;let h=`<section class="card">${seg}`;
+ if(repMode==='hafta'){const wl=weeksList();if(!repWeek||!wl.includes(repWeek))repWeek=wl[0];const o=wkObj(repWeek);
+  h+=`<label>Hafta</label><select onchange="repWeek=this.value;render()">${wl.map(w=>`<option value="${w}" ${w===repWeek?'selected':''}>${weekLabel(w)} · ${sessionsOfWeek(w).length} ders</option>`).join('')}</select>
+  <div class="grid2" style="margin-top:10px"><button class="btn" onclick="sharePanel()">🌐 Veli paneli (sesli, interaktif)</button><button class="btn" onclick="sharePng()">🖼️ Görsel (WhatsApp)</button><button class="btn ghost" onclick="sharePdf()">📄 PDF</button><button class="btn ghost" onclick="shareText()">💬 Mesaj metni</button><button class="btn ghost" onclick="aiWeek()">✨ AI değerlendirme</button><button class="btn ghost" onclick="editWeek()">✏️ Not, odak, ev</button><button class="btn ghost" onclick="makePlan(repWeek);render()">🎲 Ev planını yenile</button><button class="btn ghost" onclick="printRep()">🖨️ Yazdır</button></div>${o.letter?'':'<p class="mut" style="margin-top:8px">💡 “✨ AI değerlendirme” veliye sıcak bir mektup ve gelecek hafta odağını yazar.</p>'}`}
+ else if(repMode==='ders'){if(!S.sessions.length)h+=`<p class="mut" style="margin-top:10px">Henüz bitmiş ders yok. Dersi <b>Kayıt</b> sekmesinden bitirince burada olur.</p>`;else{const s=curSess();repSel=s.id;h+=`<label>Ders</label><select onchange="repSel=this.value;render()">${S.sessions.map(x=>`<option value="${x.id}" ${x.id===s.id?'selected':''}>${fmtD(x.date)}</option>`).join('')}</select><div class="grid2" style="margin-top:10px"><button class="btn" onclick="shareText()">💬 Mesaj gönder</button><button class="btn" onclick="sharePng()">🖼️ Görsel</button><button class="btn ghost" onclick="aiLetter()">✨ AI veli mektubu</button><button class="btn ghost" onclick="editSess()">✏️ Düzenle</button></div><button class="btn danger sm" style="margin-top:8px" onclick="delSess()">🗑️ Bu ders kaydını sil</button>`}}
+ else h+=`<div class="grid2" style="margin-top:10px"><button class="btn" onclick="sharePdf()">📄 PDF</button><button class="btn" onclick="sharePng()">🖼️ Görsel</button></div>`;
+ return h+`</section><iframe id="rf" class="rf" title="Rapor önizleme"></iframe>`}
+async function curInner(mode){if(repMode==='hafta')return weekInner(repWeek||weekKey(Date.now()),mode);if(repMode==='ders'){const s=curSess();return s?sessInner(s):'<div class="rep"><p>Ders yok</p></div>'}return allInner()}
+let _fillTok=0;
+async function fillReport(){const f=$('#rf');if(!f)return;if(repMode==='ders'&&!S.sessions.length){f.style.display='none';return}const tok=++_fillTok;const inner=await curInner('html');if(tok!==_fillTok)return;f.onload=()=>{try{f.style.height=(f.contentDocument.body.scrollHeight+20)+'px'}catch(e){}};f.srcdoc=wrapDoc('Rapor',inner,repMode==='hafta'?panelScript(repWeek):'')}
+function repName(ext){const n=fn(S.settings.student);if(repMode==='hafta')return `${n}_Haftalik_Rapor_${repWeek}.${ext}`;if(repMode==='ders'){const s=curSess();return `${n}_Ders_${dISO(s?s.date:Date.now())}.${ext}`}return `${n}_Genel_Rapor_${dISO(Date.now())}.${ext}`}
+async function sharePanel(){busy('Veli paneli hazırlanıyor… (ses kayıtları ekleniyor)');try{const inner=await weekInner(repWeek,'html');offerShare(new Blob([wrapDoc(S.settings.student+' · Haftalık Rapor',inner,panelScript(repWeek))],{type:'text/html'}),repName('html'),'text/html')}catch(e){toast('Hazırlanamadı: '+e.message)}finally{busy(false)}}
+function shareText(){const t=repMode==='hafta'?weekText(repWeek):repMode==='ders'?sessText(curSess()):weekText(weekKey(Date.now()));if(navigator.share)navigator.share({text:t}).catch(e=>{if(e.name!=='AbortError')copyText(t)});else copyText(t)}
+async function renderCanvas(inner){await loadJs('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');const h=document.createElement('div');h.style.cssText='position:fixed;left:-10000px;top:0;width:860px;background:#fff';h.innerHTML=`<style>${REP_CSS}</style>`+inner;document.body.appendChild(h);try{await Promise.all([...h.querySelectorAll('img')].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));return await html2canvas(h,{scale:2,backgroundColor:'#ffffff',useCORS:true,windowWidth:900})}finally{h.remove()}}
+async function sharePng(){busy('Görsel hazırlanıyor…');try{const cv=await renderCanvas(await curInner('img'));const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.9));offerShare(blob,repName('jpg'),'image/jpeg')}catch(e){toast('Görsel oluşturulamadı: '+e.message)}finally{busy(false)}}
+async function sharePdf(){busy('PDF hazırlanıyor…');try{const cv=await renderCanvas(await curInner('img'));await loadJs('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');const pdf=new window.jspdf.jsPDF('p','pt','a4');const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();const sliceH=Math.floor(cv.width*ph/pw);for(let y=0,i=0;y<cv.height;y+=sliceH,i++){const pc=document.createElement('canvas');pc.width=cv.width;pc.height=Math.min(sliceH,cv.height-y);const g=pc.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,pc.width,pc.height);g.drawImage(cv,0,y,cv.width,pc.height,0,0,cv.width,pc.height);if(i)pdf.addPage();pdf.addImage(pc.toDataURL('image/jpeg',.9),'JPEG',0,0,pw,pc.height*pw/cv.width)}offerShare(pdf.output('blob'),repName('pdf'),'application/pdf')}catch(e){toast('PDF oluşturulamadı: '+e.message+' — Yazdır › PDF olarak kaydet’i dene')}finally{busy(false)}}
+function printRep(){const f=$('#rf');try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast('Yazdırılamadı')}}
+function editWeek(){const o=wkObj(repWeek);modal(`<h3>✏️ ${weekLabel(repWeek)}</h3><label>Veliye mektup</label><textarea id="wL" rows="6">${esc(o.letter)}</textarea><label>Öğretmen notu</label><textarea id="wN" rows="3">${esc(o.note)}</textarea><label>Gelecek hafta odağımız</label><textarea id="wF" rows="3">${esc(o.focus)}</textarea><label>Velinin bildirdiği ev çalışması (geçen hafta, gün)</label><select id="wH"><option value="">—</option>${[0,1,2,3,4,5,6,7].map(n=>`<option ${o.homeDays===n?'selected':''}>${n}</option>`).join('')}</select><label>Ev planı kelimeleri (her satır bir gün, kelimeler virgülle)</label><textarea id="wP" rows="7">${esc((o.plan||makePlan(repWeek)).map(d=>d.items.map(x=>x.w).join(', ')).join('\n'))}</textarea><div class="mbtns"><button class="btn" onclick="saveWeek()">💾 Kaydet</button><button class="btn ghost" onclick="closeModal()">Vazgeç</button></div>`)}
+function saveWeek(){const o=wkObj(repWeek);o.letter=$('#wL').value.trim();o.note=$('#wN').value.trim();o.focus=$('#wF').value.trim();o.homeDays=$('#wH').value===''?null:+$('#wH').value;const lines=$('#wP').value.split('\n');const plan=o.plan||makePlan(repWeek);plan.forEach((d,i)=>{const ws=(lines[i]||'').split(',').map(low).filter(Boolean);if(ws.length)d.items=ws.map(w=>({w,e:emojiOf(w)}))});o.plan=plan;save();closeModal();render()}
+async function aiWeek(){const wk=repWeek,W=weekData(wk);const data={ogrenci:S.settings.student,hafta:weekLabel(wk),ders_sayisi:W.ss.length,toplam_dk:W.mins,sesler:Object.fromEntries(Object.entries(W.snd).map(([s,o])=>[s,{dogru_yuzde:o.acc,ipucuyla_yuzde:o.cueAcc,deneme:o.n,gecen_hafta_yuzde:W.prev[s]?W.prev[s].acc:null,duzeyler:Object.keys(o.lv).map(l=>LV[l])}])),fonolojik:Object.fromEntries(Object.entries(W.pa).map(([k,v])=>[PA_N[k],pct(v.ok,v.n)])),dogru_kelimeler:Object.entries(W.words).filter(x=>x[1]==='+').map(x=>x[0]).slice(0,20),calisilan_kelimeler:Object.entries(W.words).filter(x=>x[1]!=='+').map(x=>x[0]).slice(0,20),ruh_hali:W.ss.map(s=>s.mood).filter(Boolean),dikkat:W.ss.map(s=>s.att).filter(Boolean),ogretmen_notlari:W.ss.map(s=>s.notes).filter(Boolean),hedefler:(S.profile.goals||[]).map(g=>g.t+(g.st==='tamam'?' (ulaşıldı)':'')),yazi_calismasi:W.works.length,ses_kaydi:W.recs.length};
+ busy('Haftalık değerlendirme yazılıyor…');try{const r=await gemini([{text:`Sen deneyimli, sıcak bir dil-konuşma ve özel eğitim öğretmenisin (${S.settings.teacher}). ${ctx()}\nVeli ${S.settings.parent}'e bu haftanın özel ders değerlendirmesini yaz. Samimi, umut veren ama gerçekçi ol; verilmeyen bilgi uydurma, teknik terimleri sade açıkla (ör. "fonolojik farkındalık = sesleri duyup ayırt edebilme"). "Sevgili ..." hitabını YAZMA. Sadece JSON döndür:\n{"mektup":"150-220 kelime, bu haftanın gelişimi, güçlü yönler, zorlandığı noktalar","odak":"gelecek hafta için 2-3 kısa somut hedef, her biri yeni satırda"}\nVeriler: ${JSON.stringify(data)}`}]);const o=wkObj(wk);if(r.mektup)o.letter=String(r.mektup);if(r.odak)o.focus=String(r.odak);save();render();toast('Değerlendirme rapora eklendi')}catch(e){toast('AI hatası: '+e.message)}finally{busy(false)}}
+function editSess(){const s=curSess();modal(`<h3>✏️ Ders kaydını düzenle</h3><label>Sayfalar</label><input id="xP" value="${esc(s.pages)}"><label>Ruh hali</label><select id="xM">${['','😊','😐','😟'].map(m=>`<option ${s.mood===m?'selected':''}>${m}</option>`).join('')}</select><label>Dikkat (1-5)</label><input id="xA" type="number" min="0" max="5" value="${s.att||0}"><label>Veli mektubu</label><textarea id="xL" rows="6">${esc(s.letter)}</textarea><label>Öğretmen notu</label><textarea id="xN" rows="3">${esc(s.notes)}</textarea><label>Evde yapılacaklar</label><textarea id="xH" rows="2">${esc(s.home)}</textarea><div class="mbtns"><button class="btn" onclick="saveSess()">💾 Kaydet</button><button class="btn ghost" onclick="closeModal()">Vazgeç</button></div>`)}
+function saveSess(){const s=curSess();s.pages=$('#xP').value;s.mood=$('#xM').value;s.att=Math.min(5,Math.max(0,+$('#xA').value||0));s.letter=$('#xL').value.trim();s.notes=$('#xN').value;s.home=$('#xH').value;save();closeModal();render()}
+function delSess(){const s=curSess();if(!s||!confirm(fmtD(s.date)+' dersi silinsin mi?'))return;S.sessions=S.sessions.filter(x=>x.id!==s.id);repSel=null;save();render()}
+async function aiLetter(){const s=curSess();if(!s)return;const d=sessData(s);const data={ogrenci:S.settings.student,tarih:fmtD(s.date),sure_dk:d.mins,ruh_hali:s.mood,dikkat:s.att,sesler:Object.fromEntries(Object.entries(d.snd).map(([k,o])=>[k,{dogru:o.acc,deneme:o.n}])),dogru_kelimeler:Object.entries(d.words).filter(x=>x[1]==='+').map(x=>x[0]),ogretmen_notu:s.notes,ev:s.home};busy('Veli mektubu yazılıyor…');try{const r=await gemini([{text:`Sen sıcak bir özel eğitim öğretmenisin (${S.settings.teacher}). ${ctx()}\nVeli ${S.settings.parent}'e bugünkü dersi anlatan 100-150 kelimelik mesaj yaz. Uydurma bilgi yok, "Sevgili ..." hitabı yok, sonda 1-2 ev önerisi. Sadece JSON: {"mektup":"..."}\nVeriler: ${JSON.stringify(data)}`}]);if(!r.mektup)throw new Error('Boş yanıt');s.letter=String(r.mektup);save();render();toast('Mektup eklendi')}catch(e){toast('AI hatası: '+e.message)}finally{busy(false)}}
+
+/* ================== ÇOCUK EKRANI ================== */
+function kid(inner){const c=child.cfg||{};$('#app').innerHTML=`<div class="kid ${S.settings.calm?'calm':''}"><div class="kbar"><button class="lock" id="lock" aria-label="Öğretmen çıkışı">🔒</button><div class="row" style="gap:8px">${c.s?`<span class="ksnd">${SOUNDS[c.s].e} /${esc(c.s)}/ · ${esc(LV[c.lvl])}</span>`:''}<div class="kst">⭐ ${S.current?S.current.stars:0}</div></div>${child.act?'<button class="kb" onclick="childBack()">🏠</button>':'<span style="width:48px"></span>'}</div><div class="kmain">${inner}</div></div>`;bindLock()}
+function bindLock(){const l=$('#lock');if(!l)return;let h;const st=e=>{e.preventDefault();l.classList.add('hold');h=setTimeout(()=>{try{speechSynthesis.cancel()}catch(x){}$('#sp').classList.remove('on');if(REC.mr)try{REC.mr.stop()}catch(x){}child=null;view='kayit';render();window.scrollTo(0,0)},1200)};const en=()=>{clearTimeout(h);l.classList.remove('hold')};l.addEventListener('pointerdown',st);['pointerup','pointerleave','pointercancel'].forEach(ev=>l.addEventListener(ev,en));l.addEventListener('contextmenu',e=>e.preventDefault())}
+function childBack(){child.act=null;child.st=null;$('#sp').classList.remove('on');render()}
+function startAct(a){if(a==='yazi'){openLetterBoard(true);return}child.act=a;child.st=null;render()}
+function dots(r,t){return `<div class="dots">${Array.from({length:t},(_,i)=>`<i class="${i<r?'on':''}"></i>`).join('')}</div>`}
+function renderChild(){const R={drill:actDrill,minimal:actMinimal,robot:actRobot,puzzle:actPuzzle,hece:actHece,ilkses:actIlk,sira:actSira,dinle:actDinle};return child.act&&R[child.act]?R[child.act]():childHome()}
+function childHome(){const c=S.current,sch=S.schedule;const first=sch.findIndex(a=>!c.done.includes(a));const tiles=sch.map((a,i)=>{const d=c.done.includes(a);const tag=d?'✅':i===first?'ŞİMDİ':(first>=0&&i===first+1)?'SONRA':'';return `<button class="ktile ${d?'done':''} ${i===first?'now':''}" onclick="startAct('${a}')"><span class="kti">${ACTS[a].i}</span><span class="ktn">${ACTS[a].n}</span>${tag?`<em>${tag}</em>`:''}</button>`}).join('');const u=curUnit();
+kid(`<button class="khello" onclick="say('Merhaba ${Q(S.settings.student)}! ${first>=0?'Şimdi '+Q(ACTS[sch[first]].n)+' zamanı.':'Hepsini bitirdin, harikasın!'}')"><span class="kro">🤖</span><span><b>Merhaba ${esc(S.settings.student)}!</b><small>${u?esc((u.icon||'')+' '+u.title):'Bugünkü programın'}</small></span></button><div class="ktiles">${tiles}</div>${first<0?'<div class="kdone">🎉 Hepsi bitti! Robotuna yeni parçalar kazandın.</div>':''}<div class="kgar">${PARTS.map((p,i)=>`<span class="${i<S.parts?'on':''}">${p.split(' ')[0]}</span>`).join('')}</div>`)}
+function finishAct(msg){const a=child.act,c=ensureSession();if(!c.done.includes(a))c.done.push(a);addStar(2);child.act=null;child.st=null;save();render();celebrate(msg||('Harika '+S.settings.student+'! '+ACTS[a].n+' bitti!'),'🏆')}
+
+/* --- Ortak: deneme paneli (öğretmen işaretler) --- */
+function tbarHTML(fnName){return `<div class="tbar"><button class="g" onclick="${fnName}('+')">✅ Doğru</button><button class="y" onclick="${fnName}('~')">🟡 İpucu</button><button class="n" onclick="${fnName}('-')">⏳ Henüz</button><button class="rec ${REC.mr?'on':''}" onclick="recCur()">🎙️</button></div>`}
+function recCur(){const it=(child&&child.st&&child.st.item)||spItem||{};recToggle({w:it.base||it.w||'',s:child.cfg.s,lvl:it.lvl||child.cfg.lvl})}
+function trialPanel(item,next){spItem=item;spNext=next;const p=$('#sp');const s=child.cfg.s;p.innerHTML=`<div class="spbox"><div class="spE">${esc(item.e||'🗣️')}</div><div class="spW">${hlWord(item.w,s)}</div><button class="say" onclick="say(spItem.say||spItem.w)">🔊 Tekrar dinle</button><div class="sprow"><button class="g" onclick="spRate('+')">✅<br>Doğru</button><button class="y" onclick="spRate('~')">🟡<br>İpucuyla</button><button class="n" onclick="spRate('-')">⏳<br>Henüz</button><button class="rec ${REC.mr?'on':''}" onclick="recCur()">🎙️</button></div><div class="sph">Öğretmen: ${esc(S.settings.student)}'in söyleyişini işaretle${s?` · hedef /${esc(s)}/`:''}</div></div>`;p.classList.add('on')}
+function spRate(r){const it=spItem,cb=spNext;if(!it)return;$('#sp').classList.remove('on');spItem=null;spNext=null;addTrial(r,it.base||it.w,child.act,Object.assign({},child.cfg,{lvl:it.lvl||child.cfg.lvl}));addStar(r==='+'?2:1);say(r==='+'?'Süper! Çok güzel söyledin!':r==='~'?'Aferin! Birlikte söyledik.':'Tamam, sonra yine deneriz.');setTimeout(()=>cb&&cb(),900)}
+function wordItem(x){const c=child.cfg;if(c.lvl==='cumle'){const t=CARRIER[ri(CARRIER.length)];const w=t.replace('{w}',x.w);return {w:w.charAt(0).toLocaleUpperCase('tr')+w.slice(1),e:x.e,say:w,base:x.w,lvl:'cumle'}}return {w:x.w,e:x.e,say:x.w,base:x.w,lvl:c.lvl==='konusma'?'konusma':'kelime'}}
+function targetWords(n){const c=child.cfg;let p=c.s?poolFor(c.s,c.pos):[];if(p.length<3&&c.s)p=poolFor(c.s,'karisik');if(p.length<3)p=allWords();const out=[];while(out.length<n){out.push(...shuffle(p))}return out.slice(0,n)}
+
+/* --- 1. Ses Robotu (tekrar) --- */
+function drillItems(){const c=child.cfg,s=c.s,N=ROUNDS.drill;if(!s)return targetWords(N).map(wordItem);const S0=SOUNDS[s];
+ if(c.lvl==='izole')return Array.from({length:N},()=>({w:S0.iso,e:S0.e,say:S0.cue,lvl:'izole',base:'/'+s+'/'}));
+ if(c.lvl==='hece'){const y=sylls(s);const list=c.pos==='son'?y.vc:c.pos==='orta'?y.vcv:c.pos==='bas'?y.cv:y.cv.concat(y.vc,y.vcv);return shuffle(list.concat(list)).slice(0,N).map(x=>({w:x,e:'',say:x,syl:true,lvl:'hece',base:x}))}
+ if(c.lvl==='konusma')return targetWords(N).map(x=>({w:x.w,e:x.e,say:'Bunu anlat bakalım: '+x.w,base:x.w,lvl:'konusma',talk:true}));
+ return targetWords(N).map(wordItem)}
+function actDrill(){const st=child.st||(child.st={i:0,items:drillItems(),res:[]});const N=st.items.length;if(st.i>=N){const ok=st.res.filter(r=>r==='+').length;return finishAct(`Robot şarj oldu! ${ok}/${N} doğru! ⚡`)}const it=st.item=st.items[st.i];const s=child.cfg.s;
+ if(!st.spoke){st.spoke=1;setTimeout(()=>say(it.say),300)}
+ const track=Array.from({length:N},(_,i)=>`<i class="${st.res[i]?RES[st.res[i]].c:''} ${i===st.i?'cur':''}">${i===st.i?'🤖':st.res[i]==='+'?'⚡':''}</i>`).join('')+'<i class="end">🔋</i>';
+ const card=it.syl?`<div class="syl"><span>${esc(it.w)}</span></div><div class="dW" style="font-size:22px">${SOUNDS[s].e}</div>`:`<div class="dE">${esc(it.e)}</div><div class="dW">${it.lvl==='izole'?esc(it.w):hlWord(it.w,s)}</div>${it.talk?'<div class="mut">Ne görüyorsun? Anlat bakalım!</div>':''}`;
+ kid(`<div class="track">${track}</div><button class="dcard" onclick="say(child.st.item.say)">${card}<span class="mut">🔊 dokun, robot söylesin</span></button>${tbarHTML('drillRate')}<div class="tlab">Öğretmen: ${esc(S.settings.student)}'in söyleyişini işaretle · ${st.i+1}/${N}</div>`)}
+function drillRate(r){const st=child.st;const it=st.item;addTrial(r,it.base||it.w,'drill',Object.assign({},child.cfg,{lvl:it.lvl}));st.res[st.i]=r;st.i++;st.spoke=0;if(r==='+'){addStar(1);say(['Süper!','Harika!','Çok güzel!','Aferin!','Mükemmel!'][ri(5)])}else if(r==='~')say('Aferin, birlikte söyledik!');else say('Tamam, sıradaki!');setTimeout(render,r==='-'?500:700)}
+
+/* --- 2. Minimal Çift --- */
+function mpPool(){const act=activeSounds().concat(child.cfg.s?[child.cfg.s]:[]);const procs=(S.profile.processes||[]).map(p=>p.split(' (')[0]);let l=MP.filter(p=>act.some(s=>p.c.split('–').includes(s))||procs.some(x=>x.startsWith(p.p.split(' ')[0])));if(l.length<2)l=MP;return l}
+function actMinimal(){const st=child.st||(child.st={r:0,mode:null});if(!st.mode)return kid(`<div class="khello" style="justify-content:center"><span class="kro">🎯</span><span><b>Minimal Çift</b><small>Robot doğru resme gitsin!</small></span></div><div class="mode2"><button class="kbtn" onclick="mpMode('d')">👂 Dinle, bul</button><button class="kbtn alt" onclick="mpMode('s')">🗣️ Söyle, robot gitsin</button></div><p class="mut" style="max-width:520px;text-align:center">Dinle: robot iki benzer kelimeden birini söyler, ${esc(S.settings.student)} doğru resmi seçer. Söyle: ${esc(S.settings.student)} parlayan resmi söyler; öğretmen <b>duyduğu</b> resme dokunur ve robot oraya gider.</p>`);
+ if(st.r>=ROUNDS.minimal)return finishAct();
+ if(!st.p){st.p=mpPool()[ri(mpPool().length)];st.tg=ri(2)?'a':'b';st.fails=0;st.bot=0;st.lock=false;setTimeout(()=>say(st.mode==='d'?st.p[st.tg][1]+'. Hangisi '+st.p[st.tg][1]+'?':'Söyle bakalım: '+st.p[st.tg][1]),300)}
+ const P=st.p;const opts=['a','b'];const card=k=>`<button class="kcard ${st.mode==='s'&&k===st.tg?'tgt':''} ${st.mode==='d'&&st.fails>=2&&k===st.tg?'hint':''} ${st.bad===k?'shake':''}" onclick="mpTap('${k}')">${esc(P[k][0])}<span class="cap">${esc(P[k][1])}</span></button>`;
+ kid(`<div class="kq"><button class="kbig" onclick="say(child.st.mode==='d'?child.st.p[child.st.tg][1]:'Söyle: '+child.st.p[child.st.tg][1])">🔊</button>${dots(st.r,ROUNDS.minimal)}</div><div class="mpwrap">${card('a')}<div class="mpbot" style="transform:translateX(${st.bot*120}%)">🤖</div>${card('b')}</div><p class="mut">${st.mode==='d'?'Hangisini duydun?':'Öğretmen: '+esc(S.settings.student)+'\'in söylediği kelimenin resmine dokun'}</p>`);st.bad=null}
+function mpMode(m){child.st.mode=m;render()}
+function mpTap(k){const st=child.st,P=st.p;if(st.lock)return;const ok=k===st.tg;if(st.mode==='d'){logIt('mpd',P[st.tg][1],ok,{pair:P.a[1]+'/'+P.b[1]});if(ok){st.lock=true;st.bot=k==='a'?-1:1;render();addStar(1);say('Evet! '+P[k][1]+'!');setTimeout(()=>{st.r++;st.p=null;render()},1300)}else{st.fails++;st.bad=k;say('Bu '+P[k][1]+'. Biz '+P[st.tg][1]+' dedik.');render()}return}
+ st.lock=true;st.bot=k==='a'?-1:1;logIt('mps',P[st.tg][1],ok,{said:P[k][1],pair:P.a[1]+'/'+P.b[1]});render();if(ok){addStar(2);say('Robot doğru yere gitti! '+P[k][1]+'!');setTimeout(()=>{st.r++;st.p=null;render()},1500)}else{say('Robot '+P[k][1]+' resmine gitti! Ama biz '+P[st.tg][1]+' istiyorduk. Bir daha söyle: '+P[st.tg][1]);setTimeout(()=>{st.lock=false;st.bot=0;render()},2400)}}
+
+/* --- 3. Kod Yolu --- */
+const DIRS={u:[-1,0,'⬆️','yukarı'],d:[1,0,'⬇️','aşağı'],l:[0,-1,'⬅️','sola'],r:[0,1,'➡️','sağa']};
+function bfs(N,R,T,W){const seen=new Set([R+'']);const q=[R];while(q.length){const [a,b]=q.shift();if(a===T[0]&&b===T[1])return true;for(const d of Object.values(DIRS)){const n=[a+d[0],b+d[1]],k=n+'';if(n[0]<0||n[1]<0||n[0]>=N||n[1]>=N||W.has(k)||seen.has(k))continue;seen.add(k);q.push(n)}}return false}
+function genRobot(r){const N=5;const want=Math.min(2+r,6);for(let k=0;k<300;k++){const R=[ri(N),ri(N)],T=[ri(N),ri(N)];const d=Math.abs(R[0]-T[0])+Math.abs(R[1]-T[1]);if(d<Math.max(2,want-1)||d>want+1)continue;const W=new Set();const nw=r<2?0:Math.min(r,3);let g=0;while(W.size<nw&&g++<50){const k2=[ri(N),ri(N)]+'';if(k2!==R+''&&k2!==T+'')W.add(k2)}if(bfs(N,R,T,W))return{N,R,T,W:[...W],pos:R.slice(),prog:[],run:false,step:-1,bad:-1}}return{N,R:[2,0],T:[2,2],W:[],pos:[2,0],prog:[],run:false,step:-1,bad:-1}}
+function actRobot(){const st=child.st||(child.st={r:0,words:targetWords(ROUNDS.robot)});if(st.r>=ROUNDS.robot)return finishAct();if(!st.g){st.g=genRobot(st.r);st.word=st.words[st.r];setTimeout(()=>say('Robotu '+st.word.w+' yanına götür.'),350)}const g=st.g;let cells='';
+for(let i=0;i<g.N;i++)for(let j=0;j<g.N;j++){const k=i+','+j;const isR=g.pos[0]===i&&g.pos[1]===j,isT=g.T[0]===i&&g.T[1]===j,isW=g.W.includes(k);cells+=`<div class="rc ${isW?'w':''} ${isT?'t':''}">${isR?'🤖':isT?esc(st.word.e):isW?'🧱':''}</div>`}
+const prog=g.prog.map((c,i)=>`<span class="pc ${g.step===i?'on':''} ${g.bad===i?'bad':''}">${DIRS[c][2]}</span>`).join('')||'<span class="mut">Oklara bas, robotun yolunu yaz 👇</span>';const dis=g.run?'disabled':'';const b=d=>`<button onclick="rAdd('${d}')" ${dis}>${DIRS[d][2]}</button>`;
+kid(`<div class="kq"><button class="kbig" onclick="say('Robotu '+child.st.word.w+' yanına götür')">🔊</button>${dots(st.r,ROUNDS.robot)}</div><div class="rg">${cells}</div><div class="prog">${prog}</div><div class="pad"><span></span>${b('u')}<span></span>${b('l')}<button class="go" onclick="rRun()" ${g.run||!g.prog.length?'disabled':''}>▶️</button>${b('r')}<span></span>${b('d')}<button class="del" onclick="rDel()" ${dis}>↩️</button></div>`)}
+function rAdd(d){const g=child.st.g;if(g.run||g.prog.length>=14)return;g.prog.push(d);g.bad=-1;g.pos=g.R.slice();say(DIRS[d][3]);render()}
+function rDel(){const g=child.st.g;if(g.run)return;g.prog.pop();g.bad=-1;g.pos=g.R.slice();render()}
+function rRun(){const st=child.st,g=st.g;if(g.run||!g.prog.length)return;g.run=true;g.pos=g.R.slice();g.step=-1;g.bad=-1;render();let i=0;
+const reset=ms=>setTimeout(()=>{if(child&&child.st===st){g.pos=g.R.slice();g.step=-1;render()}},ms);
+const tick=()=>{if(!child||child.st!==st)return;if(i>=g.prog.length){g.run=false;logIt('robot',st.word.w,false);say('Biraz daha kaldı. Yolu tamamlayalım.');render();reset(1200);return}const c=g.prog[i];const np=[g.pos[0]+DIRS[c][0],g.pos[1]+DIRS[c][1]];g.step=i;
+if(np[0]<0||np[1]<0||np[0]>=g.N||np[1]>=g.N||g.W.includes(np+'')){g.run=false;g.bad=i;logIt('robot',st.word.w,false);say('Hop! '+(i+1)+'. adımda robot takıldı. Düzeltelim.');render();reset(1300);return}
+g.pos=np;render();if(np[0]===g.T[0]&&np[1]===g.T[1]){g.run=false;logIt('robot',st.word.w,true);const it=wordItem(st.word);say('Robot '+st.word.w+' buldu! Sen de söyle: '+it.say);setTimeout(()=>trialPanel(it,()=>{st.r++;st.g=null;render()}),800);return}i++;setTimeout(tick,560)};setTimeout(tick,420)}
+
+/* --- 4. Yapboz --- */
+function pieces(e,n,bg){const Z=360,c=document.createElement('canvas');c.width=c.height=Z;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,Z,Z);x.textAlign='center';x.textBaseline='middle';x.font=`${Math.round(Z*.7)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;x.fillText(e,Z/2,Z/2+Z*.04);const out=[],p=Z/n;for(let r=0;r<n;r++)for(let q=0;q<n;q++){const d=document.createElement('canvas');d.width=d.height=p;d.getContext('2d').drawImage(c,q*p,r*p,p,p,0,0,p,p);out.push(d.toDataURL())}return out}
+const PZBG=['#e0e7ff','#fce7f3','#dcfce7','#fef3c7','#e0f2fe'];
+function actPuzzle(){const st=child.st||(child.st={r:0,words:targetWords(ROUNDS.puzzle)});if(st.r>=ROUNDS.puzzle)return finishAct();if(!st.p){const w=st.words[st.r];const n=st.r<1?2:3;const imgs=pieces(w.e,n,PZBG[st.r%PZBG.length]);let ord=shuffle(imgs.map((_,i)=>i));while(ord.every((v,i)=>v===i))ord=shuffle(ord);st.p={w,n,imgs,ord,sel:-1};setTimeout(()=>say('Yapboz zamanı! Parçaları yerine koy.'),350)}const p=st.p;
+kid(`<div class="kq"><div class="pzprev">${esc(p.w.e)}</div>${dots(st.r,ROUNDS.puzzle)}</div><div class="pz" style="grid-template-columns:repeat(${p.n},1fr)">${p.ord.map((v,i)=>`<img src="${p.imgs[v]}" class="${p.sel===i?'sel':''} ${v===i?'ok':''}" onclick="pzTap(${i})" alt="">`).join('')}</div><p class="mut">İki parçaya dokun, yer değiştirsinler.</p>`)}
+function pzTap(i){const st=child.st,p=st.p;if(!p||p.done)return;if(p.sel<0){p.sel=i;render();return}if(p.sel===i){p.sel=-1;render();return}const a=p.sel;[p.ord[a],p.ord[i]]=[p.ord[i],p.ord[a]];p.sel=-1;render();if(p.ord.every((v,k)=>v===k)){p.done=true;logIt('puzzle',p.w.w,true);const it=wordItem(p.w);say('Tamamlandı! Sen de söyle: '+it.say);setTimeout(()=>trialPanel(it,()=>{st.r++;st.p=null;render()}),900)}}
+
+/* --- 5. Hece Treni --- */
+function actHece(){const st=child.st||(child.st={r:0,list:shuffle(allWords().filter(x=>{const n=heceOf(x.w).length;return n>=1&&n<=4})).slice(0,ROUNDS.hece)});if(st.r>=ROUNDS.hece)return finishAct();const w=st.list[st.r];const hs=heceOf(w.w);if(!st.spoke){st.spoke=1;setTimeout(()=>say(w.w+'. Kaç vagon? Alkışla say.'),300)}
+ kid(`<div class="kq"><button class="kbig" onclick="say(child.st.list[child.st.r].w)">🔊</button>${dots(st.r,ROUNDS.hece)}</div><div class="hE">${esc(w.e)}</div>${st.show?`<div class="hs">${hs.map((h,i)=>`<button class="hb c${i%4}" onclick="say('${Q(h)}')">${esc(h)}</button>`).join('')}</div>`:'<p class="mut" style="font-size:18px">👏 Alkışla, kaç parça?</p>'}<div class="train">${[1,2,3,4].map(n=>`<button class="${st.bad===n?'shake':''} ${st.fails>=2&&n===hs.length?'hint':''}" onclick="heceSec(${n})">🚂${'🚃'.repeat(n)}</button>`).join('')}</div>`);st.bad=0}
+function heceSec(n){const st=child.st,w=st.list[st.r],hs=heceOf(w.w);if(st.show)return;const ok=n===hs.length;logIt('hece',w.w,ok);if(ok){st.show=1;render();addStar(1);sayQ(hs.concat([w.w]),i=>{document.querySelectorAll('.hb').forEach((b,k)=>b.classList.toggle('lit',k===i||i>=hs.length))},()=>setTimeout(()=>{if(!child||child.act!=='hece')return;st.r++;st.show=0;st.spoke=0;st.fails=0;render()},600))}else{st.fails=(st.fails||0)+1;st.bad=n;say('Bir daha alkışlayalım: '+hs.join(', '));render()}}
+
+/* --- 6. İlk Ses Dedektifi --- */
+function actIlk(){const st=child.st||(child.st={r:0});if(st.r>=ROUNDS.ilkses)return finishAct();const s=child.cfg.s||'s';if(!st.cur){const yes=shuffle(poolFor(s,'bas'));const no=shuffle(allWords().filter(x=>!low(x.w).startsWith(s)&&low(x.w)[0]!==s));if(yes.length<2){st.r=ROUNDS.ilkses;toast('Bu ses için yeterli kelime yok');return render()}st.cur=yes[0];st.ex=yes[1];st.opts=shuffle([yes[0],no[0],no[1]]);st.fails=0;setTimeout(()=>say(`${st.ex.w}. ${st.ex.w} gibi başlayan hangisi?`),300)}
+ kid(`<div class="kq"><button class="kbig" onclick="say(child.st.ex.w+' gibi başlayan hangisi?')">🔊</button><div class="pzprev">${esc(st.ex.e)}</div>${dots(st.r,ROUNDS.ilkses)}</div><p class="mut" style="font-size:18px">🔍 <b>${esc(st.ex.w)}</b> gibi başlayan hangisi? <b style="color:#e11d48">/${esc(s)}/</b></p><div class="kopts">${st.opts.map((o,i)=>`<button class="kcard ${st.fails>=2&&o===st.cur?'hint':''} ${st.bad===i?'shake':''}" onclick="ilkSec(${i})">${esc(o.e)}</button>`).join('')}</div>`);st.bad=-1}
+function ilkSec(i){const st=child.st,o=st.opts[i];const ok=o===st.cur;logIt('ilkses',st.cur.w,ok);if(ok){addStar(1);say('Evet! '+o.w+'! '+st.ex.w+' gibi başlıyor.');setTimeout(()=>{st.r++;st.cur=null;render()},1500)}else{st.fails++;st.bad=i;say('Bu '+o.w+'. Dinle: '+st.ex.w+', '+st.cur.w+'…');render()}}
+
+/* --- 7. Sıralama --- */
+function actSira(){const st=child.st||(child.st={r:0,list:shuffle(seqOf(curUnit()))});const tot=Math.min(ROUNDS.sira,st.list.length);if(st.r>=tot)return finishAct();if(!st.cur){st.cur=st.list[st.r];st.cards=shuffle(st.cur.map((x,i)=>Object.assign({i},x)));st.placed=[];setTimeout(()=>say('Sırala bakalım. Önce hangisi?'),350)}
+kid(`<div class="kq"><button class="kbig" onclick="say('Önce hangisi?')">🔊</button>${dots(st.r,tot)}</div><div class="slots">${st.cur.map((_,i)=>{const p=st.placed[i];return `<div class="slot ${p?'f':''}"><small>${i+1}</small>${p?esc(p.e):''}</div>`}).join('')}</div><div class="kopts">${st.cards.map((c,k)=>st.placed.includes(c)?'':`<button class="kcard ${st.bad===k?'shake':''}" onclick="siraTap(${k})">${esc(c.e)}</button>`).join('')}</div>`);st.bad=-1}
+function siraTap(k){const st=child.st,c=st.cards[k];if(st.placed.includes(c))return;if(c.i===st.placed.length){st.placed.push(c);say(c.t);render();if(st.placed.length===st.cur.length){const s=st.cur;logIt('sira',s[0].t,true);const sent='Önce '+s[0].t+', sonra '+s[1].t+(s[2]?', en son '+s[2].t:'');setTimeout(()=>{say('Harika algoritma! '+sent);trialPanel({w:sent,e:s.map(x=>x.e).join(''),say:sent,base:sent,lvl:'cumle'},()=>{st.r++;st.cur=null;render()})},700)}}else{st.bad=k;logIt('sira',st.cur[0].t,false);say('Hımm, '+(st.placed.length?'sonra':'önce')+' hangisi olmalı?');render()}}
+
+/* --- 8. Dinle-Bul --- */
+function actDinle(){const st=child.st||(child.st={r:0});if(st.r>=ROUNDS.dinle)return finishAct();if(!st.cur){const ws=unitWordsOr(3);st.cur=ws[0];st.opts=shuffle(ws);st.fails=0;setTimeout(()=>say(st.cur.w+' nerede? '+st.cur.w+' göster.'),350)}
+kid(`<div class="kq"><button class="kbig" onclick="say(child.st.cur.w+' nerede?')">🔊</button>${dots(st.r,ROUNDS.dinle)}</div><div class="kopts">${st.opts.map((o,i)=>`<button class="kcard ${st.fails>=2&&o===st.cur?'hint':''} ${st.bad===i?'shake':''}" onclick="dinleSec(${i})">${esc(o.e)}</button>`).join('')}</div>`);st.bad=-1}
+function dinleSec(i){const st=child.st,o=st.opts[i];if(o===st.cur){logIt('dinle',o.w,true);const it=wordItem(o);say('Aferin! Bu '+o.w+'. Sen de söyle: '+it.say);trialPanel(it,()=>{st.r++;st.cur=null;render()})}else{st.fails++;st.bad=i;logIt('dinle',st.cur.w,false);say('Bir daha dinleyelim. '+st.cur.w);render()}}
+
+/* ================== YAZI TAHTASI (kalem + cihazlar arası canlı) ================== */
+const PEN_COLORS=['#1e293b','#e11d48','#2563eb','#16a34a','#f59e0b','#9333ea'];
+const PEN_SIZES=[.004,.008,.016];
+const B={on:false,strokes:[],redo:[],bg:null,aspect:1.414,title:'',key:null,book:null,page:0,letter:null,fromChild:false,color:PEN_COLORS[0],size:1,mode:'pen',guest:false,peer:null,conns:[],host:null,code:null,cur:null,lastSend:0,cv:null,ctx:null,W:0,H:0};
+function makePaper(letter){const W=1600,H=1000;const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);
+ if(letter){const base=H*.78,top=H*.18,mid=(base+top)/2+40;g.strokeStyle='#93c5fd';g.lineWidth=3;[top,base].forEach(y=>{g.beginPath();g.moveTo(40,y);g.lineTo(W-40,y);g.stroke()});g.setLineDash([14,12]);g.strokeStyle='#fda4af';g.beginPath();g.moveTo(40,mid);g.lineTo(W-40,mid);g.stroke();
+  const txt=letter.toLocaleUpperCase('tr')+' '+letter;g.font=`bold ${Math.round(base-top+40)}px "Comic Sans MS","Chalkboard SE","Segoe Print",Arial,sans-serif`;g.textAlign='center';g.textBaseline='alphabetic';g.setLineDash([18,16]);g.lineWidth=7;g.strokeStyle='#94a3b8';g.strokeText(txt,W/2,base);g.setLineDash([]);
+  const s=SOUNDS[letter];if(s){g.font='110px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.textAlign='left';g.fillText(s.e,48,150)}}
+ else{g.strokeStyle='#e2e8f0';g.lineWidth=2;for(let y=120;y<H;y+=110){g.beginPath();g.moveTo(40,y);g.lineTo(W-40,y);g.stroke()}}
+ return c.toDataURL('image/jpeg',.9)}
+async function openBookBoard(bookId,page,share){busy('Sayfa hazırlanıyor…');try{const bg=await pageImg(bookId,page,1400,.82);await openBoard({bg,title:`${bookOf(bookId).name} · s.${page}`,key:`ann:${bookId}:${page}`,book:bookId,page});if(share)shareBoard()}catch(e){toast(e.message)}finally{busy(false)}}
+function openLetterBoard(fromChild){const s=(child&&child.cfg&&child.cfg.s)||curCfg().s||activeSounds()[0]||'a';openBoard({bg:makePaper(s),title:`Harf: ${s.toLocaleUpperCase('tr')} ${s}`,letter:s,fromChild:!!fromChild});if(fromChild)say(`Haydi ${s} harfini yazalım! Noktaların üstünden git.`)}
+function openBlankBoard(){openBoard({bg:makePaper(null),title:'Boş tahta'})}
+async function openBoard(o){Object.assign(B,{on:true,strokes:[],redo:[],bg:o.bg,title:o.title||'',key:o.key||null,book:o.book||null,page:o.page||0,letter:o.letter||null,fromChild:!!o.fromChild});if(B.key){try{const s=await idbGet(B.key);if(Array.isArray(s))B.strokes=s}catch(e){}}B.aspect=await imgAspect(B.bg);bUI();bLayout();bBroadcastInit()}
+function imgAspect(src){return new Promise(r=>{if(!src)return r(1.6);const i=new Image();i.onload=()=>r(i.naturalWidth/i.naturalHeight||1.6);i.onerror=()=>r(1.6);i.src=src})}
+function bUI(){const el=$('#board');const g=B.guest;const letters=activeSounds().length?activeSounds():['a','e','r','s','k'];
+ el.innerHTML=`<div class="btool">${g?'':'<button onclick="closeBoard()" title="Kapat">✖</button>'}<b>${esc(B.title||'Yazı tahtası')}</b><span class="sep"></span>
+ ${PEN_COLORS.map(c=>`<button class="sw ${B.color===c&&B.mode!=='er'?'on':''}" style="background:${c}" onclick="bSet('color','${c}')"></button>`).join('')}<span class="sep"></span>
+ ${PEN_SIZES.map((s,i)=>`<button class="sz ${B.size===i?'on':''}" onclick="bSet('size',${i})"><i style="width:${6+i*6}px;height:${6+i*6}px"></i></button>`).join('')}<span class="sep"></span>
+ <button class="${B.mode==='pen'?'on':''}" onclick="bSet('mode','pen')">✏️</button><button class="${B.mode==='hl'?'on':''}" onclick="bSet('mode','hl')">🖍️</button><button class="${B.mode==='er'?'on':''}" onclick="bSet('mode','er')">🧽</button><button onclick="bUndo()">↩️</button><button onclick="bClear()">🗑️</button>
+ ${B.book&&!g?`<span class="sep"></span><button onclick="bPage(-1)">◀</button><button onclick="bPage(1)">▶</button>`:''}${B.letter&&!g?`<span class="sep"></span>${letters.map(l=>`<button class="${B.letter===l?'on':''}" onclick="bLetter('${l}')" style="font-weight:800">${esc(l.toLocaleUpperCase('tr'))}</button>`).join('')}`:''}
+ <span class="sep"></span><button onclick="${g?'':'shareBoard()'}" title="Başka cihaza bağla">${B.peer?(B.conns.length||B.host?'📡✅':'📡…'):'📡'}</button>${document.fullscreenEnabled?'<button onclick="bFull()">⛶</button>':''}<button class="save" onclick="bSave()">${B.fromChild?'✅ Bitti':'💾 Kaydet'}</button></div>
+ <div class="bstage" id="bstage"><div class="bpage" id="bpage">${B.bg?`<img src="${B.bg}" alt="">`:''}<canvas id="bcv"></canvas></div>${B.note?`<div class="bnote">${esc(B.note)}</div>`:''}</div>`;
+ el.classList.add('on');const cv=$('#bcv');B.cv=cv;B.ctx=cv.getContext('2d');bindDraw(cv)}
+function bNote(t){B.note=t;const n=document.querySelector('.bnote');if(n)n.textContent=t;else if(B.on){const st=$('#bstage');if(st)st.insertAdjacentHTML('beforeend',`<div class="bnote">${esc(t)}</div>`)}clearTimeout(B._nt);if(t)B._nt=setTimeout(()=>{B.note='';const n2=document.querySelector('.bnote');if(n2)n2.remove()},4000)}
+function bLayout(){const st=$('#bstage'),pg=$('#bpage');if(!st||!pg)return;const aw=st.clientWidth-16,ah=st.clientHeight-16;let w=aw,h=w/B.aspect;if(h>ah){h=ah;w=h*B.aspect}pg.style.width=w+'px';pg.style.height=h+'px';const dpr=Math.min(2,window.devicePixelRatio||1);B.W=w;B.H=h;B.cv.width=Math.round(w*dpr);B.cv.height=Math.round(h*dpr);B.ctx.setTransform(dpr,0,0,dpr,0,0);bRedraw()}
+window.addEventListener('resize',()=>{if(B.on)bLayout()});
+function bSet(k,v){B[k]=v;if(k==='color'&&B.mode==='er')B.mode='pen';bUI();bLayout()}
+function strokeStyle(g,s){const w=Math.max(1,s.w*B.W);g.lineCap='round';g.lineJoin='round';g.lineWidth=s.m==='hl'?w*3.2:s.m==='er'?w*3:w;g.globalCompositeOperation=s.m==='er'?'destination-out':'source-over';g.globalAlpha=s.m==='hl'?.32:1;g.strokeStyle=s.c;g.fillStyle=s.c}
+function drawStroke(g,s,W,H){const p=s.pts;if(!p.length)return;strokeStyle(g,s);if(W!==B.W)g.lineWidth=g.lineWidth*W/B.W;if(p.length===1){g.beginPath();g.arc(p[0][0]*W,p[0][1]*H,g.lineWidth/2,0,7);g.fill();return}g.beginPath();g.moveTo(p[0][0]*W,p[0][1]*H);for(let i=1;i<p.length-1;i++){const mx=(p[i][0]+p[i+1][0])/2,my=(p[i][1]+p[i+1][1])/2;g.quadraticCurveTo(p[i][0]*W,p[i][1]*H,mx*W,my*H)}const l=p[p.length-1];g.lineTo(l[0]*W,l[1]*H);g.stroke()}
+function bRedraw(){const g=B.ctx;if(!g)return;g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,B.cv.width,B.cv.height);g.restore();B.strokes.forEach(s=>{g.save();drawStroke(g,s,B.W,B.H);g.restore()})}
+function bindDraw(cv){const pt=e=>{const r=cv.getBoundingClientRect();return [Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))]};
+ cv.addEventListener('pointerdown',e=>{if(S.settings.penOnly&&e.pointerType==='touch'&&!B.guest)return;e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(x){}const s={id:uid(),c:B.color,w:PEN_SIZES[B.size],m:B.mode,pts:[pt(e)]};B.cur=s;B.strokes.push(s);B.redo=[];bRedraw()});
+ cv.addEventListener('pointermove',e=>{const s=B.cur;if(!s)return;e.preventDefault();const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];evs.forEach(ev=>s.pts.push(pt(ev)));const g=B.ctx;g.save();const n=s.pts.length;drawStroke(g,{c:s.c,w:s.w,m:s.m,pts:s.pts.slice(Math.max(0,n-evs.length-2))},B.W,B.H);g.restore();const now=Date.now();if(now-B.lastSend>70){B.lastSend=now;bSend({t:'s',s})}});
+ const end=e=>{const s=B.cur;if(!s)return;B.cur=null;if(s.m==='hl')bRedraw();bSend({t:'s',s});bPersist()};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);cv.addEventListener('lostpointercapture',end)}
+function bPersist(){if(!B.key||B.guest)return;clearTimeout(B._ps);B._ps=setTimeout(()=>{idbSet(B.key,B.strokes.map(s=>({id:s.id,c:s.c,w:s.w,m:s.m,pts:s.pts}))).catch(()=>{})},400)}
+function bUndo(){const s=B.strokes.pop();if(!s)return;B.redo.push(s);bRedraw();bSend({t:'undo',id:s.id});bPersist()}
+function bClear(){if(!B.strokes.length||!confirm('Sayfadaki tüm yazılar silinsin mi?'))return;B.strokes=[];bRedraw();bSend({t:'clear'});bPersist()}
+async function bPage(d){const b=bookOf(B.book);if(!b)return;const n=B.page+d;if(n<1||n>b.pages)return;busy('Sayfa '+n+'…');try{const bg=await pageImg(b.id,n,1400,.82);B.page=n;B.bg=bg;B.key=`ann:${b.id}:${n}`;B.title=`${b.name} · s.${n}`;B.strokes=[];try{const s=await idbGet(B.key);if(Array.isArray(s))B.strokes=s}catch(e){}B.aspect=await imgAspect(bg);pvPage=n;bUI();bLayout();bBroadcastInit()}catch(e){toast(e.message)}finally{busy(false)}}
+function bLetter(l){B.letter=l;B.bg=makePaper(l);B.title=`Harf: ${l.toLocaleUpperCase('tr')} ${l}`;B.strokes=[];bUI();bLayout();bBroadcastInit();say(l)}
+function bFull(){try{if(document.fullscreenElement)document.exitFullscreen();else $('#board').requestFullscreen()}catch(e){}}
+async function bComposite(maxW){const W=Math.min(maxW||1400,Math.round(1400)),H=Math.round(W/B.aspect);const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);if(B.bg){const i=new Image();await new Promise(r=>{i.onload=i.onerror=r;i.src=B.bg});g.drawImage(i,0,0,W,H)}const ink=document.createElement('canvas');ink.width=W;ink.height=H;const ig=ink.getContext('2d');B.strokes.forEach(s=>{ig.save();drawStroke(ig,s,W,H);ig.restore()});g.drawImage(ink,0,0);return c}
+async function bSave(){if(!B.strokes.length&&!confirm('Sayfa boş. Yine de kaydedilsin mi?'))return;busy('Kaydediliyor…');try{const c=await bComposite(1400);const img=c.toDataURL('image/jpeg',.85);if(B.guest){busy(false);return offerShare(await dataToBlob(img),`yazi_${dISO(Date.now())}.jpg`,'image/jpeg')}
+ const t=document.createElement('canvas');t.width=480;t.height=Math.round(480/B.aspect);t.getContext('2d').drawImage(c,0,0,t.width,t.height);const th=t.toDataURL('image/jpeg',.8);const id=uid();await idbSet('work:'+id,{img,th});const ses=ensureSession();S.works.unshift({id,date:new Date().toISOString(),title:B.title,sid:ses.id});ses.works.push(id);if(B.letter)logIt('yazi',B.letter,true);save();bPersist();toast('✍️ Çalışma kaydedildi — veli raporuna eklenecek');
+ if(B.fromChild){closeBoard();const c2=ensureSession();if(!c2.done.includes('yazi'))c2.done.push('yazi');addStar(2);render();celebrate('Harika yazdın '+S.settings.student+'!','✍️')}}catch(e){toast('Kaydedilemedi: '+e.message)}finally{busy(false)}}
+function closeBoard(){B.on=false;$('#board').classList.remove('on');$('#board').innerHTML='';if(B.peer&&!B.guest){try{B.peer.destroy()}catch(e){}B.peer=null;B.conns=[]}if(child)render();else if(view==='kayit')render()}
+
+/* ---- Peer bağlantısı ---- */
+const PEERJS='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',QRJS='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+function bInitMsg(){return {t:'init',bg:B.bg,aspect:B.aspect,title:B.title,strokes:B.strokes}}
+function bBroadcastInit(){if(!B.peer||B.guest)return;B.conns.forEach(c=>{try{c.open&&c.send(bInitMsg())}catch(e){}})}
+function bSend(m,except){if(B.guest){try{B.host&&B.host.open&&B.host.send(m)}catch(e){}return}B.conns.forEach(c=>{if(c!==except){try{c.open&&c.send(m)}catch(e){}}})}
+function bOnData(d,from){if(!d||!d.t)return;if(d.t==='init'){B.bg=d.bg;B.aspect=d.aspect||1.6;B.title=d.title;B.strokes=d.strokes||[];bUI();bLayout();return}
+ if(d.t==='s'){const i=B.strokes.findIndex(x=>x.id===d.s.id);if(i>=0)B.strokes[i]=d.s;else B.strokes.push(d.s);bRedraw();if(!B.guest){bSend(d,from);bPersist()}}
+ else if(d.t==='undo'){B.strokes=B.strokes.filter(x=>x.id!==d.id);bRedraw();if(!B.guest){bSend(d,from);bPersist()}}
+ else if(d.t==='clear'){B.strokes=[];bRedraw();if(!B.guest){bSend(d,from);bPersist()}}}
+function joinUrl(code){return location.origin+location.pathname+'?tahta='+code}
+async function shareBoard(){if(B.peer){return showShare()}if(location.protocol==='file:'){modal(`<h3>📡 Cihazlar arası bağlantı</h3><p>Bağlantı için sistemi <b>internet adresinden</b> açman gerekiyor (ör. GitHub Pages sitende). Dosyadan açıldığında diğer cihaz aynı adrese ulaşamaz.</p><button class="btn" onclick="closeModal()">Tamam</button>`);return}
+ busy('Bağlantı hazırlanıyor…');try{await loadJs(PEERJS);await startHost(String(1000+ri(9000)))}catch(e){busy(false);toast(e.message)}}
+function startHost(code){return new Promise((res,rej)=>{let p;try{p=new Peer('metedk-'+code,{debug:0})}catch(e){return rej(e)}B.peer=p;B.code=code;B.conns=[];
+ p.on('open',()=>{busy(false);bUI();bLayout();showShare();res()});
+ p.on('connection',c=>{c.on('open',()=>{B.conns.push(c);try{c.send(bInitMsg())}catch(e){}bUI();bLayout();closeModal();bNote('📱 Cihaz bağlandı! Yazdıklarınız eşleniyor.')});c.on('data',d=>bOnData(d,c));c.on('close',()=>{B.conns=B.conns.filter(x=>x!==c);if(B.on){bUI();bLayout()}})});
+ p.on('error',e=>{if(e.type==='unavailable-id'){try{p.destroy()}catch(x){}B.peer=null;startHost(String(1000+ri(9000))).then(res,rej)}else{busy(false);toast('Bağlantı hatası: '+e.type);}});
+ p.on('disconnected',()=>{setTimeout(()=>{try{p.reconnect()}catch(x){}},1500)})})}
+async function showShare(){const url=joinUrl(B.code);modal(`<h3>📡 Tahta / tablet bağla</h3><p class="mut">Diğer cihazda (akıllı tahta, tablet, telefon) kamerayla QR'ı okut ya da adresi aç. Aynı sayfayı görür, biri yazınca diğerinde anında belirir.</p><div class="qrbox" id="qr"></div><div class="code">${B.code}</div><p class="mut" style="word-break:break-all;text-align:center">${esc(url)}</p><p style="text-align:center"><b>${B.conns.length}</b> cihaz bağlı</p><div class="mbtns"><button class="btn ghost" onclick="copyText('${Q(url)}')">📋 Adresi kopyala</button><button class="btn" onclick="closeModal()">Tamam</button></div>`);try{await loadJs(QRJS);new QRCode($('#qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M})}catch(e){$('#qr').textContent='QR oluşturulamadı (internet?)'}}
+async function joinBoard(code){B.guest=true;B.on=true;B.title='Bağlanıyor…';B.bg=makePaper(null);B.aspect=1.6;document.body.style.paddingBottom='0';bUI();bLayout();bNote('📡 Öğretmenin tahtasına bağlanılıyor… ('+code+')');
+ try{await loadJs(PEERJS)}catch(e){return bNote('İnternet bağlantısı gerekli')}const p=new Peer({debug:0});B.peer=p;p.on('open',()=>{const c=p.connect('metedk-'+code,{reliable:true});B.host=c;c.on('open',()=>{bNote('✅ Bağlandı! Yazmaya başlayabilirsin.');bUI();bLayout()});c.on('data',d=>bOnData(d,c));c.on('close',()=>{bNote('Bağlantı koptu — öğretmen tahtayı kapattı mı?');B.host=null;bUI();bLayout()})});p.on('error',e=>bNote(e.type==='peer-unavailable'?'Bu kodla açık tahta bulunamadı. Öğretmen cihazında 📡 açık mı?':'Bağlantı hatası: '+e.type))}
+
+/* ================== BAŞLAT ================== */
+(function boot(){const q=new URLSearchParams(location.search);const t=q.get('tahta');if(t){joinBoard(t.replace(/\D/g,''));return}render()})();
+
+</script>
+</body>
+</html>
