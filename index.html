@@ -349,6 +349,39 @@ details.card summary{cursor:pointer;list-style:none;padding:2px 0}details.card s
 @media(min-width:700px){.atabs{grid-template-columns:repeat(6,1fr)}}
 .aistat{display:flex;gap:12px;align-items:center}.aistat .ais{font-size:34px}.aistat>div:nth-child(2){flex:1;display:flex;flex-direction:column}.aistat span{color:var(--mut);font-size:13px}
 .klist{display:flex;flex-direction:column;gap:6px}.krow{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:8px 10px}.krow code{font-size:13px;flex:1}.krow small{color:var(--mut);font-size:12px}.krow button{border:0;background:#fff;border-radius:8px;width:30px;height:30px}
+
+/* ===== v8 oyunlar ===== */
+.racewrap{display:flex;gap:14px;width:min(98vw,1200px);align-items:stretch}
+.race{position:relative;flex:1;aspect-ratio:16/9;border-radius:22px;overflow:hidden;background:linear-gradient(#7dd3fc,#bae6fd 55%,#dcfce7);box-shadow:0 6px 0 #dfe3f3;min-height:220px}
+.race .sun{position:absolute;right:8%;top:6%;font-size:clamp(30px,6vw,64px)}.race .cloud{position:absolute;font-size:clamp(30px,6vw,70px);opacity:.95;animation:drift 18s linear infinite}.race .c1{top:8%;left:10%}.race .c2{top:16%;left:55%;animation-duration:26s}
+@keyframes drift{50%{transform:translateX(40px)}}
+.race .hills{position:absolute;left:0;right:0;bottom:30%;width:100%;height:32%}
+.race .trees{position:absolute;bottom:40%;left:6%;right:20%;display:flex;justify-content:space-between;font-size:clamp(20px,4vw,46px)}
+.race .house{position:absolute;right:4%;bottom:30%;font-size:clamp(50px,10vw,120px);line-height:1}.race .flag{position:absolute;right:20%;bottom:29%;font-size:clamp(24px,4vw,44px)}
+.race .road{position:absolute;left:0;right:0;bottom:0;height:32%;background:#475569;border-top:6px solid #94a3b8}.race .road i{position:absolute;left:0;right:0;top:46%;border-top:6px dashed #fde047}
+.race .car{position:absolute;bottom:9%;transition:left .9s cubic-bezier(.4,1.4,.5,1);display:flex;align-items:center}
+.race .car span{font-size:clamp(60px,12vw,150px);line-height:1;transform:scaleX(-1);display:inline-block;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+.race .car button{position:absolute;left:30%;top:24%;width:clamp(34px,5vw,54px);height:clamp(34px,5vw,54px);border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.9);font-size:clamp(16px,2.4vw,26px)}
+.race .rprog{position:absolute;left:4%;bottom:3%;width:40%;height:12px;background:rgba(255,255,255,.4);border-radius:9px;overflow:hidden}.race .rprog i{display:block;height:100%;background:#22c55e;transition:width .8s}
+.race .rcount{position:absolute;left:46%;bottom:1.5%;color:#fff;font-size:20px}
+.rcards{display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:min(30vw,260px)}
+.rcard{border:0;background:#fff;border-radius:22px;padding:14px 18px;box-shadow:0 6px 0 #dfe3f3;min-height:90px;display:flex;align-items:center;justify-content:center}
+.rcard.big{min-height:180px}
+.gi{display:flex;flex-direction:column;align-items:center;gap:4px}.gi i{font-style:normal;font-size:clamp(30px,5vw,54px);line-height:1}.gi b{font-family:"Baloo 2",Nunito,sans-serif;color:#1e293b;line-height:1.15;text-align:center}
+@media(max-width:760px){.racewrap{flex-direction:column}.rcards{flex-direction:row;flex-wrap:wrap;justify-content:center}.rcard{flex:1;min-width:30%}}
+.carkwrap{display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap}.wheelbox{position:relative;width:min(86vw,56vh,520px);aspect-ratio:1}.wheel{width:100%;height:100%;border-radius:50%;box-shadow:0 10px 30px rgba(0,0,0,.25);cursor:pointer}.wheel svg{width:100%;height:100%;display:block}
+.wptr{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-size:44px;color:#1e293b;z-index:2;text-shadow:0 2px 0 #fff}
+.wgo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22%;aspect-ratio:1;border-radius:50%;border:5px solid #fff;background:#1e293b;color:#fff;font-weight:900;font-size:clamp(12px,2.4vw,20px);z-index:2;box-shadow:0 4px 12px rgba(0,0,0,.3)}.wgo:disabled{opacity:.6}
+.wres{display:flex;align-items:center;gap:12px}.wres .rcard{min-width:min(70vw,360px)}
+.balloons{display:flex;gap:clamp(10px,3vw,40px);justify-content:center;flex-wrap:wrap;margin-top:20px}
+.bal{position:relative;border:0;background:none;padding:0;animation:float 3s ease-in-out infinite}
+.bal span{display:flex;align-items:center;justify-content:center;width:clamp(110px,22vw,190px);aspect-ratio:.85;border-radius:50% 50% 48% 48%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.55),transparent 30%),var(--bc);color:#fff;font-family:"Baloo 2",Nunito,sans-serif;font-weight:800;font-size:clamp(22px,4.5vw,44px);box-shadow:inset -8px -10px 0 rgba(0,0,0,.12);padding:8px;text-align:center;line-height:1.1}
+.bal i{display:block;width:2px;height:60px;background:#94a3b8;margin:0 auto}
+.bal.popped span{animation:popb .35s forwards}.bal.popped i{opacity:0}
+@keyframes popb{60%{transform:scale(1.25)}100%{transform:scale(0);opacity:0}}
+@keyframes float{50%{transform:translateY(-14px)}}
+.gcard{border:2px solid #fecaca}.setprev{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;align-items:center}.setprev span{background:var(--bg);border-radius:8px;padding:4px 10px;font-weight:700;font-family:"Baloo 2",Nunito,sans-serif}
+.ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ggrid button{border:0;border-radius:18px;padding:14px 6px;background:linear-gradient(135deg,#fee2e2,#fef3c7);display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800}.ggrid span{font-size:38px}
 </style>
 </head>
 <body>
@@ -7755,11 +7788,26 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "7.0",
+const APP_VER = "8.2",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 10828,
-  APP_KB = 795;
+  APP_LINES = 11525,
+  APP_KB = 829;
 const CHANGELOG = [
+  [
+    "8.2",
+    "10 Ekim 2026",
+    "Tahta kilit ekranı: tahta modunda tam ekran büyük kod, telefon bağlanınca kendiliğinden açılır, bağlantı koparsa geri gelir; telefonda her ekranda 📱 Kumanda düğmesi, 4 hane yazınca kendiliğinden bağlanır",
+  ],
+  [
+    "8.1",
+    "10 Ekim 2026",
+    'Telefon→tahta aktarımı netleşti: QR farklı tarayıcıda açılırsa uyarı, bağlanınca iki tarafta veri özeti, kitap/fotoğraf yüklenince tahtaya anında gönderim, kumandada büyük "📤 Kitapları tahtaya gönder" düğmesi, kod öncelikli bağlantı ekranı',
+  ],
+  [
+    "8.0",
+    "10 Ekim 2026",
+    "Oyun atölyesi: öğretmenin yazdığı hece/kelime/cümle listeleriyle 🚗 Araba Yarışı (doğru bildikçe araba eve gider), 🎡 Çark Çevir, 🎈 Balon Patlat; kumandadan yönetim",
+  ],
   [
     "7.0",
     "10 Ekim 2026",
@@ -10808,6 +10856,655 @@ mergeState = function (R) {
   ).sort((a, b) => new Date(b.date) - new Date(a.date));
   save();
 };
+
+/* ================== v8: OYUN ATÖLYESİ (kendi hece/kelime/cümlelerinle) ================== */
+Object.assign(SUBJ, { oyun: { n: "Oyunlar", i: "🎮", c: "#ef4444" } });
+(function () {
+  const tmp = { oyun: SUBJ.oyun };
+  Object.keys(SUBJ).forEach((k) => {
+    if (k !== "oyun") tmp[k] = SUBJ[k];
+  });
+  Object.keys(SUBJ).forEach((k) => delete SUBJ[k]);
+  Object.assign(SUBJ, tmp);
+})();
+function autoItems() {
+  const syl = hmode()
+    ? learnedSyl().slice()
+    : (() => {
+        const L = learned();
+        const V = L.filter((c) => VOW.includes(c)),
+          C = L.filter((c) => !VOW.includes(c));
+        const o = [];
+        C.forEach((c) => V.forEach((v) => o.push(c + v)));
+        return o.slice(0, 20);
+      })();
+  return [...new Set(syl.concat(readable().map((x) => x.w)))];
+}
+function setsAll() {
+  return [
+    {
+      id: "auto",
+      name: hmode() ? "📕 Öğrendiği heceler + kelimeler" : "🔤 Okuyabildikleri",
+      items: autoItems(),
+      auto: 1,
+    },
+  ].concat(S.sets || []);
+}
+function activeSet() {
+  const L = setsAll();
+  return L.find((s) => s.id === S.activeSet) || L[0];
+}
+function gameItems() {
+  let it = (activeSet().items || []).map((s) => String(s).trim()).filter(Boolean);
+  if (it.length < 3) it = it.concat(["ba", "sa", "ra", "baba", "araba"].filter((x) => !it.includes(x)));
+  return [...new Set(it)];
+}
+const itEmoji = (w) => {
+  const x = TRW.find((t) => t.w === low(w));
+  return x ? x.e : "";
+};
+const itFont = (w) =>
+  w.length > 14 ? "clamp(22px,4.4vw,38px)" : w.length > 7 ? "clamp(30px,6vw,54px)" : "clamp(44px,9vw,84px)";
+function itemCard(w, extra) {
+  const e = itEmoji(w);
+  return `<span class="gi">${e ? `<i>${e}</i>` : ""}<b style="font-size:${itFont(w)}">${esc(w)}</b></span>${extra || ""}`;
+}
+function vroom() {
+  try {
+    const a = ac();
+    if (!a || !S.settings.sound) return;
+    const o = a.createOscillator(),
+      g = a.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(90, a.currentTime);
+    o.frequency.exponentialRampToValueAtTime(260, a.currentTime + 0.6);
+    g.gain.setValueAtTime(0.08, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.75);
+    o.connect(g).connect(a.destination);
+    o.start();
+    o.stop(a.currentTime + 0.8);
+  } catch (e) {}
+}
+function pop() {
+  try {
+    const a = ac();
+    if (!a || !S.settings.sound) return;
+    const o = a.createOscillator(),
+      g = a.createGain();
+    o.type = "square";
+    o.frequency.setValueAtTime(700, a.currentTime);
+    o.frequency.exponentialRampToValueAtTime(120, a.currentTime + 0.12);
+    g.gain.setValueAtTime(0.12, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.15);
+    o.connect(g).connect(a.destination);
+    o.start();
+    o.stop(a.currentTime + 0.16);
+  } catch (e) {}
+}
+topic("oy_araba", "oyun", "Araba Yarışı", "🚗", null, { type: "race" });
+topic("oy_cark", "oyun", "Çark Çevir", "🎡", null, { type: "cark" });
+topic("oy_balon", "oyun", "Balon Patlat", "🎈", null, { type: "balon", rounds: 8 });
+topic("oy_tren", "oyun", "Hece Treni", "🚂", null, { type: "act", act: "hece" });
+
+/* ---- 🚗 Araba yarışı ---- */
+function raceScene(st) {
+  const p = Math.min(1, st.pos / st.goal);
+  return `<div class="race"><div class="sun">☀️</div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div><svg class="hills" viewBox="0 0 1000 200" preserveAspectRatio="none"><path d="M0 120 Q150 40 300 110 T600 100 T1000 90 V200 H0Z" fill="#86efac"/><path d="M0 150 Q200 90 420 140 T800 130 T1000 140 V200 H0Z" fill="#4ade80"/></svg><div class="trees">🌲🌳🌲<span>🌲🌲</span>🌳🌲</div><div class="house">🏠</div><div class="flag">🏁</div><div class="road"><i></i></div><div class="car" style="left:calc(4% + ${(p * 72).toFixed(1)}%)"><span>🚗</span><button onclick="raceSay()">🔊</button></div><div class="rprog"><i style="width:${p * 100}%"></i></div><b class="rcount">${st.pos}/${st.goal}</b></div>`;
+}
+function actRace(t) {
+  const st =
+    child.st ||
+    (child.st = {
+      pos: 0,
+      goal: Math.min(10, Math.max(5, gameItems().length)),
+      mode: null,
+      items: shuffle(gameItems()),
+    });
+  if (!st.mode)
+    return kid(
+      `<div class="khello" style="justify-content:center"><span class="kro">🚗</span><span><b>Araba Yarışı</b><small>${esc(activeSet().name)} · ${gameItems().length} öğe</small></span></div><div class="mode2"><button class="kbtn" onclick="child.st.mode='dinle';render()">👂 Dinle, bul</button><button class="kbtn alt" onclick="child.st.mode='oku';render()">📖 Oku, araba gitsin</button></div><p class="mut" style="text-align:center;max-width:560px">Dinle: araba söyler, Mete doğru kartı bulur. Oku: kart çıkar, Mete okur, sen ✅ ile onaylarsın. Her doğruda araba eve yaklaşır.</p>`,
+    );
+  if (st.pos >= st.goal) return;
+  if (!st.cur) {
+    const its = st.items;
+    st.cur = its[(st.k = (st.k || 0) % its.length)];
+    st.k++;
+    st.first = true;
+    if (st.mode === "dinle") {
+      st.opts = shuffle([
+        st.cur,
+        ...pickN(
+          its.filter((x) => x !== st.cur),
+          2,
+        ),
+      ]);
+    }
+    const c = st.cur;
+    setTimeout(() => {
+      if (child && child.st === st && st.cur === c && st.mode === "dinle") say(c, 0.8);
+    }, 400);
+  }
+  const right =
+    st.mode === "dinle"
+      ? `<div class="rcards">${st.opts.map((o, i) => `<button class="rcard ${st.bad === i ? "shake" : ""} ${st.fails >= 2 && o === st.cur ? "hint" : ""}" onclick="racePick(${i})">${itemCard(o)}</button>`).join("")}</div>`
+      : `<div class="rcards"><div class="rcard big">${itemCard(st.cur)}</div></div>`;
+  kid(`<div class="racewrap">${raceScene(st)}${right}</div>${st.mode === "oku" ? tbarHTML("raceRate") : ""}`);
+  st.bad = -1;
+}
+function raceSay() {
+  const st = child && child.st;
+  if (st && st.cur) say(st.cur, 0.8);
+}
+function raceGo(ok) {
+  const st = child.st;
+  if (ok) {
+    st.pos++;
+    vroom();
+    addStar(1);
+  }
+  st.cur = null;
+  st.fails = 0;
+  render();
+  if (st.pos >= st.goal) {
+    setTimeout(() => {
+      if (child && child.st === st) {
+        say("Eve vardık! Harikasın!");
+        finishTopic("🏁 Araba eve vardı! 🏠");
+      }
+    }, 900);
+  }
+}
+function racePick(i) {
+  const st = child.st;
+  const o = st.opts[i];
+  if (o === st.cur) {
+    qLog(st.first);
+    say(["Süper!", "Harika!", "Doğru!", "Vın vın!"][ri(4)]);
+    raceGo(true);
+  } else {
+    if (st.first) {
+      qLog(false);
+      st.first = false;
+    }
+    st.fails = (st.fails || 0) + 1;
+    st.bad = i;
+    say("Bir daha dinle: " + st.cur, 0.8);
+    render();
+  }
+}
+function raceRate(r) {
+  const st = child.st;
+  logIt("q", "oy_araba", r === "+", { sub: "oyun", w: st.cur });
+  if (r === "-") {
+    say("Birlikte okuyalım: " + st.cur, 0.75);
+    st.items.push(st.cur);
+    raceGo(false);
+    return;
+  }
+  say(r === "+" ? "Süper okudun!" : "Aferin!");
+  raceGo(true);
+}
+
+/* ---- 🎡 Çark ---- */
+const WCOL = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#6366f1", "#a855f7", "#ec4899"];
+function wheelSVG(items) {
+  const n = items.length,
+    R = 200,
+    cx = 210,
+    cy = 210;
+  let s = "";
+  items.forEach((w, i) => {
+    const a0 = (i / n) * 2 * Math.PI - Math.PI / 2,
+      a1 = ((i + 1) / n) * 2 * Math.PI - Math.PI / 2;
+    const x0 = cx + R * Math.cos(a0),
+      y0 = cy + R * Math.sin(a0),
+      x1 = cx + R * Math.cos(a1),
+      y1 = cy + R * Math.sin(a1);
+    const mid = ((i + 0.5) / n) * 360;
+    const fs = Math.max(12, Math.min(30, (n > 10 ? 190 : 260) / Math.max(3, w.length)));
+    s += `<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 ${n < 2 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}Z" fill="${WCOL[i % WCOL.length]}" stroke="#fff" stroke-width="3"/><text x="${cx}" y="${cy - R * 0.62}" transform="rotate(${mid.toFixed(1)} ${cx} ${cy})" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" font-weight="800" fill="#fff" font-family="'Baloo 2',Nunito,sans-serif">${esc(w.length > 16 ? w.slice(0, 15) + "…" : w)}</text>`;
+  });
+  return `<svg viewBox="0 0 420 420">${s}<circle cx="${cx}" cy="${cy}" r="26" fill="#fff" stroke="#1e293b" stroke-width="4"/></svg>`;
+}
+function actCark(t) {
+  const st =
+    child.st ||
+    (child.st = { items: gameItems().slice(0, 16), rot: 0, spin: false, pick: null, n: 0, rm: !!S.carkRm });
+  if (st.n >= 8 && !st.pick) return finishTopic("🎡 Çark turu bitti!");
+  kid(
+    `<div class="kq"><span class="kst">🎡 ${st.n}/8</span><label class="ksnd" style="cursor:pointer"><input type="checkbox" ${st.rm ? "checked" : ""} onchange="child.st.rm=S.carkRm=this.checked;save()" style="width:auto"> çıkan silinsin</label></div><div class="carkwrap"><div class="wheelbox"><div class="wptr">▼</div><div class="wheel" id="wheel" style="transform:rotate(${st.spin ? st.prev : st.rot}deg)">${wheelSVG(st.items)}</div><button class="wgo" onclick="spinWheel()" ${st.spin || st.pick ? "disabled" : ""}>ÇEVİR</button></div>${st.pick ? `<div class="wres"><div class="rcard big">${itemCard(st.pick)}</div><button class="kbig" onclick="say(child.st.pick,.8)">🔊</button></div></div>${tbarHTML("carkRate")}` : '</div><p class="mut" style="font-size:18px">Çarka dokun ya da ÇEVİR\'e bas!</p>'}`,
+  );
+  const w = $("#wheel");
+  if (w && !st.spin && !st.pick) w.onclick = spinWheel;
+}
+function spinWheel() {
+  const st = child.st;
+  if (st.spin || st.pick || st.items.length < 1) return;
+  st.spin = true;
+  const n = st.items.length;
+  const target = ri(n);
+  const seg = 360 / n;
+  const want = 360 - (target + 0.5) * seg;
+  st.prev = st.rot;
+  const base = st.rot - (st.rot % 360);
+  st.rot = base + 360 * 5 + want + (Math.random() - 0.5) * seg * 0.6;
+  render();
+  const w = $("#wheel");
+  if (w) {
+    w.style.transition = "none";
+    requestAnimationFrame(() => {
+      w.style.transition = "transform 4.2s cubic-bezier(.17,.67,.21,1)";
+      w.style.transform = `rotate(${st.rot}deg)`;
+    });
+  }
+  let k = 0;
+  const tick = () => {
+    if (!st.spin) return;
+    try {
+      tone(900, 0.03, 0, 0.08);
+    } catch (e) {}
+    k++;
+    setTimeout(tick, 40 + k * k * 1.2);
+  };
+  tick();
+  setTimeout(() => {
+    st.spin = false;
+    st.pick = st.items[target];
+    render();
+    say(st.pick, 0.8);
+  }, 4300);
+}
+function carkRate(r) {
+  const st = child.st;
+  logIt("q", "oy_cark", r === "+", { sub: "oyun", w: st.pick });
+  if (r === "+") {
+    addStar(1);
+    say("Süper!");
+  } else say(r === "~" ? "Aferin!" : "Birlikte okuyalım: " + st.pick, 0.75);
+  if (st.rm && r !== "-" && st.items.length > 2) st.items = st.items.filter((x) => x !== st.pick);
+  st.pick = null;
+  st.n++;
+  setTimeout(render, 600);
+}
+
+/* ---- 🎈 Balon patlat ---- */
+const BCOL = ["#ef4444", "#3b82f6", "#22c55e", "#f59e0b", "#a855f7", "#ec4899"];
+function actBalon(t) {
+  const st = child.st || (child.st = { r: 0, items: gameItems() });
+  if (st.r >= t.rounds) return finishTopic("🎈 Bütün balonlar patladı!");
+  if (!st.cur) {
+    const its = st.items;
+    st.cur = its[ri(its.length)];
+    st.opts = shuffle([
+      st.cur,
+      ...pickN(
+        its.filter((x) => x !== st.cur),
+        Math.min(3, its.length - 1),
+      ),
+    ]);
+    st.popped = -1;
+    st.first = true;
+    const c = st.cur;
+    setTimeout(() => {
+      if (child && child.st === st && st.cur === c) say(c + ". " + c + " balonunu patlat!", 0.8);
+    }, 400);
+  }
+  kid(
+    `<div class="kq"><button class="kbig" onclick="say(child.st.cur,.8)">🔊</button>${dots(st.r, t.rounds)}</div><div class="balloons">${st.opts.map((o, i) => `<button class="bal ${st.popped === i ? "popped" : ""} ${st.bad === i ? "shake" : ""}" style="--bc:${BCOL[i % BCOL.length]};animation-delay:${i * 0.4}s" onclick="balonTap(${i})"><span>${esc(o)}</span><i></i></button>`).join("")}</div>`,
+  );
+  st.bad = -1;
+}
+function balonTap(i) {
+  const st = child.st;
+  if (st.popped >= 0) return;
+  const o = st.opts[i];
+  if (o === st.cur) {
+    qLog(st.first);
+    st.popped = i;
+    pop();
+    addStar(1);
+    say("Pat! " + o + "!");
+    render();
+    setTimeout(() => {
+      if (child && child.st === st) {
+        st.r++;
+        st.cur = null;
+        render();
+      }
+    }, 900);
+  } else {
+    if (st.first) {
+      qLog(false);
+      st.first = false;
+    }
+    st.bad = i;
+    say("Bu " + o + ". Biz " + st.cur + " arıyoruz.", 0.85);
+    render();
+  }
+}
+
+/* ---- yönlendirme + kumanda ---- */
+const _rt8 = renderTopic;
+renderTopic = function () {
+  const t = TOP[child.topic];
+  if (t && t.type === "race") return actRace(t);
+  if (t && t.type === "cark") return actCark(t);
+  if (t && t.type === "balon") return actBalon(t);
+  return _rt8();
+};
+const _onCmd8 = onCmd;
+onCmd = function (d) {
+  if (d.c === "rate" && child && child.act === "q" && TOP[child.topic]) {
+    const ty = TOP[child.topic].type;
+    if (ty === "race" && child.st && child.st.mode === "oku" && child.st.cur) return raceRate(d.r);
+    if (ty === "cark" && child.st && child.st.pick) return carkRate(d.r);
+    if (ty === "cark" && child.st && !child.st.pick) return spinWheel();
+    if (ty === "cards" && TOP[child.topic].mode === "say") return cardRate(d.r);
+  }
+  return _onCmd8(d);
+};
+const _pushStatus8 = pushStatus;
+pushStatus = function (now) {
+  if (child && child.act === "q" && child.st) {
+    const s = child.st;
+    if (s.cur || s.pick) spItem = null;
+  }
+  return _pushStatus8(now);
+};
+function startGame(k) {
+  if (!child) {
+    child = { u: "", act: null, st: null, cfg: curCfg() };
+    ensureSession();
+  }
+  child.act = "sub";
+  child.sub = "oyun";
+  child.st = null;
+  startTopic(k);
+  if (RM.role === "phone") rmCmd("act", { a: "t:" + k });
+}
+
+/* ---- içerik setleri (öğretmen yazar) ---- */
+function gamesCard() {
+  const L = setsAll();
+  const a = activeSet();
+  return `<section class="card gcard"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🎡 Oyun atölyesi</h3><button class="btn sm" onclick="editSet()">➕ Yeni liste</button></div><p class="mut">Hece, kelime ya da cümleleri sen yaz; Mete araba yarışında, çarkta ve balonlarda okusun.</p>
+ <div class="bchips">${L.map((s) => `<button class="${s.id === a.id ? "on" : ""}" onclick="S.activeSet='${s.id}';save();render()">${esc(s.name)} <small>${(s.items || []).length}</small></button>`).join("")}</div>
+ <div class="setprev">${
+   (a.items || [])
+     .slice(0, 30)
+     .map((w) => `<span>${esc(w)}</span>`)
+     .join("") || '<span class="mut">Liste boş</span>'
+ }${a.auto ? "" : ` <button class="btn ghost sm" onclick="editSet('${a.id}')">✏️ Düzenle</button>`}</div>
+ <div class="ggrid"><button onclick="startGame('oy_araba')"><span>🚗</span><b>Araba Yarışı</b></button><button onclick="startGame('oy_cark')"><span>🎡</span><b>Çark Çevir</b></button><button onclick="startGame('oy_balon')"><span>🎈</span><b>Balon Patlat</b></button></div></section>`;
+}
+function editSet(id) {
+  const s = (S.sets || []).find((x) => x.id === id) || { id: "", name: "", items: [] };
+  modal(
+    `<h3>${id ? "✏️ Listeyi düzenle" : "➕ Yeni liste"}</h3><label>Liste adı</label><input id="setN" value="${esc(s.name)}" placeholder="ör. ba-sa-ra heceleri / 3. hafta kelimeleri / kısa cümleler"><label>Öğeler — her satıra bir hece, kelime ya da cümle</label><textarea id="setI" rows="10" placeholder="ba&#10;sa&#10;ra&#10;baba&#10;Ela bal al.">${esc((s.items || []).join("\n"))}</textarea><div class="row" style="margin-top:6px"><button class="btn ghost sm" onclick="$('#setI').value=autoItems().join('\\n')">📕 Öğrendiği hecelerle doldur</button></div><div class="mbtns"><button class="btn" onclick="saveSet('${s.id}')">💾 Kaydet</button>${id ? `<button class="btn danger" onclick="delSet('${s.id}')">🗑️ Sil</button>` : `<button class="btn ghost" onclick="closeModal()">Vazgeç</button>`}</div>`,
+  );
+}
+function saveSet(id) {
+  const name = $("#setN").value.trim() || "Listem";
+  const raw = $("#setI").value;
+  const items = (raw.includes("\n") ? raw.split("\n") : raw.split(",")).map((x) => x.trim()).filter(Boolean);
+  if (items.length < 2) return toast("En az 2 öğe yaz");
+  S.sets = S.sets || [];
+  let s = S.sets.find((x) => x.id === id);
+  if (!s) {
+    s = { id: uid() };
+    S.sets.push(s);
+  }
+  s.name = name;
+  s.items = items;
+  S.activeSet = s.id;
+  save();
+  closeModal();
+  render();
+  toast("🎡 Liste hazır: " + items.length + " öğe");
+}
+function delSet(id) {
+  if (!confirm("Liste silinsin mi?")) return;
+  S.sets = (S.sets || []).filter((x) => x.id !== id);
+  if (S.activeSet === id) S.activeSet = "auto";
+  save();
+  closeModal();
+  render();
+}
+const _vDers8 = vDers;
+vDers = function () {
+  const h = _vDers8();
+  const k = h.indexOf('<section class="card"><h3>🎮 Bugünkü ders</h3>');
+  return gamesCard() + h;
+};
+const _ms8 = mergeState;
+mergeState = function (R) {
+  const mine = S.sets;
+  _ms8(R);
+  S.sets = unionBy(mine, R.sets, (x) => x.id);
+  save();
+};
+
+/* ================== v8.1: AKTARIM TEŞHİSİ VE KOLAY GÖNDERİM ================== */
+function dataSummary(st) {
+  st = st || S;
+  return {
+    books: (st.books || []).length,
+    sess: (st.sessions || []).length + (st.current ? 1 : 0),
+    photo: !!(st.settings && st.settings.photo),
+    works: (st.works || []).length,
+    notes: (st.notebook || []).length,
+  };
+}
+const sumTxt = (x) => `${x.books} kitap · ${x.sess} ders · ${x.works} yazı${x.photo ? " · 📷 fotoğraf" : ""}`;
+const isEmptyHere = () => {
+  const x = dataSummary();
+  return !x.books && !x.sess && !x.photo && !x.works && !x.notes;
+};
+const _onSync81 = onSync;
+onSync = async function (d) {
+  const other = dataSummary(d.st);
+  await _onSync81(d);
+  const who = RM.role === "board" ? "📱 Telefonda" : "📺 Tahtada";
+  const sig = sumTxt(other);
+  if (RM.lastSum !== sig) {
+    RM.lastSum = sig;
+    toast(`${who}: ${sig}`);
+  }
+  if (RM.role === "board" && !RM.warned && !other.books && !other.sess && !other.photo) {
+    RM.warned = 1;
+    setTimeout(
+      () =>
+        modal(
+          `<h3>⚠️ Telefon boş görünüyor</h3><p>Bağlanan telefonda <b>hiç kitap, ders ya da fotoğraf yok</b>. Bu genelde şu yüzden olur: QR kod telefonda <b>farklı bir tarayıcıda</b> (ör. Chrome) açıldı; oysa Mete'nin verileri sistemi her gün kullandığın tarayıcıda (genelde <b>Safari</b>) duruyor. Her tarayıcının hafızası ayrıdır.</p><ol class="steps"><li>Telefonda sistemi <b>her zamanki tarayıcında</b> aç.</li><li><b>Ayarlar › 📺 Cihazlar › 📱 Bu cihaz kumanda</b>'ya dokun.</li><li>Kodu yaz: <b class="code" style="font-size:26px">${esc(RM.code || "")}</b></li></ol><button class="btn" style="width:100%" onclick="closeModal()">Tamam</button>`,
+        ),
+      1500,
+    );
+  }
+};
+/* QR ile farklı tarayıcıda açılırsa uyar */
+const _phoneMode81 = phoneMode;
+phoneMode = async function (code, force) {
+  code = String(code || "").replace(/\D/g, "");
+  if (!force && isEmptyHere() && /kumanda=/.test(location.search)) {
+    const url = location.origin + location.pathname + "?kumanda=" + code;
+    return modal(
+      `<h3>📱 Bu tarayıcı boş</h3><p>Bu tarayıcıda Mete'nin <b>kitapları, dersleri ve fotoğrafı yok</b>. QR kod büyük ihtimalle her zamanki tarayıcın yerine başka bir tarayıcıda açıldı (ör. Safari yerine Chrome). Her tarayıcının hafızası ayrıdır.</p><ol class="steps"><li>Sistemi <b>her zaman kullandığın tarayıcıda</b> (genelde Safari) aç.</li><li><b>Ayarlar › 📺 Cihazlar › 📱 Bu cihaz kumanda</b></li><li>Kod: <b style="font-size:24px;color:var(--pri)">${esc(code)}</b></li></ol><div class="mbtns"><button class="btn" onclick="copyText('${Q(url)}')">📋 Bağlantıyı kopyala</button><button class="btn ghost" onclick="closeModal();phoneMode('${Q(code)}',true)">Yine de bu tarayıcıyla bağlan</button></div>`,
+    );
+  }
+  return _phoneMode81(code);
+};
+/* Tahta bağlantı ekranı: kod öncelikli, açık anlatım */
+showPair = async function () {
+  const url = location.origin + location.pathname + "?kumanda=" + RM.code;
+  modal(
+    `<h3>📺 Tahta hazır — telefonu bağla</h3><div class="pairbig"><small>Bağlantı kodu</small><b>${RM.code}</b></div><ol class="steps"><li>Telefonda Mete sistemini <b>her zaman kullandığın tarayıcıda</b> aç (kitapları yüklediğin yer — genelde <b>Safari</b>).</li><li><b>Ayarlar › 📺 Cihazlar › 📱 Bu cihaz kumanda</b>'ya dokun, <b>${RM.code}</b> yaz.</li><li>Kitaplar, fotoğraf ve dersler buraya <b>kendiliğinden</b> gelir; üstte ilerleme görünür. Aynı Wi‑Fi gerekmez.</li></ol><details><summary class="mut">QR ile bağlan</summary><p class="mut">QR'ı okutunca açılan tarayıcı, kitapları yüklediğin tarayıcı olmalı; değilse veriler görünmez.</p><div class="qrbox" id="qr"></div></details><div class="mbtns"><button class="btn ghost" onclick="copyText('${Q(url)}')">📋 Adresi kopyala</button><button class="btn" onclick="closeModal();startChild()">🎮 Çocuk ekranını aç</button></div>`,
+  );
+  try {
+    await loadJs(QRJS);
+    new QRCode($("#qr"), { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+  } catch (e) {
+    const q = $("#qr");
+    if (q) q.textContent = "QR oluşturulamadı";
+  }
+};
+askRemote = function () {
+  modal(
+    `<h3>📱 Bu telefonu kumanda yap</h3><p class="mut">Tahtada <b>📺 Tahta modu</b> açıkken ekrandaki 4 haneli kodu yaz. Bu telefondaki kitaplar, fotoğraf ve dersler tahtaya gönderilir.</p><div class="pairbig" style="margin:10px 0"><small>Bu telefonda</small><b style="font-size:20px;letter-spacing:0">${sumTxt(dataSummary())}</b></div><input id="rmCode" inputmode="numeric" maxlength="4" placeholder="1234" style="font-size:30px;text-align:center;letter-spacing:.3em" value="${esc(S.settings.rmCode || "")}"><div class="mbtns"><button class="btn" onclick="const c=$('#rmCode').value;closeModal();phoneMode(c,true)">Bağlan ve gönder</button><button class="btn ghost" onclick="closeModal()">Vazgeç</button></div>`,
+  );
+};
+/* Bağlıyken yeni kitap / fotoğraf / görsel eklenince hemen tahtaya gönder */
+const autoPush = () => {
+  if (RM.open && RM.conn) {
+    xfUI("📤 Tahtaya gönderiliyor…");
+    setTimeout(syncSend, 300);
+  }
+};
+const _abf81 = addBookFiles;
+addBookFiles = async function (f) {
+  await _abf81(f);
+  autoPush();
+};
+const _sp81 = setPhoto;
+setPhoto = async function (f) {
+  await _sp81(f);
+  autoPush();
+};
+const _ac81 = addCards;
+addCards = async function (f) {
+  await _ac81(f);
+  autoPush();
+};
+/* Kumanda paneline belirgin "kitapları gönder" düğmesi */
+const _rmUI81 = rmUI;
+rmUI = function () {
+  _rmUI81();
+  const el = $("#remote");
+  if (!el || RM.fold || el.querySelector(".sendbooks")) return;
+  const n = dataSummary();
+  el.insertAdjacentHTML(
+    "beforeend",
+    `<button class="btn ok sendbooks" style="width:100%;margin-top:8px" onclick="syncSend();xfUI('📤 Gönderiliyor…')">📤 Kitapları ve verileri tahtaya gönder (${n.books} kitap)</button>`,
+  );
+};
+(function () {
+  const s = document.createElement("style");
+  s.textContent =
+    ".pairbig{background:var(--soft,#eef4ff);border-radius:16px;padding:12px;text-align:center;margin:10px 0}.pairbig small{display:block;opacity:.7}.pairbig b{display:block;font-size:44px;letter-spacing:.25em;color:var(--pri);font-weight:900}";
+  document.head.appendChild(s);
+})();
+
+/* ================== v8.2: TAHTA KİLİT EKRANI + TEK DOKUNUŞ KUMANDA ================== */
+/* Tahta: 📺 Tahta modu açılınca tam ekran kilit ekranı, ortada büyük kod. Telefon bağlanınca kendiliğinden açılır. */
+const LK = { dismissed: false, t: 0 };
+function lockShow() {
+  if (RM.role !== "board" || RM.open || LK.dismissed) return;
+  let el = $("#lockScr");
+  const nm = esc(S.settings.student || "Mete");
+  const url = location.origin + location.pathname + "?kumanda=" + RM.code;
+  const html = `<div class="lkIn">${avatarHTML(110)}<h2>${nm} ile derse hazırız</h2><div class="lkCode">${String(
+    RM.code || "",
+  )
+    .split("")
+    .map((c) => `<span>${c}</span>`)
+    .join(
+      "",
+    )}</div><ol class="lkSteps"><li>Telefonda sistemi aç, <b>📱 Kumanda</b>'ya dokun</li><li>Bu kodu yaz</li><li>Kitaplar ve dersler buraya gelir</li></ol><p class="lkWait"><i></i> Telefon bekleniyor… aynı Wi‑Fi gerekmez</p><div class="lkBtns"><button onclick="LK.qr=!LK.qr;lockShow()">QR</button><button onclick="copyText('${Q(url)}')">Adresi kopyala</button><button onclick="LK.dismissed=true;lockHide()">✕ Kapat</button></div>${LK.qr ? '<div class="qrbox" id="lkqr"></div>' : ""}</div>`;
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "lockScr";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = html;
+  if (LK.qr)
+    loadJs(QRJS)
+      .then(
+        () =>
+          new QRCode($("#lkqr"), { text: url, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M }),
+      )
+      .catch(() => {});
+}
+function lockHide() {
+  const el = $("#lockScr");
+  if (el) el.remove();
+}
+showPair = async function () {
+  closeModal();
+  LK.dismissed = false;
+  lockShow();
+};
+const _rmUI82 = rmUI;
+rmUI = function () {
+  _rmUI82();
+  if (RM.role === "board") {
+    clearTimeout(LK.t);
+    if (RM.open) {
+      lockHide();
+      LK.dismissed = false;
+    } else LK.t = setTimeout(lockShow, 6000);
+  }
+  kumFab();
+};
+/* Telefon: her ekranda görünen "📱 Kumanda" düğmesi */
+function kumFab() {
+  let b = $("#kumfab");
+  const show =
+    !child &&
+    RM.role !== "board" &&
+    !(RM.role === "phone" && RM.open) &&
+    !(typeof B !== "undefined" && B && B.on);
+  if (!show) {
+    if (b) b.remove();
+    return;
+  }
+  if (!b) {
+    b = document.createElement("button");
+    b.id = "kumfab";
+    b.onclick = () => askRemote();
+    document.body.appendChild(b);
+  }
+  b.innerHTML = RM.role === "phone" ? "📱 Bağlanıyor…" : "📱 Kumanda";
+}
+askRemote = function () {
+  const n = dataSummary();
+  modal(
+    `<h3>📱 Kumanda</h3><p class="mut">Tahtadaki kilit ekranında yazan <b>4 haneli kodu</b> gir.</p><input id="rmCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="• • • •" autocomplete="off" style="font-size:40px;text-align:center;letter-spacing:.4em;font-weight:900" value="${esc(S.settings.rmCode || "")}" oninput="this.value=this.value.replace(/\\D/g,'');if(this.value.length===4){const c=this.value;closeModal();phoneMode(c,true)}"><p class="mut" style="text-align:center;margin-top:8px">Bu telefondan gidecek: ${sumTxt(n)}</p><div class="mbtns"><button class="btn" onclick="const c=$('#rmCode').value;if(c.length===4){closeModal();phoneMode(c,true)}else toast('Kodu 4 hane yaz')">Bağlan</button><button class="btn ghost" onclick="closeModal()">Vazgeç</button></div>`,
+  );
+  setTimeout(() => {
+    const i = $("#rmCode");
+    if (i) {
+      i.focus();
+      i.select();
+    }
+  }, 150);
+};
+const _render82 = render;
+render = function () {
+  const r = _render82.apply(this, arguments);
+  try {
+    kumFab();
+  } catch (e) {}
+  return r;
+};
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+#lockScr{position:fixed;inset:0;z-index:9000;background:linear-gradient(160deg,#1e3a8a,#0f172a);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px}
+#lockScr .lkIn{max-width:720px;width:100%}
+#lockScr .av{margin:0 auto 10px;display:inline-flex;border:4px solid #fff3}
+#lockScr h2{font-size:clamp(22px,4vw,36px);margin:4px 0 18px}
+.lkCode{display:flex;gap:clamp(8px,2vw,18px);justify-content:center;margin-bottom:18px}
+.lkCode span{width:clamp(64px,13vw,130px);height:clamp(84px,17vw,160px);display:flex;align-items:center;justify-content:center;background:#fff;color:#1e3a8a;border-radius:20px;font-size:clamp(48px,10vw,110px);font-weight:900;box-shadow:0 10px 30px #0006}
+.lkSteps{list-style:none;padding:0;margin:0 auto 14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;counter-reset:k}
+.lkSteps li{counter-increment:k;background:#ffffff1a;border-radius:14px;padding:10px 14px;font-size:clamp(14px,1.8vw,18px)}
+.lkSteps li::before{content:counter(k);display:inline-flex;width:24px;height:24px;border-radius:50%;background:#fff;color:#1e3a8a;font-weight:900;align-items:center;justify-content:center;margin-right:8px;font-size:14px}
+.lkWait{opacity:.85}.lkWait i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#4ade80;margin-right:6px;animation:lkp 1.2s infinite}
+@keyframes lkp{50%{opacity:.2}}
+.lkBtns{display:flex;gap:8px;justify-content:center;margin-top:10px}.lkBtns button{background:#ffffff22;color:#fff;border:0;border-radius:12px;padding:8px 14px;font-size:14px;cursor:pointer}
+#lkqr{display:inline-block;background:#fff;padding:10px;border-radius:14px;margin-top:12px}
+#kumfab{position:fixed;left:14px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:110;border:0;border-radius:999px;padding:12px 18px;font-size:16px;font-weight:800;background:var(--pri,#2563eb);color:#fff;box-shadow:0 6px 18px #0003;cursor:pointer}
+body.remote #kumfab{display:none}@media (min-width:1100px) and (pointer:fine){#kumfab{display:none}}`;
+  document.head.appendChild(s);
+})();
 
 /* ================== BAŞLAT ================== */
 (function boot() {
