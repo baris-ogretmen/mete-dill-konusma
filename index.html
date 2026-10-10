@@ -7788,11 +7788,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "8.2",
+const APP_VER = "8.3",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 11525,
-  APP_KB = 829;
+  APP_LINES = 11681,
+  APP_KB = 834;
 const CHANGELOG = [
+  [
+    "8.3",
+    "10 Ekim 2026",
+    "Kitap aynası: telefonda açılan kitap sayfası tahtada da açılır, sayfa çevirince tahta da çevirir, yazılanlar iki yönlü anında görünür; kumandada 📖 kitap düğmeleri (kaldığın sayfadan açar); sayfa açılınca kumanda paneli kendiliğinden küçülür",
+  ],
   [
     "8.2",
     "10 Ekim 2026",
@@ -11503,6 +11508,157 @@ render = function () {
 #lkqr{display:inline-block;background:#fff;padding:10px;border-radius:14px;margin-top:12px}
 #kumfab{position:fixed;left:14px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:110;border:0;border-radius:999px;padding:12px 18px;font-size:16px;font-weight:800;background:var(--pri,#2563eb);color:#fff;box-shadow:0 6px 18px #0003;cursor:pointer}
 body.remote #kumfab{display:none}@media (min-width:1100px) and (pointer:fine){#kumfab{display:none}}`;
+  document.head.appendChild(s);
+})();
+
+/* ================== v8.3: KİTAP AYNASI — telefonda açılan sayfa tahtada, yazılanlar iki yönlü ================== */
+const MR = { rx: false };
+function mrOn() {
+  return RM.open && RM.conn && RM.conn.open;
+}
+function mrSend(m) {
+  if (!mrOn()) return;
+  try {
+    RM.conn.send(m);
+  } catch (e) {}
+}
+function mrOpenMsg() {
+  return {
+    t: "bk",
+    bg: B.bg,
+    title: B.title,
+    book: B.book,
+    page: B.page,
+    letter: B.letter,
+    kind: B.kind,
+    strokes: B.strokes.map((s) => ({ id: s.id, c: s.c, w: s.w, m: s.m, pts: s.pts })),
+  };
+}
+function mrAfterOpen() {
+  if (MR.rx) return;
+  if (B.book) {
+    S.settings.lastPage = S.settings.lastPage || {};
+    S.settings.lastPage[B.book] = B.page;
+    save();
+  }
+  if (!mrOn()) return;
+  mrSend(mrOpenMsg());
+  if (RM.role === "phone") {
+    RM.fold = true;
+    rmUI();
+    toast("📺 Tahtada da açıldı");
+  }
+}
+const _openBoard83 = openBoard;
+openBoard = async function (o) {
+  await _openBoard83(o);
+  mrAfterOpen();
+};
+const _bPage83 = bPage;
+bPage = async function (d) {
+  await _bPage83(d);
+  mrAfterOpen();
+};
+const _bLetter83 = bLetter;
+bLetter = function (l) {
+  _bLetter83(l);
+  mrAfterOpen();
+};
+const _closeBoard83 = closeBoard;
+closeBoard = function () {
+  const was = B.on;
+  _closeBoard83();
+  if (was && !MR.rx) mrSend({ t: "bx" });
+};
+/* çizgiler, geri al, temizle → karşı tarafa */
+const _bSend83 = bSend;
+bSend = function (m, except) {
+  _bSend83(m, except);
+  if (except !== "rm" && B.on) mrSend({ t: "bd", m });
+};
+async function mrOnOpen(d) {
+  MR.rx = true;
+  try {
+    await _openBoard83({
+      bg: d.bg,
+      title: d.title,
+      key: d.book ? `ann:${d.book}:${d.page}` : null,
+      book: d.book,
+      page: d.page,
+      letter: d.letter,
+      kind: d.kind,
+    });
+    if (Array.isArray(d.strokes)) {
+      B.strokes = d.strokes;
+      bRedraw();
+      bPersist();
+    }
+  } catch (e) {
+    toast("Sayfa açılamadı: " + e.message);
+  } finally {
+    MR.rx = false;
+  }
+}
+const _rmData83 = rmData;
+rmData = function (d) {
+  if (d && d.t === "bk") return mrOnOpen(d);
+  if (d && d.t === "bd") {
+    if (B.on) bOnData(d.m, "rm");
+    return;
+  }
+  if (d && d.t === "bx") {
+    if (B.on) {
+      MR.rx = true;
+      try {
+        _closeBoard83();
+      } finally {
+        MR.rx = false;
+      }
+    }
+    return;
+  }
+  return _rmData83(d);
+};
+/* Bağlanınca telefonda açık sayfa varsa tahtaya da aç */
+const _rmUI83 = rmUI;
+let _mrWasOpen = false;
+rmUI = function () {
+  _rmUI83();
+  const now = mrOn();
+  if (now && !_mrWasOpen && RM.role === "phone" && B.on) setTimeout(() => mrSend(mrOpenMsg()), 800);
+  _mrWasOpen = now;
+  const el = $("#remote");
+  if (!el || RM.fold || el.querySelector(".rmbooks") || !(S.books || []).length) return;
+  const lp = S.settings.lastPage || {};
+  el.insertAdjacentHTML(
+    "beforeend",
+    `<div class="rmbooks"><small>📖 Kitap aç (telefonda ve tahtada)</small><div>${S.books.map((b) => `<button onclick="openBookBoard('${Q(b.id)}',${lp[b.id] || 1})">📖 ${esc(b.name)} <i>s.${lp[b.id] || 1}</i></button>`).join("")}</div></div>`,
+  );
+};
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `.rmbooks{margin-top:8px}.rmbooks small{display:block;opacity:.7;margin-bottom:4px}.rmbooks div{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.rmbooks button{flex:none;border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:12px;padding:10px 12px;font-weight:700;font-size:15px;white-space:nowrap}.rmbooks i{font-style:normal;opacity:.6;font-weight:500}`;
+  document.head.appendChild(s);
+})();
+/* Kitap sayfasında her ekranda görünen büyük sayfa düğmeleri (telefonda araç çubuğu sığmıyordu) */
+const _bUI83 = bUI;
+bUI = function () {
+  _bUI83();
+  const el = $("#board");
+  if (!el || !B.book || B.guest) return;
+  const bk = bookOf(B.book);
+  const n = bk ? bk.pages : "?";
+  let nv = el.querySelector(".bpnav");
+  if (!nv) {
+    nv = document.createElement("div");
+    nv.className = "bpnav";
+    el.appendChild(nv);
+  }
+  nv.innerHTML = `<button onclick="bPage(-1)" ${B.page <= 1 ? "disabled" : ""}>◀</button><b>${B.page} / ${n}</b><button onclick="bPage(1)" ${bk && B.page >= bk.pages ? "disabled" : ""}>▶</button>`;
+};
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `.bpnav{position:absolute;left:50%;bottom:calc(124px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:6px;box-shadow:0 6px 20px #0003}.bpnav button{width:48px;height:48px;border-radius:50%;border:0;background:#4f46e5;color:#fff;font-size:22px}.bpnav button:disabled{opacity:.3}.bpnav b{min-width:64px;text-align:center;font-size:17px}`;
   document.head.appendChild(s);
 })();
 
