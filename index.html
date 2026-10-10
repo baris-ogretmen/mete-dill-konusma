@@ -7788,11 +7788,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "9.0",
+const APP_VER = "10.0",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 12443,
-  APP_KB = 859;
+  APP_LINES = 13653,
+  APP_KB = 900;
 const CHANGELOG = [
+  [
+    "10.0",
+    "10 Ekim 2026",
+    "Tahta Stüdyosu+: araçlar gruplandı (🎯 Sunum, ✏️ Çiz, 🔢 Matematik, 🏫 Sınıf); boyutu ayarlı spot, okuma şeridi, büyüteç, kazı-kazan, gizle-göster kutuları, dikkat ekranı, daire/kare/yazı; Toplama–Çıkarma Stüdyosu: kurbağalı sayı doğrusu, onluk çerçeve, zar, zamanlayıcı, resimli/sayılı/eksik sayılı etkinlik sayfası oluşturucu ve cevap anahtarı — hepsi telefon↔tahta eşzamanlı",
+  ],
   [
     "9.0",
     "10 Ekim 2026",
@@ -11530,6 +11535,7 @@ function mrSend(m) {
 function mrOpenMsg() {
   return {
     t: "bk",
+    key: B.key,
     bg: B.bg,
     title: B.title,
     book: B.book,
@@ -11587,7 +11593,7 @@ async function mrOnOpen(d) {
     await _openBoard83({
       bg: d.bg,
       title: d.title,
-      key: d.book ? `ann:${d.book}:${d.page}` : null,
+      key: d.key || (d.book ? `ann:${d.book}:${d.page}` : null),
       book: d.book,
       page: d.page,
       letter: d.letter,
@@ -12421,6 +12427,1210 @@ rmData = function (d) {
 .gogrid button{border:2px solid #e2e8f0;background:#fff;border-radius:10px;padding:4px;cursor:pointer;display:flex;flex-direction:column;gap:3px;align-items:stretch}
 .gogrid button.cur{border-color:#4f46e5}.gogrid .th{display:block;aspect-ratio:.72;background:#f1f5f9 center/cover no-repeat;border-radius:6px}.gogrid b{font-size:13px}
 @media (max-width:600px){.strail{right:4px;padding:4px;gap:3px}.strail button{width:46px;min-height:44px}.strail button span{font-size:18px}.strail button small{font-size:9px}}`;
+  document.head.appendChild(s);
+})();
+
+/* ================== v10.0: TAHTA STÜDYOSU+ ve TOPLAMA–ÇIKARMA STÜDYOSU ==================
+   Sunum: spot (boyut ayarlı), okuma şeridi, büyüteç, kazı-kazan, gizle-göster kutuları, dikkat ekranı
+   Çizim: daire, kare, yazı
+   Matematik: kurbağalı sayı doğrusu, onluk çerçeve, zar, toplama/çıkarma etkinlik sayfası + cevap anahtarı
+   Sınıf: zamanlayıcı. Hepsi telefon↔tahta eşzamanlı. */
+const FX = {
+  band: null,
+  bandH: 0.09,
+  lens: null,
+  scr: null,
+  boxes: [],
+  attn: false,
+  ans: null,
+  nl: null,
+  tf: null,
+  dice: null,
+  timer: null,
+};
+TS.spotR = S.settings.spotR || 0.16;
+TS.grp = null;
+TS.op = null;
+const WSANS = {};
+const r3 = (v) => Math.round(v * 1000) / 1000;
+
+/* ---------- sayfa değişince sayfaya bağlı katmanları sıfırla ---------- */
+const _bLayout10 = bLayout;
+bLayout = function () {
+  if (ZM.bg !== B.bg) {
+    FX.band = null;
+    FX.lens = null;
+    FX.scr = null;
+    FX.boxes = [];
+    FX.ans = null;
+  }
+  _bLayout10();
+};
+
+/* ---------- eşitleme ---------- */
+function fxPack() {
+  return {
+    band: FX.band,
+    bandH: FX.bandH,
+    lens: FX.lens,
+    scr: FX.scr,
+    boxes: FX.boxes,
+    attn: FX.attn,
+    ans: FX.ans,
+    nl: FX.nl,
+    tf: FX.tf,
+    dice: FX.dice,
+    timer: FX.timer,
+    spotR: TS.spotR,
+  };
+}
+fxSend = function () {
+  clearTimeout(TS._fxT);
+  const go = () => {
+    TS._fx = Date.now();
+    mrSend({ t: "fx", spot: TS.spot, curtain: TS.curtain, x: fxPack() });
+  };
+  if (Date.now() - TS._fx > 70) go();
+  else TS._fxT = setTimeout(go, 70);
+};
+const _rmData10 = rmData;
+rmData = function (d) {
+  if (d && d.t === "fx" && d.x) {
+    const old = FX.dice && FX.dice.r;
+    Object.assign(FX, d.x);
+    if (d.x.spotR) TS.spotR = d.x.spotR;
+    attnRender();
+    wRender(true);
+    if (FX.dice && FX.dice.r !== old && old != null) diceAnim(true);
+  }
+  return _rmData10(d);
+};
+const fxUpd = () => {
+  stOverlay();
+  wRender();
+  attnRender();
+  fxSend();
+};
+
+/* ---------- sayfa katmanları ---------- */
+const _stOverlay10 = stOverlay;
+stOverlay = function () {
+  _stOverlay10();
+  const pg = $("#bpage");
+  if (!pg || !B.W) return;
+  const sp = $("#stspot");
+  if (sp && TS.spot) {
+    const r = Math.round(B.W * TS.spotR);
+    sp.style.background = `radial-gradient(circle ${r}px at ${TS.spot[0] * 100}% ${TS.spot[1] * 100}%, transparent 0, transparent ${r - 3}px, rgba(15,23,42,.8) ${r + 2}px)`;
+  }
+  lay(pg, "stband", FX.band != null, (el) => {
+    const a = (FX.band - FX.bandH / 2) * 100,
+      b = (FX.band + FX.bandH / 2) * 100;
+    el.style.background = `linear-gradient(to bottom,rgba(15,23,42,.72) 0,rgba(15,23,42,.72) ${a}%,rgba(250,204,21,.13) ${a}%,rgba(250,204,21,.13) ${b}%,rgba(15,23,42,.72) ${b}%)`;
+    el.innerHTML = `<i style="top:${a}%"></i><i style="top:${b}%"></i>`;
+  });
+  lay(pg, "stboxes", FX.boxes.length > 0, (el) => {
+    el.innerHTML = FX.boxes
+      .map(
+        (x, i) =>
+          `<div class="stbox ${x.o ? "open" : ""}" style="left:${x.x * 100}%;top:${x.y * 100}%;width:${x.w * 100}%;height:${x.h * 100}%;--c:${BOXC[i % BOXC.length]}">${x.o ? "" : "<b>?</b>"}</div>`,
+      )
+      .join("");
+  });
+  lay(pg, "stans", !!FX.ans, (el) => {
+    el.innerHTML = (FX.ans || [])
+      .map(
+        (a) =>
+          `<span style="left:${a[0] * 100}%;top:${a[1] * 100}%;font-size:${Math.round(B.W * 0.045)}px">${a[2]}</span>`,
+      )
+      .join("");
+  });
+  scrDraw();
+  lensDraw();
+};
+const BOXC = ["#6366f1", "#ec4899", "#f59e0b", "#10b981", "#0ea5e9", "#8b5cf6"];
+function lay(pg, id, on, fn) {
+  let el = document.getElementById(id);
+  if (!on) {
+    if (el) el.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    el.className = "stlay";
+    pg.appendChild(el);
+  }
+  fn(el);
+}
+function scrDraw() {
+  const pg = $("#bpage");
+  let c = $("#stscr");
+  if (!FX.scr) {
+    if (c) c.remove();
+    return;
+  }
+  if (!pg) return;
+  if (!c) {
+    c = document.createElement("canvas");
+    c.id = "stscr";
+    pg.appendChild(c);
+  }
+  const W = Math.round(B.W),
+    H = Math.round(B.H);
+  if (c.width !== W || c.height !== H) {
+    c.width = W;
+    c.height = H;
+  }
+  const g = c.getContext("2d");
+  g.globalCompositeOperation = "source-over";
+  const gr = g.createLinearGradient(0, 0, W, H);
+  gr.addColorStop(0, "#cbd5e1");
+  gr.addColorStop(0.5, "#f1f5f9");
+  gr.addColorStop(1, "#94a3b8");
+  g.fillStyle = gr;
+  g.fillRect(0, 0, W, H);
+  g.fillStyle = "rgba(100,116,139,.35)";
+  g.font = `bold ${Math.round(W * 0.05)}px sans-serif`;
+  g.textAlign = "center";
+  for (let y = 0.12; y < 1; y += 0.16)
+    for (let x = 0.17; x < 1; x += 0.33)
+      g.fillText("✨ Kazı ✨", x * W + ((y * 100) % 2 ? W * 0.08 : 0), y * H);
+  g.globalCompositeOperation = "destination-out";
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  g.lineWidth = W * 0.06;
+  FX.scr.forEach((p) => {
+    if (!p.length) return;
+    g.beginPath();
+    g.moveTo(p[0][0] * W, p[0][1] * H);
+    p.forEach((q) => g.lineTo(q[0] * W, q[1] * H));
+    if (p.length === 1) g.lineTo(p[0][0] * W + 0.1, p[0][1] * H);
+    g.stroke();
+  });
+  g.globalCompositeOperation = "source-over";
+}
+function lensDraw() {
+  const pg = $("#bpage");
+  let c = $("#stlens");
+  if (!FX.lens || !pg) {
+    if (c) c.remove();
+    return;
+  }
+  const R = Math.round(B.W * 0.15),
+    Zf = 2.2;
+  if (!c) {
+    c = document.createElement("canvas");
+    c.id = "stlens";
+    pg.appendChild(c);
+  }
+  const S2 = R * 2 * Math.min(2, window.devicePixelRatio || 1);
+  if (c.width !== S2) {
+    c.width = S2;
+    c.height = S2;
+  }
+  c.style.width = c.style.height = R * 2 + "px";
+  c.style.left = FX.lens[0] * B.W - R + "px";
+  c.style.top = FX.lens[1] * B.H - R + "px";
+  const g = c.getContext("2d");
+  g.clearRect(0, 0, S2, S2);
+  g.save();
+  g.beginPath();
+  g.arc(S2 / 2, S2 / 2, S2 / 2 - 3, 0, 7);
+  g.clip();
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, S2, S2);
+  const img = pg.querySelector("img");
+  const span = (2 * R) / Zf / B.W;
+  const sx = FX.lens[0] - span / 2,
+    sy = FX.lens[1] - (span * B.W) / B.H / 2,
+    sh = (span * B.W) / B.H;
+  if (img && img.naturalWidth)
+    g.drawImage(
+      img,
+      sx * img.naturalWidth,
+      sy * img.naturalHeight,
+      span * img.naturalWidth,
+      sh * img.naturalHeight,
+      0,
+      0,
+      S2,
+      S2,
+    );
+  if (B.cv)
+    g.drawImage(B.cv, sx * B.cv.width, sy * B.cv.height, span * B.cv.width, sh * B.cv.height, 0, 0, S2, S2);
+  g.restore();
+  g.lineWidth = 6;
+  g.strokeStyle = "#4f46e5";
+  g.beginPath();
+  g.arc(S2 / 2, S2 / 2, S2 / 2 - 3, 0, 7);
+  g.stroke();
+}
+const _bRedraw10 = bRedraw;
+bRedraw = function () {
+  _bRedraw10();
+  if (FX.lens) lensDraw();
+};
+
+/* ---------- yazı damgası (renk|metin) ---------- */
+const _ds10 = drawStroke;
+drawStroke = function (g, s, W, H) {
+  if (s.m === "tx") {
+    const p = s.pts[0];
+    if (!p) return;
+    const i = (s.c || "").indexOf("|");
+    const col = i > 0 ? s.c.slice(0, i) : "#111",
+      t = i > 0 ? s.c.slice(i + 1) : s.c;
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "source-over";
+    g.fillStyle = col;
+    g.font = `700 ${Math.max(12, s.w * W)}px "Andika","Comic Sans MS","Segoe Print",sans-serif`;
+    g.textAlign = "left";
+    g.textBaseline = "middle";
+    g.fillText(t, p[0] * W, p[1] * H);
+    return;
+  }
+  return _ds10(g, s, W, H);
+};
+
+/* ---------- dokunma: yeni araçlar ---------- */
+const NEWM = ["band", "lens", "scratch", "box", "circle", "rect", "text"];
+function shapePts(m, a, b) {
+  if (m === "rect") {
+    const P = [
+      [a[0], a[1]],
+      [b[0], a[1]],
+      [b[0], b[1]],
+      [a[0], b[1]],
+      [a[0], a[1]],
+    ];
+    const o = [];
+    P.forEach((p) => {
+      o.push(p, p.slice());
+    });
+    return o;
+  }
+  const cx = (a[0] + b[0]) / 2,
+    cy = (a[1] + b[1]) / 2,
+    rx = Math.abs(b[0] - a[0]) / 2,
+    ry = Math.abs(b[1] - a[1]) / 2;
+  const o = [];
+  for (let i = 0; i <= 48; i++) {
+    const t = (i / 48) * Math.PI * 2;
+    o.push([r3(cx + rx * Math.cos(t)), r3(cy + ry * Math.sin(t))]);
+  }
+  return o;
+}
+const _sd10 = stDown;
+stDown = function (e) {
+  const m = B.mode;
+  const tg = e.target;
+  const onPg = tg.closest && tg.closest("#bpage");
+  if (TS.ptrs.size >= 1 && !TS.ptrs.has(e.pointerId)) {
+    if (TS.op) {
+      if (TS.op.s) {
+        const id = TS.op.s.id;
+        B.strokes = B.strokes.filter((x) => x.id !== id);
+        bRedraw();
+        bSend({ t: "undo", id });
+      }
+      TS.op = null;
+    }
+    return _sd10(e);
+  }
+  if (!onPg || !NEWM.includes(m) || (tg.closest && tg.closest(".stcurtain"))) return _sd10(e);
+  TS.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  try {
+    e.currentTarget.setPointerCapture(e.pointerId);
+  } catch (x) {}
+  const p = pgPt(e);
+  if (m === "band") {
+    FX.band = p[1];
+    fxUpd();
+    TS.op = { m };
+  } else if (m === "lens") {
+    FX.lens = p;
+    fxUpd();
+    TS.op = { m };
+  } else if (m === "scratch") {
+    if (!FX.scr) FX.scr = [];
+    FX.scr.push([[r3(p[0]), r3(p[1])]]);
+    scrDraw();
+    fxSend();
+    TS.op = { m };
+  } else if (m === "box") {
+    TS.op = { m, a: p, tmp: null };
+  } else if (m === "circle" || m === "rect") {
+    const s = { id: uid(), c: B.color, w: PEN_SIZES[B.size] / zf(), m: "pen", pts: shapePts(m, p, p) };
+    B.strokes.push(s);
+    B.redo = [];
+    TS.op = { m, a: p, s };
+    bRedraw();
+  } else if (m === "text") {
+    TS.ptrs.delete(e.pointerId);
+    txtAsk(p);
+  }
+  return stStop(e);
+};
+const _sm10 = stMove;
+stMove = function (e) {
+  const o = TS.op;
+  if (!o || TS.pinch) return _sm10(e);
+  if (TS.ptrs.has(e.pointerId)) TS.ptrs.set(e.pointerId, [e.clientX, e.clientY]);
+  const p = pgPt(e);
+  if (o.m === "band") {
+    FX.band = p[1];
+    stOverlay();
+    fxSend();
+  } else if (o.m === "lens") {
+    FX.lens = p;
+    lensDraw();
+    fxSend();
+  } else if (o.m === "scratch") {
+    FX.scr[FX.scr.length - 1].push([r3(p[0]), r3(p[1])]);
+    scrDraw();
+    fxSend();
+    if (Math.random() < 0.15)
+      try {
+        tone(2400 + Math.random() * 900, 0.03, 0, 0.05);
+      } catch (x) {}
+  } else if (o.m === "box") {
+    o.b = p;
+    let el = $("#stboxtmp");
+    const pg = $("#bpage");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "stboxtmp";
+      pg.appendChild(el);
+    }
+    const x = Math.min(o.a[0], p[0]),
+      y = Math.min(o.a[1], p[1]);
+    Object.assign(el.style, {
+      left: x * 100 + "%",
+      top: y * 100 + "%",
+      width: Math.abs(p[0] - o.a[0]) * 100 + "%",
+      height: Math.abs(p[1] - o.a[1]) * 100 + "%",
+    });
+  } else if (o.s) {
+    o.s.pts = shapePts(o.m, o.a, p);
+    bRedraw();
+    const n = Date.now();
+    if (n - TS._ls > 80) {
+      TS._ls = n;
+      bSend({ t: "s", s: o.s });
+    }
+  }
+  return stStop(e);
+};
+const _su10 = stUp;
+stUp = function (e) {
+  const o = TS.op;
+  if (!o || TS.pinch) return _su10(e);
+  TS.ptrs.delete(e.pointerId);
+  TS.op = null;
+  if (o.m === "box") {
+    const t = $("#stboxtmp");
+    if (t) t.remove();
+    const b = o.b || o.a;
+    const w = Math.abs(b[0] - o.a[0]),
+      h = Math.abs(b[1] - o.a[1]);
+    if (w > 0.025 && h > 0.015) {
+      FX.boxes.push({
+        x: r3(Math.min(o.a[0], b[0])),
+        y: r3(Math.min(o.a[1], b[1])),
+        w: r3(w),
+        h: r3(h),
+        o: false,
+      });
+    } else {
+      for (let i = FX.boxes.length - 1; i >= 0; i--) {
+        const x = FX.boxes[i];
+        if (o.a[0] >= x.x && o.a[0] <= x.x + x.w && o.a[1] >= x.y && o.a[1] <= x.y + x.h) {
+          x.o = !x.o;
+          try {
+            x.o ? (tone(660, 0.08), tone(990, 0.12, 0.08)) : tone(440, 0.08);
+          } catch (q) {}
+          break;
+        }
+      }
+    }
+    fxUpd();
+  } else if (o.s) {
+    bSend({ t: "s", s: o.s });
+    bPersist();
+  } else fxSend();
+  return stStop(e);
+};
+function txtAsk(p) {
+  modal(
+    `<h3>🔤 Sayfaya yazı ekle</h3><input id="txIn" placeholder="ör. ba, baba, 3+2=5" style="font-size:26px"><div class="mbtns" style="margin-top:6px">${[0.035, 0.055, 0.08].map((s, i) => `<button class="btn ${i === 1 ? "" : "ghost"}" onclick="txtPut(${p[0]},${p[1]},${s})">${["Küçük", "Orta", "Büyük"][i]}</button>`).join("")}</div>`,
+  );
+  setTimeout(() => {
+    const i = $("#txIn");
+    if (i) {
+      i.focus();
+      i.onkeydown = (e) => {
+        if (e.key === "Enter") txtPut(p[0], p[1], 0.055);
+      };
+    }
+  }, 120);
+}
+function txtPut(x, y, sz) {
+  const t = ($("#txIn") || {}).value;
+  closeModal();
+  if (!t || !t.trim()) return;
+  const s = { id: uid(), c: B.color + "|" + t.trim(), w: sz / zf(), m: "tx", pts: [[x, y]] };
+  B.strokes.push(s);
+  B.redo = [];
+  bRedraw();
+  bSend({ t: "s", s });
+  bPersist();
+}
+
+/* ---------- dikkat ekranı ---------- */
+function attnRender() {
+  let el = $("#stattn");
+  if (!FX.attn) {
+    if (el) el.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "stattn";
+    el.onclick = () => {
+      FX.attn = false;
+      fxUpd();
+    };
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<div>${avatarHTML(160)}<h1>👀 Bana bak ${esc(S.settings.student || "Mete")}!</h1><p>Dokununca kapanır</p></div>`;
+}
+
+/* ---------- yüzen araçlar (sayı doğrusu, onluk çerçeve, zar, süre) ---------- */
+function wWrap(id, title, body) {
+  return `<div class="stwid ${TS.wmin[id] ? "min" : ""}" id="w_${id}" data-w="${id}"><div class="wh"><span class="grip">⠿</span><b>${title}</b><button onclick="wMin('${id}')" title="Küçült">${TS.wmin[id] ? "▢" : "–"}</button><button onclick="wClose('${id}')">✕</button></div><div class="wb">${body}</div></div>`;
+}
+TS.wmin = {};
+function wMin(id) {
+  TS.wmin[id] = !TS.wmin[id];
+  const el = $("#w_" + id);
+  if (el) {
+    el.classList.toggle("min", !!TS.wmin[id]);
+    el.querySelector(".wh button").textContent = TS.wmin[id] ? "▢" : "–";
+  }
+}
+function wClose(id) {
+  FX[id] = null;
+  if (id === "timer") clearInterval(TS._ti);
+  fxUpd();
+}
+function wRender(remote) {
+  const bd = $("#board");
+  document.querySelectorAll(".stwid").forEach((x) => {
+    if (!FX[x.dataset.w]) x.remove();
+  });
+  if (!bd || !B.on) return;
+  [
+    ["nl", "🐸 Sayı doğrusu", nlBody],
+    ["tf", "🔟 Onluk çerçeve", tfBody],
+    ["dice", "🎲 Zar", diceBody],
+    ["timer", "⏱️ Süre", timerBody],
+  ].forEach(([id, t, f]) => {
+    if (!FX[id]) return;
+    let el = $("#w_" + id);
+    const html = f();
+    if (!el) {
+      if (remote && innerWidth < 700 && TS.wmin[id] == null) TS.wmin[id] = true;
+      bd.insertAdjacentHTML("beforeend", wWrap(id, t, html));
+      el = $("#w_" + id);
+      wPlace(el);
+      wDrag(el);
+    } else el.querySelector(".wb").innerHTML = html;
+  });
+  if (FX.timer) timerTick();
+}
+function wPlace(el) {
+  const p = (S.settings.wpos || {})[el.dataset.w];
+  const bd = $("#board");
+  const W = bd.clientWidth,
+    H = bd.clientHeight;
+  const w = el.offsetWidth,
+    h = el.offsetHeight;
+  let x, y;
+  if (p) {
+    x = p[0] * W;
+    y = p[1] * H;
+  } else {
+    const d = { nl: [0.5, 0.86], tf: [0.2, 0.55], dice: [0.12, 0.25], timer: [0.85, 0.2] }[el.dataset.w] || [
+      0.5, 0.5,
+    ];
+    x = d[0] * W - w / 2;
+    y = d[1] * H - h / 2;
+  }
+  el.style.left = Math.min(W - w - 4, Math.max(4, x)) + "px";
+  el.style.top = Math.min(H - h - 4, Math.max(60, y)) + "px";
+}
+function wDrag(el) {
+  const gh = el.querySelector(".wh");
+  gh.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const r = el.getBoundingClientRect();
+    const o = [e.clientX - r.left, e.clientY - r.top];
+    try {
+      gh.setPointerCapture(e.pointerId);
+    } catch (x) {}
+    const mv = (ev) => {
+      const bd = $("#board");
+      el.style.left = Math.min(bd.clientWidth - r.width, Math.max(0, ev.clientX - o[0])) + "px";
+      el.style.top = Math.min(bd.clientHeight - 40, Math.max(0, ev.clientY - o[1])) + "px";
+    };
+    const up = () => {
+      gh.removeEventListener("pointermove", mv);
+      gh.removeEventListener("pointerup", up);
+      const bd = $("#board");
+      S.settings.wpos = S.settings.wpos || {};
+      S.settings.wpos[el.dataset.w] = [
+        (parseFloat(el.style.left) + el.offsetWidth / 2) / bd.clientWidth,
+        (parseFloat(el.style.top) + el.offsetHeight / 2) / bd.clientHeight,
+      ];
+      save();
+    };
+    gh.addEventListener("pointermove", mv);
+    gh.addEventListener("pointerup", up);
+  });
+}
+function wOpen(id) {
+  if (FX[id]) {
+    wClose(id);
+    return;
+  }
+  FX[id] =
+    id === "nl"
+      ? { max: 10, pos: null, arcs: [] }
+      : id === "tf"
+        ? { c: Array(20).fill(0), col: 1 }
+        : id === "dice"
+          ? { n: 2, a: 3, b: 4, r: 0, show: false }
+          : { end: 0, dur: 0 };
+  fxUpd();
+}
+/* sayı doğrusu */
+function nlBody() {
+  const n = FX.nl;
+  const W = Math.min(780, (innerWidth || 800) - 60),
+    pad = 24,
+    st = (W - pad * 2) / n.max,
+    X = (i) => pad + i * st;
+  const by = 96;
+  let svg = `<svg viewBox="0 0 ${W} 130" width="${W}" height="130"><line x1="${pad - 10}" y1="${by}" x2="${W - pad + 10}" y2="${by}" stroke="#334155" stroke-width="3"/>`;
+  n.arcs.forEach((a) => {
+    const x1 = X(a[0]),
+      x2 = X(a[1]),
+      mx = (x1 + x2) / 2,
+      h = Math.min(70, 18 + Math.abs(x2 - x1) * 0.35),
+      col = a[1] > a[0] ? "#16a34a" : "#dc2626";
+    svg += `<path d="M${x1} ${by - 4} Q${mx} ${by - 4 - h * 2} ${x2} ${by - 4}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="6 4"/><text x="${mx}" y="${by - 8 - h}" text-anchor="middle" font-size="16" font-weight="800" fill="${col}">${a[1] > a[0] ? "+" : "−"}${Math.abs(a[1] - a[0])}</text>`;
+  });
+  for (let i = 0; i <= n.max; i++)
+    svg += `<g onclick="nlTap(${i})" style="cursor:pointer"><rect x="${X(i) - st / 2}" y="${by - 14}" width="${st}" height="44" fill="transparent"/><line x1="${X(i)}" y1="${by - 8}" x2="${X(i)}" y2="${by + 8}" stroke="#334155" stroke-width="2"/><text x="${X(i)}" y="${by + 27}" text-anchor="middle" font-size="${n.max > 10 ? 15 : 19}" font-weight="700" fill="${n.pos === i ? "#4f46e5" : "#0f172a"}">${i}</text></g>`;
+  if (n.pos != null)
+    svg += `<text x="${X(n.pos)}" y="${by - 10}" text-anchor="middle" font-size="30">🐸</text>`;
+  svg += "</svg>";
+  let eq = "";
+  if (n.arcs.length) {
+    eq = String(n.arcs[0][0]);
+    n.arcs.forEach((a) => {
+      eq += (a[1] >= a[0] ? " + " : " − ") + Math.abs(a[1] - a[0]);
+    });
+    eq += " = " + n.pos;
+  } else
+    eq =
+      n.pos == null
+        ? "Kurbağayı başlatmak için bir sayıya dokun"
+        : "Kurbağa " + n.pos + "'de. Zıplamak için başka sayıya dokun";
+  return `${svg}<div class="wrow"><span class="eq">${eq}</span><button onclick="FX.nl.max=FX.nl.max===10?20:10;FX.nl.arcs=[];FX.nl.pos=null;fxUpd()">0–${n.max === 10 ? 20 : 10}</button><button onclick="FX.nl.arcs=[];fxUpd()">↺ Sil</button><button onclick="FX.nl.arcs=[];FX.nl.pos=null;fxUpd()">🐸 Baştan</button></div>`;
+}
+function nlTap(i) {
+  const n = FX.nl;
+  if (n.pos != null && n.pos !== i) {
+    n.arcs.push([n.pos, i]);
+    try {
+      tone(i > n.pos ? 700 : 500, 0.08);
+      tone(i > n.pos ? 900 : 380, 0.1, 0.09);
+    } catch (e) {}
+    say(i > n.pos ? `${i - n.pos} ileri, ${i}` : `${n.pos - i} geri, ${i}`);
+  } else say(String(i));
+  n.pos = i;
+  fxUpd();
+}
+/* onluk çerçeve */
+function tfBody() {
+  const t = FX.tf;
+  const r = t.c.filter((x) => x === 1).length,
+    b = t.c.filter((x) => x === 2).length;
+  const fr = (k) =>
+    `<div class="tfr">${t.c
+      .slice(k * 10, k * 10 + 10)
+      .map(
+        (v, i) =>
+          `<button onclick="tfTap(${k * 10 + i})">${v ? `<i class="${v === 1 ? "r" : "b"}"></i>` : ""}</button>`,
+      )
+      .join("")}</div>`;
+  return `${fr(0)}${fr(1)}<div class="wrow"><button class="${t.col === 1 ? "on" : ""}" onclick="FX.tf.col=1;fxUpd()">🔴</button><button class="${t.col === 2 ? "on" : ""}" onclick="FX.tf.col=2;fxUpd()">🔵</button><span class="eq">${r || b ? `🔴 ${r}${b ? ` + 🔵 ${b}` : ""} = ${r + b}` : "Kutulara dokun"}</span><button onclick="FX.tf.c=Array(20).fill(0);fxUpd()">↺</button></div>`;
+}
+function tfTap(i) {
+  const t = FX.tf;
+  t.c[i] = t.c[i] ? 0 : t.col;
+  try {
+    tone(t.c[i] ? 820 : 420, 0.07);
+  } catch (e) {}
+  if (t.c[i]) say(String(t.c.filter((x) => x).length));
+  fxUpd();
+}
+/* zar */
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const dieHTML = (v) =>
+  `<div class="die">${Array.from({ length: 9 }, (_, i) => `<i class="${PIPS[v].includes(i) ? "p" : ""}"></i>`).join("")}</div>`;
+function diceBody() {
+  const d = FX.dice;
+  return `<div class="dice">${dieHTML(d.a)}${d.n === 2 ? dieHTML(d.b) : ""}</div><div class="wrow"><button class="roll" onclick="diceRoll()">🎲 At</button><button onclick="FX.dice.n=FX.dice.n===2?1:2;fxUpd()">${d.n === 2 ? "1 zar" : "2 zar"}</button>${d.n === 2 ? `<button class="eq" onclick="FX.dice.show=!FX.dice.show;fxUpd()">${d.a} + ${d.b} = ${d.show ? d.a + d.b : "?"}</button>` : ""}</div>`;
+}
+function diceRoll() {
+  const d = FX.dice;
+  d.a = 1 + ri(6);
+  d.b = 1 + ri(6);
+  d.r = (d.r || 0) + 1;
+  d.show = false;
+  diceAnim(false);
+}
+function diceAnim(remote) {
+  const el = $("#w_dice");
+  if (!el) {
+    wRender();
+    return;
+  }
+  const d = FX.dice;
+  let k = 0;
+  el.classList.add("rolling");
+  const t = setInterval(() => {
+    const ds = el.querySelectorAll(".die");
+    ds.forEach((x) => (x.outerHTML = dieHTML(1 + ri(6))));
+    try {
+      tone(300 + ri(300), 0.03, 0, 0.15);
+    } catch (e) {}
+    if (++k > 9) {
+      clearInterval(t);
+      el.classList.remove("rolling");
+      wRender();
+      if (!remote) fxSend();
+      say(d.n === 2 ? `${d.a} ve ${d.b}` : String(d.a));
+    }
+  }, 70);
+}
+/* süre */
+function timerBody() {
+  const t = FX.timer;
+  const left = t.end ? Math.max(0, t.end - Date.now()) : 0;
+  const f = t.dur ? left / t.dur : 0;
+  const m = Math.floor(left / 60000),
+    s = Math.floor((left % 60000) / 1000);
+  const C = 2 * Math.PI * 52;
+  return `<svg viewBox="0 0 120 120" width="150" height="150" class="tring"><circle cx="60" cy="60" r="52" stroke="#e2e8f0" stroke-width="12" fill="none"/><circle cx="60" cy="60" r="52" stroke="${f > 0.25 ? "#10b981" : "#f59e0b"}" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - f)}" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" font-size="26" font-weight="800" fill="#0f172a">${t.end ? `${m}:${String(s).padStart(2, "0")}` : "⏱️"}</text></svg><div class="wrow">${[1, 2, 3, 5].map((n) => `<button onclick="timerSet(${n})">${n} dk</button>`).join("")}<button onclick="timerSet(0)">⏹</button></div>`;
+}
+function timerSet(n) {
+  FX.timer = { end: n ? Date.now() + n * 60000 : 0, dur: n * 60000, done: false };
+  fxUpd();
+}
+function timerTick() {
+  clearInterval(TS._ti);
+  TS._ti = setInterval(() => {
+    const t = FX.timer;
+    const el = $("#w_timer");
+    if (!t || !el) {
+      clearInterval(TS._ti);
+      return;
+    }
+    el.querySelector(".wb").innerHTML = timerBody();
+    if (t.end && Date.now() >= t.end && !t._rang) {
+      t._rang = 1;
+      clearInterval(TS._ti);
+      stCele("Süre bitti! 🔔");
+    }
+  }, 500);
+}
+
+/* ---------- TOPLAMA–ÇIKARMA ETKİNLİK SAYFASI ---------- */
+const OBJ = ["🍎", "⭐", "🎈", "🐟", "🚗", "🍓", "⚽", "🐞", "🌸", "🍪", "🤖", "🦆"];
+function wsPick() {
+  modal(`<h3>📄 Toplama–çıkarma sayfası</h3><p class="mut">Seçimine göre yeni bir çalışma sayfası oluşur, tahtada ve telefonda açılır. Mete cevapları yazar; ✅ Cevaplar ile kontrol edersin.</p>
+ <label class="mut">İşlem</label><div class="seg" id="wsT">${[
+   ["top", "➕ Toplama"],
+   ["cik", "➖ Çıkarma"],
+   ["kar", "🔀 Karışık"],
+ ]
+   .map((x, i) => `<button class="${i === 0 ? "on" : ""}" data-v="${x[0]}">${x[1]}</button>`)
+   .join("")}</div>
+ <label class="mut">Sayılar</label><div class="seg" id="wsR">${[5, 10, 20].map((x, i) => `<button class="${i === 1 ? "on" : ""}" data-v="${x}">${x}'a kadar</button>`).join("")}</div>
+ <label class="mut">Görünüm</label><div class="seg" id="wsV">${[
+   ["res", "🍎 Resimli"],
+   ["say", "🔢 Sadece sayı"],
+   ["eks", "❓ Eksik sayı"],
+ ]
+   .map((x, i) => `<button class="${i === 0 ? "on" : ""}" data-v="${x[0]}">${x[1]}</button>`)
+   .join("")}</div>
+ <div class="mbtns"><button class="btn" onclick="wsGo()">✨ Sayfayı oluştur</button><button class="btn ghost" onclick="closeModal()">Vazgeç</button></div>`);
+  setTimeout(
+    () =>
+      document.querySelectorAll(".seg").forEach(
+        (g) =>
+          (g.onclick = (e) => {
+            const b = e.target.closest("button");
+            if (!b) return;
+            g.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+          }),
+      ),
+    50,
+  );
+}
+const segV = (id) => {
+  const b = document.querySelector("#" + id + " button.on");
+  return b && b.dataset.v;
+};
+function wsProblems(type, R, n) {
+  const out = [],
+    seen = new Set();
+  let guard = 0;
+  while (out.length < n && guard++ < 500) {
+    const op = type === "kar" ? (ri(2) ? "+" : "-") : type === "top" ? "+" : "-";
+    let a, b;
+    if (op === "+") {
+      a = 1 + ri(R - 1);
+      b = 1 + ri(Math.max(1, R - a));
+      if (a + b > R) continue;
+    } else {
+      a = 2 + ri(R - 1);
+      if (a > R) a = R;
+      b = 1 + ri(a - 1);
+    }
+    const k = a + op + b;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push({ a, b, op, r: op === "+" ? a + b : a - b });
+  }
+  return out;
+}
+function wsGo() {
+  const type = segV("wsT") || "top",
+    R = +(segV("wsR") || 10),
+    view = segV("wsV") || "res";
+  closeModal();
+  const pics = view === "res" && R <= 10;
+  const N = pics ? 6 : 8;
+  const P = wsProblems(type, R, N);
+  const W = 1400,
+    H = 1980,
+    c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, W, H);
+  const EF = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif',
+    TF = '"Andika","Comic Sans MS","Segoe UI",sans-serif';
+  g.fillStyle = "#eef2ff";
+  g.fillRect(0, 0, W, 170);
+  g.fillStyle = "#312e81";
+  g.font = `800 64px ${TF}`;
+  g.textAlign = "left";
+  g.textBaseline = "middle";
+  const ttl = { top: "Toplama", cik: "Çıkarma", kar: "Toplama – Çıkarma" }[type];
+  g.fillText(`${S.settings.student || "Mete"}'nin ${ttl} Sayfası`, 70, 88);
+  g.font = `600 34px ${TF}`;
+  g.textAlign = "right";
+  g.fillStyle = "#6366f1";
+  g.fillText(new Date().toLocaleDateString("tr-TR"), W - 70, 88);
+  const ans = [];
+  const top = 230,
+    rows = pics ? 6 : 8,
+    rh = (H - top - 60) / rows;
+  P.forEach((p, i) => {
+    const y = top + i * rh + rh / 2;
+    g.strokeStyle = "#e2e8f0";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.roundRect
+      ? g.roundRect(50, y - rh / 2 + 10, W - 100, rh - 20, 28)
+      : g.rect(50, y - rh / 2 + 10, W - 100, rh - 20);
+    g.stroke();
+    g.fillStyle = "#6366f1";
+    g.beginPath();
+    g.arc(105, y, 30, 0, 7);
+    g.fill();
+    g.fillStyle = "#fff";
+    g.font = `800 34px ${TF}`;
+    g.textAlign = "center";
+    g.fillText(i + 1, 105, y + 2);
+    let x = 170;
+    const ob = OBJ[(i * 5 + ri(3)) % OBJ.length];
+    if (pics) {
+      const sz = Math.min(54, 520 / Math.max(p.a + p.b, 6));
+      g.font = `${sz}px ${EF}`;
+      g.textAlign = "left";
+      const grp = (k, cross) => {
+        for (let j = 0; j < k; j++) {
+          const xx = x + (j % 5) * (sz + 6),
+            yy = y - rh * 0.18 + Math.floor(j / 5) * (sz + 6);
+          g.fillText(ob, xx, yy);
+          if (cross && j >= k - cross) {
+            g.strokeStyle = "#dc2626";
+            g.lineWidth = 6;
+            g.beginPath();
+            g.moveTo(xx, yy - sz * 0.45);
+            g.lineTo(xx + sz, yy + sz * 0.45);
+            g.stroke();
+          }
+        }
+        x += Math.min(k, 5) * (sz + 6) + 20;
+      };
+      if (p.op === "+") {
+        grp(p.a);
+        g.fillStyle = "#16a34a";
+        g.font = `800 60px ${TF}`;
+        g.fillText("+", x, y - rh * 0.12);
+        x += 60;
+        g.font = `${sz}px ${EF}`;
+        grp(p.b);
+      } else {
+        grp(p.a, p.b);
+      }
+    }
+    const ey = pics ? y + rh * 0.24 : y;
+    const fs = pics ? 66 : 84;
+    g.font = `800 ${fs}px ${TF}`;
+    g.textAlign = "left";
+    g.fillStyle = "#0f172a";
+    const opS = p.op === "+" ? "+" : "−";
+    let parts = [String(p.a), opS, String(p.b), "=", "□"],
+      blank = 4;
+    if (view === "eks") {
+      blank = ri(2) ? 0 : 2;
+      parts = [String(p.a), opS, String(p.b), "=", String(p.r)];
+      parts[blank] = "□";
+    }
+    let ex = pics ? W - 640 : 300;
+    parts.forEach((t, k) => {
+      if (t === "□") {
+        const bw = fs * 1.6;
+        g.strokeStyle = "#6366f1";
+        g.lineWidth = 5;
+        g.setLineDash([12, 8]);
+        g.strokeRect(ex, ey - fs * 0.62, bw, fs * 1.24);
+        g.setLineDash([]);
+        ans.push([r3((ex + bw / 2) / W), r3(ey / H), String(blank === 4 ? p.r : blank === 0 ? p.a : p.b)]);
+        ex += bw + 26;
+      } else {
+        g.fillStyle = t === "+" ? "#16a34a" : t === "−" ? "#dc2626" : "#0f172a";
+        g.fillText(t, ex, ey);
+        ex += g.measureText(t).width + 26;
+      }
+    });
+  });
+  g.fillStyle = "#94a3b8";
+  g.font = `26px ${TF}`;
+  g.textAlign = "center";
+  g.fillText("Cevapları kutulara yaz ✏️  ·  Hata yapmak öğrenmenin parçası 💛", W / 2, H - 36);
+  const id = uid();
+  WSANS[id] = ans;
+  idbSet("wsans:" + id, ans).catch(() => {});
+  openBoard({
+    bg: c.toDataURL("image/jpeg", 0.9),
+    title: ttl + " · " + new Date().toLocaleDateString("tr-TR"),
+    key: "ann:ws:" + id,
+    kind: "matematik",
+  });
+  toast("📄 Sayfa hazır — tahtada da açıldı");
+}
+async function wsAnsToggle() {
+  if (FX.ans) {
+    FX.ans = null;
+    fxUpd();
+    return;
+  }
+  const k = B.key || "";
+  if (!k.startsWith("ann:ws:")) return toast("Cevap anahtarı sadece oluşturulan sayfalarda var");
+  const id = k.slice(7);
+  let a = WSANS[id];
+  if (!a) {
+    try {
+      a = await idbGet("wsans:" + id);
+    } catch (e) {}
+  }
+  if (!a) return toast("Bu sayfanın cevapları bu cihazda yok");
+  FX.ans = a;
+  fxUpd();
+}
+const _mom10 = mrOpenMsg;
+mrOpenMsg = function () {
+  const m = _mom10();
+  const k = B.key || "";
+  if (k.startsWith("ann:ws:") && WSANS[k.slice(7)]) m.wsans = WSANS[k.slice(7)];
+  return m;
+};
+const _moo10 = mrOnOpen;
+mrOnOpen = async function (d) {
+  if (d.wsans && d.key) {
+    const id = d.key.slice(7);
+    WSANS[id] = d.wsans;
+    idbSet("wsans:" + id, d.wsans).catch(() => {});
+  }
+  return _moo10(d);
+};
+function mathBoard() {
+  openBlankBoard();
+  setTimeout(() => {
+    if (!FX.nl) FX.nl = { max: 10, pos: null, arcs: [] };
+    if (!FX.tf) FX.tf = { c: Array(20).fill(0), col: 1 };
+    fxUpd();
+  }, 400);
+}
+
+/* ---------- yeni araç rayı: gruplar ---------- */
+const GRP = {
+  sunum: {
+    i: "🎯",
+    n: "Sunum",
+    t: [
+      ["spot", "🔦", "Spot"],
+      ["spot+", "🔆", "Spot büyüt"],
+      ["spot-", "🔅", "Spot küçült"],
+      ["band", "🟨", "Okuma şeridi"],
+      ["lens", "🔍", "Büyüteç"],
+      ["curtain", "🎭", "Perde"],
+      ["scratch", "🪙", "Kazı-kazan"],
+      ["box", "❓", "Gizle kutusu"],
+      ["laser", "🔴", "Lazer"],
+      ["clear", "🧹", "Hepsini kapat"],
+    ],
+  },
+  ciz: {
+    i: "✏️",
+    n: "Çiz",
+    t: [
+      ["line", "📏", "Çizgi"],
+      ["circle", "⭕", "Daire"],
+      ["rect", "⬜", "Kare"],
+      ["text", "🔤", "Yazı"],
+      ["stamp", "⭐", "Damga"],
+    ],
+  },
+  mat: {
+    i: "🔢",
+    n: "Matematik",
+    t: [
+      ["nl", "🐸", "Sayı doğrusu"],
+      ["tf", "🔟", "Onluk çerçeve"],
+      ["dice", "🎲", "Zar"],
+      ["ws", "📄", "Toplama–çıkarma sayfası"],
+      ["ans", "✅", "Cevaplar"],
+      ["mboard", "🧮", "Matematik tahtası"],
+    ],
+  },
+  sinif: {
+    i: "🏫",
+    n: "Sınıf",
+    t: [
+      ["timer", "⏱️", "Süre"],
+      ["attn", "👀", "Dikkat ekranı"],
+      ["aferin", "🎉", "Aferin"],
+      ["follow", "🔗", "Takip"],
+    ],
+  },
+};
+const TOOLMODE = {
+  spot: 1,
+  band: 1,
+  lens: 1,
+  scratch: 1,
+  box: 1,
+  laser: 1,
+  line: 1,
+  circle: 1,
+  rect: 1,
+  text: 1,
+  stamp: 1,
+};
+function toolOn(k) {
+  if (TOOLMODE[k]) return B.mode === k || (k === "spot" && !!TS.spot);
+  if (k === "curtain") return TS.curtain != null;
+  if (["nl", "tf", "dice", "timer"].includes(k)) return !!FX[k];
+  if (k === "attn") return FX.attn;
+  if (k === "ans") return !!FX.ans;
+  if (k === "follow") return TS.follow;
+  return false;
+}
+function stTool(k) {
+  TS.grp = null;
+  if (k === "spot") return stMode("spot");
+  if (k === "spot+" || k === "spot-") {
+    TS.spotR = Math.min(0.38, Math.max(0.07, TS.spotR * (k === "spot+" ? 1.25 : 0.8)));
+    S.settings.spotR = TS.spotR;
+    save();
+    if (!TS.spot) {
+      TS.spot = [0.5, 0.35];
+    }
+    if (B.mode !== "spot") B.mode = "spot";
+    bUI();
+    bLayout();
+    return fxUpd();
+  }
+  if (k === "band") {
+    if (B.mode === "band") {
+      FX.band = null;
+      fxUpd();
+      return bSet("mode", "pen");
+    }
+    if (FX.band == null) FX.band = 0.3;
+    fxUpd();
+    return bSet("mode", "band");
+  }
+  if (k === "lens") {
+    if (B.mode === "lens") {
+      FX.lens = null;
+      fxUpd();
+      return bSet("mode", "pen");
+    }
+    if (!FX.lens) FX.lens = [0.5, 0.4];
+    fxUpd();
+    return bSet("mode", "lens");
+  }
+  if (k === "scratch") {
+    if (FX.scr && B.mode === "scratch") {
+      FX.scr = null;
+      fxUpd();
+      return bSet("mode", "pen");
+    }
+    FX.scr = FX.scr || [];
+    fxUpd();
+    return bSet("mode", "scratch");
+  }
+  if (k === "box") {
+    if (B.mode === "box") return bSet("mode", "pen");
+    toast("❓ Sürükle: kutu yap · Dokun: aç/kapat");
+    return bSet("mode", "box");
+  }
+  if (k === "curtain") return stCurtain();
+  if (k === "stamp") return stStampPick();
+  if (k === "aferin") return stAferin();
+  if (k === "follow") return stFollowToggle();
+  if (k === "clear") {
+    TS.spot = null;
+    TS.curtain = null;
+    FX.band = null;
+    FX.lens = null;
+    FX.scr = null;
+    FX.boxes = [];
+    FX.ans = null;
+    LZ.pts = [];
+    fxUpd();
+    return bSet("mode", "pen");
+  }
+  if (["nl", "tf", "dice", "timer"].includes(k)) {
+    wOpen(k);
+    bUI();
+    return bLayout();
+  }
+  if (k === "attn") {
+    FX.attn = !FX.attn;
+    fxUpd();
+    bUI();
+    return bLayout();
+  }
+  if (k === "ws") return wsPick();
+  if (k === "ans")
+    return wsAnsToggle().then(() => {
+      bUI();
+      bLayout();
+    });
+  if (k === "mboard") return mathBoard();
+  if (TOOLMODE[k]) return stMode(k);
+}
+function stGrp(g) {
+  TS.grp = TS.grp === g ? null : g;
+  bUI();
+  bLayout();
+}
+railHTML = function () {
+  const b = (cls, click, ic, lb, tt) =>
+    `<button class="${cls}" onclick="${click}" title="${tt || lb}"><span>${ic}</span><small>${lb}</small></button>`;
+  if (!TS.rail)
+    return `<div class="strail mini"><button onclick="stRailToggle()" title="Araçları göster"><span>🧰</span><small>Araçlar</small></button></div>`;
+  const grpOn = (g) => GRP[g].t.some((t) => toolOn(t[0]));
+  let h = `<div class="strail">${b(B.mode === "hand" ? "on" : "", "stMode('hand')", "✋", "El", "Dokunmatik / kaydır — yazmaz")}${b("", "zTo(ZM.k*1.35)", "＋", "Büyüt")}<button class="zk" onclick="zFit()" title="Sayfayı sığdır">${Math.round(ZM.k * 100)}%</button>${b("", "zTo(ZM.k/1.35)", "－", "Küçült")}<i></i>`;
+  Object.keys(GRP).forEach((g) => {
+    h += b((TS.grp === g ? "open " : "") + (grpOn(g) ? "act" : ""), `stGrp('${g}')`, GRP[g].i, GRP[g].n);
+  });
+  h += `<i></i>${b("party", "stAferin()", "🎉", "Aferin")}${b("", "stRailToggle()", "⇥", "Gizle")}</div>`;
+  if (TS.grp) {
+    const G = GRP[TS.grp];
+    h += `<div class="stfly"><div class="fh">${G.i} ${G.n}<button onclick="stGrp(null)">✕</button></div><div class="fg">${G.t.map((t) => `<button class="${toolOn(t[0]) ? "on" : ""}" onclick="stTool('${t[0]}')"><span>${t[0] === "stamp" && B.mode === "stamp" ? TS.stamp : t[1]}</span><small>${t[2]}</small></button>`).join("")}</div></div>`;
+  }
+  return h;
+};
+const _bUI10 = bUI;
+bUI = function () {
+  _bUI10();
+  wRender();
+  attnRender();
+};
+const _closeBoard10 = closeBoard;
+closeBoard = function () {
+  _closeBoard10();
+  document.querySelectorAll(".stwid").forEach((x) => x.remove());
+};
+
+/* ---------- Ders sekmesine Matematik Stüdyosu kartı ---------- */
+const _vDers10 = vDers;
+vDers = function () {
+  return (
+    `<section class="card mstudio"><h3>🧮 Toplama–Çıkarma Stüdyosu</h3><p class="mut">Tahtada ve telefonda birlikte çalışır.</p><div class="grid2"><button class="btn" onclick="wsPick()">📄 Etkinlik sayfası oluştur</button><button class="btn ghost" onclick="mathBoard()">🐸 Sayı doğrusu + 🔟 onluk çerçeve</button></div></section>` +
+    _vDers10()
+  );
+};
+
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+.stlay{position:absolute;inset:0;pointer-events:none}
+#stband{z-index:2}#stband i{position:absolute;left:0;right:0;height:3px;background:#facc15;box-shadow:0 0 10px #facc15}
+#stboxes{z-index:4}.stbox{position:absolute;border-radius:10px;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 70%,#000));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0003;transition:all .25s}
+.stbox b{color:#fff;font-size:clamp(18px,3vw,46px);font-weight:900;text-shadow:0 2px 6px #0005}
+.stbox.open{background:transparent;box-shadow:none;outline:3px dashed var(--c);outline-offset:-2px}
+#stboxtmp{position:absolute;border:3px dashed #6366f1;background:#6366f122;border-radius:10px;z-index:5;pointer-events:none}
+#stans{z-index:5}#stans span{position:absolute;transform:translate(-50%,-50%);color:#16a34a;font-weight:900;text-shadow:0 0 6px #fff,0 0 12px #fff;font-family:"Comic Sans MS",sans-serif}
+#stscr{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+#stlens{position:absolute;z-index:6;pointer-events:none;border-radius:50%;box-shadow:0 10px 30px #0006}
+#stattn{position:fixed;inset:0;z-index:250;background:radial-gradient(circle,#4338ca,#0f172a);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;animation:attn .4s}
+#stattn .av{margin:0 auto 16px;display:inline-flex;border:6px solid #fff4;animation:pulse 1.6s infinite}#stattn h1{font-size:clamp(32px,6vw,80px);margin:0}#stattn p{opacity:.6}
+@keyframes attn{from{opacity:0;transform:scale(1.1)}}@keyframes pulse{50%{transform:scale(1.06)}}
+.strail button.open{background:#4f46e5;color:#fff}.strail button.act{box-shadow:inset 0 0 0 2px #4f46e5}
+.stfly{position:absolute;right:76px;top:calc(68px + env(safe-area-inset-top));z-index:9;background:#fff;border-radius:18px;box-shadow:0 14px 40px #0f172a40;padding:10px;width:min(330px,calc(100% - 96px));animation:attn .15s}
+.stfly .fh{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin:0 2px 8px}.stfly .fh button{border:0;background:#f1f5f9;border-radius:10px;width:34px;height:34px}
+.stfly .fg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stfly .fg button{border:0;background:#f8fafc;border-radius:14px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:#0f172a}
+.stfly .fg button span{font-size:26px;line-height:1}.stfly .fg button small{font-size:11px;font-weight:700;text-align:center;line-height:1.15}.stfly .fg button.on{background:#e0e7ff;outline:2px solid #4f46e5}
+.stwid{position:absolute;z-index:8;background:#fff;border-radius:18px;box-shadow:0 14px 40px #0f172a40;max-width:calc(100% - 8px)}
+.stwid .wh{display:flex;align-items:center;gap:8px;padding:6px 8px 4px 6px;touch-action:none;cursor:grab;border-bottom:1px solid #f1f5f9}.stwid .wh b{flex:1;font-size:14px}.stwid .wh .grip{color:#94a3b8}.stwid .wh button{border:0;background:#f1f5f9;border-radius:8px;width:30px;height:30px}
+.stwid.min .wb{display:none}.stwid.min{opacity:.92}.stwid .wb{padding:8px 10px 10px;overflow-x:auto}.stwid svg{display:block;max-width:100%;height:auto}
+.wrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}.wrow button{border:0;background:#eef2ff;color:#312e81;font-weight:800;border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer}.wrow button.on{outline:2px solid #4f46e5}
+.wrow .eq{font-size:20px;font-weight:900;color:#0f172a;flex:1;min-width:140px}button.eq{flex:none;background:#fef3c7;color:#92400e}
+.tfr{display:grid;grid-template-columns:repeat(5,56px);gap:4px;margin-bottom:8px}.tfr button{width:56px;height:56px;border:3px solid #334155;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tfr i{width:40px;height:40px;border-radius:50%;display:block;animation:attn .2s}.tfr i.r{background:radial-gradient(circle at 35% 35%,#fca5a5,#dc2626)}.tfr i.b{background:radial-gradient(circle at 35% 35%,#93c5fd,#2563eb)}
+.dice{display:flex;gap:14px;justify-content:center;padding:6px}.die{width:84px;height:84px;background:#fff;border:3px solid #0f172a;border-radius:16px;display:grid;grid-template-columns:repeat(3,1fr);padding:8px;gap:2px;box-shadow:0 4px 0 #0f172a}
+.die i{border-radius:50%}.die i.p{background:#0f172a}.rolling .die{animation:shake .14s infinite}@keyframes shake{50%{transform:rotate(12deg) translateY(-4px)}}
+.wrow .roll{background:#4f46e5;color:#fff;font-size:18px}
+.seg{display:flex;gap:6px;margin:4px 0 12px;flex-wrap:wrap}.seg button{flex:1;border:2px solid #e2e8f0;background:#fff;border-radius:12px;padding:10px 6px;font-weight:800;font-size:15px;cursor:pointer}.seg button.on{border-color:#4f46e5;background:#eef2ff;color:#312e81}
+@media (max-width:600px){.stfly{right:56px;width:calc(100% - 66px)}.tfr{grid-template-columns:repeat(5,44px)}.tfr button{width:44px;height:44px}.tfr i{width:30px;height:30px}.die{width:64px;height:64px}}`;
   document.head.appendChild(s);
 })();
 
