@@ -326,6 +326,29 @@ details.card summary{cursor:pointer;list-style:none;padding:2px 0}details.card s
 .hrow button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 0;font-weight:800;font-size:14px;color:#94a3b8;font-family:"Baloo 2",Nunito,sans-serif}.hrow button.on{background:#22c55e;border-color:#22c55e;color:#fff}
 .hchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hchips span{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-weight:800;border-radius:10px;padding:6px 10px;font-family:"Baloo 2",Nunito,sans-serif;font-size:18px}
 .sandbar{background:#fff7e6}
+
+/* ===== v7 ===== */
+#aifab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:110;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#6366f1,#ec4899);color:#fff;font-size:26px;box-shadow:0 8px 24px rgba(99,102,241,.45)}
+.aiq{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.aiq button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 12px;font-weight:700;font-size:13px}
+.aiout{margin-top:10px;min-height:20px}.aitxt{background:var(--bg);border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.55;max-height:46vh;overflow:auto}.aitxt .mh{display:block;color:var(--pri);margin-top:6px}.aitxt .li{display:block;padding-left:4px}
+.aispin{color:var(--mut);font-weight:700;animation:pulse 1.2s infinite;display:inline-block;padding:8px}
+.aibar{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.aibar button{flex:1;border:0;background:var(--pri-s);color:var(--pri);border-radius:10px;padding:8px 6px;font-weight:700;font-size:13px}
+.aiwarn{margin-top:10px;font-size:12px;color:#92400e;background:#fffbeb;border-radius:10px;padding:8px 10px}
+.ncats{display:flex;gap:6px;overflow-x:auto;margin:10px 0 6px;padding-bottom:4px}.ncats button{flex:none;border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 12px;font-weight:700;font-size:13px}.ncats button.on{background:var(--c,var(--pri));border-color:var(--c,var(--pri));color:#fff}.ncats.sm button{padding:6px 10px;font-size:12px}
+.nqs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.nqs button{border:0;background:var(--bg);border-radius:10px;padding:6px 10px;font-size:12px;color:#475569}
+.nta{position:relative}.nta textarea{padding-right:56px;font-size:16px}.nta .mic{position:absolute;right:8px;top:8px;width:42px;height:42px;border-radius:50%;border:0;background:var(--pri-s);font-size:20px}.nta .mic.on{background:#ef4444;animation:pulse 1s infinite}
+.abc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}.abc b{display:block;font-size:12px;color:#c2410c;margin-bottom:4px}.abc textarea{font-size:14px}
+@media(max-width:560px){.abc{grid-template-columns:1fr}}
+.nopts{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0}.nopts .tg{margin:0}
+.ncard{background:#fff;border:1px solid var(--line);border-left:5px solid var(--c);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.ncard .nh{display:flex;justify-content:space-between;gap:8px;font-size:13px}.ncard .nh small{color:var(--mut)}.ncard p{margin:6px 0;font-size:15px}
+.ncard img{width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-top:6px;background:#f1f5f9}
+.abcv{display:grid;gap:4px;margin-top:6px}.abcv span{background:#fff7ed;border-radius:8px;padding:6px 8px;font-size:13px}.abcv b{color:#c2410c;margin-right:6px}
+.nact{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}.nact button{border:0;background:var(--bg);border-radius:8px;width:36px;height:32px}
+.atabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}.atabs button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 4px;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#475569}.atabs button span{font-size:20px}.atabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+@media(min-width:700px){.atabs{grid-template-columns:repeat(6,1fr)}}
+.aistat{display:flex;gap:12px;align-items:center}.aistat .ais{font-size:34px}.aistat>div:nth-child(2){flex:1;display:flex;flex-direction:column}.aistat span{color:var(--mut);font-size:13px}
+.klist{display:flex;flex-direction:column;gap:6px}.krow{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:8px 10px}.krow code{font-size:13px;flex:1}.krow small{color:var(--mut);font-size:12px}.krow button{border:0;background:#fff;border-radius:8px;width:30px;height:30px}
 </style>
 </head>
 <body>
@@ -1735,7 +1758,8 @@ function recRow(r) {
 const TABS = [
   ["ana", "🏠", "Ana"],
   ["ders", "🎮", "Ders"],
-  ["yazi", "✍️", "Kitap & Yazı"],
+  ["notlar", "📝", "Notlar"],
+  ["yazi", "✍️", "Kitap"],
   ["rapor", "📨", "Veli"],
   ["ayar", "⚙️", "Ayarlar"],
 ];
@@ -1753,7 +1777,16 @@ function render() {
     if (!S.current) ensureSession();
     return renderChild();
   }
-  const V = { ana: vAna, kitap: vYazi, yazi: vYazi, ders: vDers, kayit: vDers, rapor: vRapor, ayar: vAyar };
+  const V = {
+    notlar: vNotlar,
+    ana: vAna,
+    kitap: vYazi,
+    yazi: vYazi,
+    ders: vDers,
+    kayit: vDers,
+    rapor: vRapor,
+    ayar: vAyar,
+  };
   if (!V[view]) view = "ana";
   $("#app").innerHTML =
     `<div class="top"><div class="topL" onclick="openProfile()">${avatarHTML(42)}<div><b>${esc(S.settings.student)} · Gelişim Robotu</b><small>⭐ ${S.stars} · ${S.sessions.length} ders · ${
@@ -2363,7 +2396,7 @@ async function exportData(withBooks) {
       if (b) media["rec:" + r.id] = await blobToData(b);
     }
     try {
-      for (const k of await idbKeys()) if (/^(card|photo):/.test(k)) media[k] = await idbGet(k);
+      for (const k of await idbKeys()) if (/^(card|photo|nphoto):/.test(k)) media[k] = await idbGet(k);
     } catch (e) {}
     offerShare(
       new Blob([JSON.stringify({ state: S, media })], { type: "application/json" }),
@@ -7722,11 +7755,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "6.0",
+const APP_VER = "7.0",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 9988,
-  APP_KB = 754;
+  APP_LINES = 10828,
+  APP_KB = 795;
 const CHANGELOG = [
+  [
+    "7.0",
+    "10 Ekim 2026",
+    "Not defteri (kategori, ABC davranış kaydı, sesle not, fotoğraf, veli raporuna ekleme, AI özet ve örüntü analizi), ZİRVE yapay zekâ katmanı (çoklu anahtar, canlı model keşfi, anahtar sağlık paneli, akıllı sıralama), ✨ AI asistan, yeni Ayarlar",
+  ],
   [
     "6.0",
     "10 Ekim 2026",
@@ -9967,6 +10005,808 @@ subHTML = function (k) {
   if (k === "tr" && hmode())
     h = h.replace(/Öğrendiğimiz harfler:[^<]*/, "Öğrendiğimiz heceler: " + esc(learnedSyl().join(" ")));
   return h;
+};
+
+/* ================== v7: ZİRVE YAPAY ZEKÂ KATMANI ================== */
+/* Anahtarlarını bir kez buraya yazarsan her yeni cihazda otomatik yüklenir (Ayarlar boşsa). */
+const GOMULU_ANAHTARLAR = [];
+const MODEL_ONCELIK = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-1.5-flash",
+];
+const LSK = "mete_zirve_ai";
+const ZA = (() => {
+  try {
+    return JSON.parse(localStorage.getItem(LSK) || "{}");
+  } catch (e) {
+    return {};
+  }
+})();
+ZA.health = ZA.health || {};
+ZA.models = ZA.models || null;
+const zSave = () => {
+  try {
+    localStorage.setItem(LSK, JSON.stringify(ZA));
+  } catch (e) {}
+};
+function ringKeys() {
+  let k = String(S.settings.keys || "")
+    .split(/[\s,;]+/)
+    .map((x) => x.trim())
+    .filter((x) => /^AIza[\w-]{20,}$/.test(x));
+  if (!k.length && GOMULU_ANAHTARLAR.length) {
+    k = GOMULU_ANAHTARLAR.slice();
+    S.settings.keys = k.join("\n");
+    save();
+  }
+  return [...new Set(k)];
+}
+function keyState(k) {
+  const h = ZA.health[k];
+  if (!h) return "yeni";
+  const age = Date.now() - h.t;
+  if (h.st === "dk" && age > 65000) return "yeni";
+  if (h.st === "gun" && new Date(h.t).toDateString() !== new Date().toDateString()) return "yeni";
+  return h.st;
+}
+function setKey(k, st) {
+  ZA.health[k] = { st, t: Date.now() };
+  zSave();
+}
+function orderedKeys() {
+  const rank = { ok: 0, yeni: 1, dk: 2, gun: 3, gecersiz: 4 };
+  return ringKeys().sort((a, b) => rank[keyState(a)] - rank[keyState(b)]);
+}
+const KST = {
+  ok: ["🟢", "Hazır"],
+  yeni: ["⚪", "Denenmedi"],
+  dk: ["🟡", "Dakikalık kota dolu"],
+  gun: ["🟠", "Günlük kota dolu"],
+  gecersiz: ["🔴", "Geçersiz"],
+};
+const maskKey = (k) => k.slice(0, 6) + "…" + k.slice(-4);
+async function ensureModels(force) {
+  if (!force && ZA.models && ZA.modelsDay === new Date().toDateString()) return ZA.models;
+  const k = orderedKeys().find((x) => keyState(x) !== "gecersiz");
+  if (!k) return MODEL_ONCELIK;
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(k)}&pageSize=200`,
+    );
+    const j = await r.json();
+    if (!r.ok) throw new Error();
+    const names = (j.models || [])
+      .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map((m) => m.name.replace("models/", ""))
+      .filter(
+        (n) => /gemini/.test(n) && /flash/.test(n) && !/image|tts|audio|live|exp|preview|thinking/.test(n),
+      );
+    let list = MODEL_ONCELIK.filter((m) => names.includes(m));
+    names.filter((n) => !list.includes(n) && !/latest/.test(n)).forEach((n) => list.push(n));
+    if (!list.length) list = MODEL_ONCELIK;
+    ZA.models = list.slice(0, 6);
+    ZA.modelsDay = new Date().toDateString();
+    zSave();
+    return ZA.models;
+  } catch (e) {
+    return ZA.models || MODEL_ONCELIK;
+  }
+}
+function modelSirasi(ms) {
+  const pref =
+    S.settings.model && S.settings.model !== "otomatik"
+      ? S.settings.model.replace(/-latest$/, "").replace("gemini-flash", "gemini-2.5-flash")
+      : null;
+  return pref ? [pref, ...ms.filter((m) => m !== pref)] : ms;
+}
+function trErr(code, msg) {
+  msg = String(msg || "");
+  if (code === 429)
+    return /day|PerDay|daily/i.test(msg)
+      ? "Günlük kota doldu (yarın sıfırlanır)"
+      : "Kota doldu, biraz sonra tekrar dene";
+  if (code === 404) return "Model bulunamadı";
+  if (code === 403 || /API key not valid|API_KEY_INVALID/i.test(msg)) return "Anahtar geçersiz";
+  if (code === 503) return "Google sunucusu yoğun, tekrar dene";
+  if (/invalid argument/i.test(msg)) return "Geçersiz istek";
+  return msg || "Hata " + code;
+}
+async function zCall(parts, opts) {
+  opts = opts || {};
+  const keys = orderedKeys();
+  if (!keys.length) throw new Error("Ayarlar › Yapay Zekâ bölümünden Gemini API anahtarı ekle");
+  if (!navigator.onLine) throw new Error("İnternet bağlantısı yok");
+  const models = modelSirasi(await ensureModels());
+  let last = "";
+  for (const k of keys) {
+    if (keyState(k) === "gecersiz") continue;
+    for (const m of models.slice(0, 4)) {
+      let gc = { temperature: opts.temp == null ? 0.6 : opts.temp };
+      if (opts.json !== false) gc.responseMimeType = "application/json";
+      if (/2\.5/.test(m)) gc.thinkingConfig = { thinkingBudget: 0 };
+      for (let attempt = 0; attempt < 2; attempt++) {
+        let r, j;
+        try {
+          r = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(k)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: gc }),
+            },
+          );
+          j = await r.json().catch(() => ({}));
+        } catch (e) {
+          last = "Bağlantı hatası";
+          break;
+        }
+        if (r.ok) {
+          setKey(k, "ok");
+          const txt = (
+            (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) ||
+            []
+          )
+            .map((p) => p.text || "")
+            .join("");
+          if (opts.json === false) return txt;
+          return JSON.parse(
+            txt
+              .replace(/^\s*```(json)?/i, "")
+              .replace(/```\s*$/, "")
+              .trim(),
+          );
+        }
+        const msg = (j.error && j.error.message) || "";
+        if (r.status === 400 && /invalid argument|thinking|responseMimeType/i.test(msg) && attempt === 0) {
+          delete gc.thinkingConfig;
+          continue;
+        }
+        last = trErr(r.status, msg);
+        if (r.status === 429) {
+          setKey(k, /day|PerDay|daily/i.test(msg) ? "gun" : "dk");
+          break;
+        }
+        if (r.status === 403 || /API key not valid|API_KEY_INVALID/i.test(msg)) {
+          setKey(k, "gecersiz");
+          break;
+        }
+        break;
+      }
+      if (["dk", "gun", "gecersiz"].includes(keyState(k))) break;
+    }
+  }
+  throw new Error(last || "Yapay zekâya ulaşılamadı");
+}
+gemini = function (parts, opts) {
+  return zCall(parts, opts);
+};
+async function zStream(prompt, onChunk) {
+  const keys = orderedKeys();
+  if (!keys.length) throw new Error("Önce Ayarlar › Yapay Zekâ bölümünden anahtar ekle");
+  const models = modelSirasi(await ensureModels());
+  let last = "";
+  for (const k of keys) {
+    if (keyState(k) === "gecersiz") continue;
+    for (const m of models.slice(0, 3)) {
+      const gc = { temperature: 0.7 };
+      if (/2\.5/.test(m)) gc.thinkingConfig = { thinkingBudget: 0 };
+      let r;
+      try {
+        r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${m}:streamGenerateContent?alt=sse&key=${encodeURIComponent(k)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: gc,
+            }),
+          },
+        );
+      } catch (e) {
+        last = "Bağlantı hatası";
+        continue;
+      }
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        const msg = (j.error && j.error.message) || "";
+        last = trErr(r.status, msg);
+        if (r.status === 429) {
+          setKey(k, /day|PerDay|daily/i.test(msg) ? "gun" : "dk");
+          break;
+        }
+        if (r.status === 403 || /API key not valid/i.test(msg)) {
+          setKey(k, "gecersiz");
+          break;
+        }
+        continue;
+      }
+      setKey(k, "ok");
+      const rd = r.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "",
+        full = "";
+      while (true) {
+        const { done, value } = await rd.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let i;
+        while ((i = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, i).trim();
+          buf = buf.slice(i + 1);
+          if (!line.startsWith("data:")) continue;
+          try {
+            const j = JSON.parse(line.slice(5));
+            const t = (
+              (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) ||
+              []
+            )
+              .map((p) => p.text || "")
+              .join("");
+            if (t) {
+              full += t;
+              onChunk(full);
+            }
+          } catch (e) {}
+        }
+      }
+      return full;
+    }
+  }
+  throw new Error(last || "Yapay zekâya ulaşılamadı");
+}
+async function testAllKeys() {
+  const keys = ringKeys();
+  if (!keys.length) return toast("Önce anahtar ekle");
+  busy(`${keys.length} anahtar test ediliyor…`, 0);
+  let i = 0;
+  const one = async (k) => {
+    try {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(k)}&pageSize=1`,
+      );
+      if (r.ok) setKey(k, "ok");
+      else {
+        const j = await r.json().catch(() => ({}));
+        setKey(k, r.status === 429 ? "dk" : "gecersiz");
+      }
+    } catch (e) {}
+    i++;
+    busy(`${i}/${keys.length} test edildi`, Math.round((100 * i) / keys.length));
+  };
+  for (let s = 0; s < keys.length; s += 8) await Promise.all(keys.slice(s, s + 8).map(one));
+  busy(false);
+  await ensureModels(true);
+  S.settings.keys = orderedKeys().join("\n");
+  save();
+  render();
+  const ok = keys.filter((k) => keyState(k) === "ok").length;
+  toast(`✅ ${ok}/${keys.length} anahtar çalışıyor — çalışanlar öne alındı`);
+}
+testKey = testAllKeys;
+function copyKeys() {
+  const t = ringKeys().join("\n");
+  if (!t) return toast("Kayıtlı anahtar yok");
+  copyText(t);
+}
+async function pasteKeys() {
+  let t = "";
+  try {
+    t = await navigator.clipboard.readText();
+  } catch (e) {
+    t = prompt("Anahtarları buraya yapıştır:") || "";
+  }
+  const nw = t.match(/AIza[\w-]{20,}/g) || [];
+  if (!nw.length) return toast("Panoda anahtar bulunamadı");
+  const old = ringKeys();
+  const dup = nw.filter((k) => old.includes(k)).length;
+  S.settings.keys = [...new Set(old.concat(nw))].join("\n");
+  save();
+  render();
+  toast(`📥 ${nw.length - dup} yeni anahtar eklendi${dup ? ` · ${dup} tanesini daha önce eklemiştin` : ""}`);
+}
+function delKey(k) {
+  S.settings.keys = ringKeys()
+    .filter((x) => x !== k)
+    .join("\n");
+  delete ZA.health[k];
+  zSave();
+  save();
+  render();
+}
+function addKeyInput() {
+  const v = ($("#newKey") || {}).value || "";
+  const nw = v.match(/AIza[\w-]{20,}/g) || [];
+  if (!nw.length) return toast("Geçerli bir anahtar gir (AIza ile başlar)");
+  const old = ringKeys();
+  const dup = nw.filter((k) => old.includes(k)).length;
+  S.settings.keys = [...new Set(old.concat(nw))].join("\n");
+  save();
+  render();
+  toast(dup ? "Bu anahtarı daha önce eklemiştin" : "🔑 Anahtar eklendi");
+}
+function aiReady() {
+  return orderedKeys().some((k) => ["ok", "yeni"].includes(keyState(k)));
+}
+/* metin temizleme ve WhatsApp biçimi */
+function duzMetin(s) {
+  return String(s || "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|li|div|h\d)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/^#+\s*/gm, "")
+    .replace(/^\s*[-*]\s+/gm, "• ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+function whatsappBicim(md) {
+  return String(md || "")
+    .replace(/\*\*(.+?)\*\*/g, "*$1*")
+    .replace(/^#+\s*(.+)$/gm, "*$1*")
+    .replace(/^\s*[-*]\s+/gm, "• ")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+function mdLite(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/^#+\s*(.+)$/gm, '<b class="mh">$1</b>')
+    .replace(/^\s*[-*•]\s+(.+)$/gm, '<span class="li">• $1</span>')
+    .replace(/\n/g, "<br>");
+}
+window.addEventListener("offline", () =>
+  toast("📡 İnternet bağlantısı koptu — yapay zekâ ve bağlantı özellikleri bekliyor"),
+);
+window.addEventListener("online", () => toast("✅ İnternet geri geldi"));
+
+/* ================== v7: ✨ AI ASİSTAN ================== */
+function durumOzeti() {
+  const W = weekData(weekKey(Date.now()));
+  const R = roadState();
+  const cur = roadCurrent(R);
+  const notes = (S.notebook || [])
+    .slice(0, 8)
+    .map(
+      (n) =>
+        `- [${NCAT[n.cat] ? NCAT[n.cat].n : ""}] ${n.text}${n.abc ? ` (Öncül: ${n.abc.a}; Davranış: ${n.abc.b}; Sonuç: ${n.abc.c})` : ""}`,
+    )
+    .join("\n");
+  return `${ctx()}\nBu hafta: ${W.ss.length} ders, ${W.n} ses denemesi${W.n ? ", %" + pct(W.p, W.n) + " doğru" : ""}.\nYol haritasında şu an: ${cur >= 0 ? R[cur].s.n : "tamamlandı"}.\nHedefler: ${(S.profile.goals || []).map((g) => g.t).join("; ") || "—"}\nSon öğretmen notları:\n${notes || "—"}`;
+}
+const AIQ = [
+  [
+    "📋",
+    "Bugünkü ders planı",
+    "Bugünkü 45 dakikalık ders için adım adım, sürelerle bir plan öner. Mete'nin sevdiği robot/kodlama/yapboz oyunlarını ödül olarak yerleştir.",
+  ],
+  [
+    "💬",
+    "Veliye mesaj taslağı",
+    "Sinan Bey'e bu haftayı anlatan kısa, sıcak bir WhatsApp mesajı taslağı yaz.",
+  ],
+  ["🏠", "Ev ödevi öner", "Bu hafta evde 5 dakikalık 3 eğlenceli ev çalışması öner."],
+  ["🎯", "Neye odaklanayım?", "Önümüzdeki 2 ders için en önemli 3 odak noktasını ve nedenini yaz."],
+  ["🧩", "Davranış önerisi", "Notlarımdaki davranışlara göre olumlu davranış desteği önerileri ver."],
+];
+function openAI(q) {
+  modal(
+    `<h3>✨ Yapay zekâ asistanı</h3><p class="mut">Mete'nin profili, bu haftanın verileri ve notların dikkate alınır. Fotoğraf ve kişisel iletişim bilgisi gönderilmez.</p>${aiReady() ? "" : `<div class="rem auto">🔑 Önce <b>Ayarlar › Yapay Zekâ</b> bölümünden Gemini anahtarı ekle.</div>`}<div class="aiq">${AIQ.map((x, i) => `<button onclick="askAI(AIQ[${i}][2])">${x[0]} ${esc(x[1])}</button>`).join("")}</div><div class="row" style="margin-top:8px"><input id="aiIn" placeholder="Kendi sorunu yaz…" style="flex:1" onkeydown="if(event.key==='Enter')askAI(this.value)"><button class="btn" onclick="askAI($('#aiIn').value)">Sor</button></div><div id="aiOut" class="aiout"></div><div class="aiwarn">⚠️ Bu bir yapay zekâdır; %100 doğru olmayabilir. Önemli kararlarda kendi gözlemine güven.</div>`,
+  );
+  if (q) askAI(q);
+}
+let AILAST = "";
+async function askAI(q) {
+  q = String(q || "").trim();
+  if (!q) return;
+  const out = $("#aiOut");
+  if (!out) return;
+  out.innerHTML = '<div class="aispin">🤖 Düşünüyorum…</div>';
+  const prompt = `Sen deneyimli bir özel eğitim ve 1. sınıf öğretmen asistanısın. Öğretmenin işini hafiflet: kısa, net, uygulanabilir Türkçe yaz. Yalnızca verilen bilgilere dayan, uydurma. LaTeX kullanma. Başlık ve madde işaretleri kullanabilirsin.\n\nDURUM:\n${durumOzeti()}\n\nİSTEK: ${q}`;
+  try {
+    const full = await zStream(prompt, (t) => {
+      AILAST = t;
+      out.innerHTML = `<div class="aitxt">${mdLite(t)}</div>`;
+    });
+    AILAST = full;
+    out.insertAdjacentHTML(
+      "beforeend",
+      `<div class="aibar"><button onclick="copyText(duzMetin(AILAST))">📋 Kopyala</button><button onclick="shareTxt(whatsappBicim(AILAST))">📤 Paylaş</button><button onclick="say(duzMetin(AILAST),1)">🔊 Dinle</button><button onclick="noteFromAI()">📝 Nota kaydet</button></div>`,
+    );
+  } catch (e) {
+    out.innerHTML = `<div class="rem">⚠️ ${esc(e.message)} <button class="btn sm ghost" onclick="closeModal();ayarTab='ai';go('ayar')">Ayarlara git</button></div>`;
+  }
+}
+function shareTxt(t) {
+  if (navigator.share) navigator.share({ text: t }).catch(() => {});
+  else copyText(t);
+}
+function noteFromAI() {
+  addNote({ cat: "plan", text: duzMetin(AILAST).slice(0, 4000) });
+  toast("📝 Notlara kaydedildi");
+}
+function aiFab() {
+  let b = $("#aifab");
+  if (child || B.on || S.settings.hideAiFab) {
+    if (b) b.remove();
+    return;
+  }
+  if (!b) {
+    b = document.createElement("button");
+    b.id = "aifab";
+    b.innerHTML = "✨";
+    b.title = "Yapay zekâ asistanı";
+    b.onclick = () => openAI();
+    document.body.appendChild(b);
+  }
+}
+
+/* ================== v7: NOT DEFTERİ ================== */
+const NCAT = {
+  gozlem: { n: "Gözlem", i: "👀", c: "#0ea5e9" },
+  dil: { n: "Dil-konuşma", i: "🗣️", c: "#8b5cf6" },
+  okuma: { n: "Okuma-yazma", i: "📖", c: "#059669" },
+  mat: { n: "Matematik", i: "🔢", c: "#2563eb" },
+  davranis: { n: "Davranış", i: "🧩", c: "#f97316" },
+  veli: { n: "Veli görüşmesi", i: "💬", c: "#db2777" },
+  plan: { n: "Plan / fikir", i: "💡", c: "#ca8a04" },
+  saglik: { n: "Genel durum", i: "🌡️", c: "#64748b" },
+};
+const NQUICK = {
+  gozlem: [
+    "Bugün çok istekliydi",
+    "Göz teması arttı",
+    "Yönergeleri ilk seferde takip etti",
+    "Dikkati 10 dakikadan sonra dağıldı",
+  ],
+  dil: [
+    "Hedef sesi modelle doğru söyledi",
+    "Kendiliğinden yeni kelime kullandı",
+    "İki kelimelik cümle kurdu",
+  ],
+  okuma: ["Yeni heceyi öğrendi", "Heceleri birleştirip kelime okudu", "Kalem tutuşu iyileşti"],
+  mat: ["1–10 arası rakamları tanıdı", "Nesneleri doğru saydı", "Toplamada parmak kullandı"],
+  davranis: ["Geçişte zorlandı", "Ödül panosu işe yaradı", "Molada sakinleşti"],
+  veli: ["Sinan Bey ile görüştük", "Evde çalışma planını konuştuk"],
+  plan: ["Gelecek derste tekrar et", "Yeni ödül dene"],
+  saglik: ["Yorgundu", "Uykusuz geldi", "Çok enerjikti"],
+};
+let NF = {
+  q: "",
+  cat: "",
+  week: false,
+  draft: { cat: "gozlem", text: "", abc: false, veli: false, pin: false, photo: null },
+  edit: null,
+};
+function addNote(n) {
+  const c = S.current;
+  const note = Object.assign(
+    {
+      id: uid(),
+      date: new Date().toISOString(),
+      sid: c ? c.id : "",
+      cat: "gozlem",
+      text: "",
+      pin: false,
+      veli: false,
+    },
+    n,
+  );
+  S.notebook = [note].concat(S.notebook || []);
+  save();
+  return note;
+}
+function vNotlar() {
+  const d = NF.draft;
+  const all = S.notebook || [];
+  const wk = weekKey(Date.now());
+  let list = all.filter(
+    (n) =>
+      (!NF.cat || n.cat === NF.cat) &&
+      (!NF.week || weekKey(n.date) === wk) &&
+      (!NF.q ||
+        low(n.text + " " + (n.abc ? n.abc.a + " " + n.abc.b + " " + n.abc.c : "")).includes(low(NF.q))),
+  );
+  list = list.filter((n) => n.pin).concat(list.filter((n) => !n.pin));
+  window._nlist = list;
+  const groups = {};
+  list.forEach((n) => {
+    const k = n.pin ? "📌 Sabitlenenler" : `${lessonNo(n.date)}. ders · ${fmtD(n.date)}`;
+    (groups[k] = groups[k] || []).push(n);
+  });
+  let h = `<section class="card nadd"><div class="row" style="justify-content:space-between"><h3 style="margin:0">📝 ${NF.edit ? "Notu düzenle" : "Yeni not"}</h3><span class="mut">${lessonNo(Date.now())}. ders · ${fmtS(Date.now())}</span></div>
+ <div class="ncats">${Object.entries(NCAT)
+   .map(
+     ([k, v]) =>
+       `<button class="${d.cat === k ? "on" : ""}" style="--c:${v.c}" onclick="NF.draft.cat='${k}';render()">${v.i} ${esc(v.n)}</button>`,
+   )
+   .join("")}</div>
+ <div class="nqs">${(NQUICK[d.cat] || []).map((q) => `<button onclick="nQuick('${Q(q)}')">+ ${esc(q)}</button>`).join("")}</div>
+ <div class="nta"><textarea id="nText" rows="4" placeholder="Bugün ne gözlemledin? (🎤 ile sesle de yazabilirsin)" oninput="NF.draft.text=this.value">${esc(d.text)}</textarea><button class="mic" id="micBtn" onclick="dictate()">🎤</button></div>
+ <label class="tg"><input type="checkbox" ${d.abc ? "checked" : ""} onchange="NF.draft.abc=this.checked?{a:'',b:'',c:''}:false;render()"> 🧩 ABC davranış kaydı (Öncül → Davranış → Sonuç)</label>
+ ${d.abc ? `<div class="abc"><div><b>A · Öncül</b><textarea rows="2" placeholder="Davranıştan hemen önce ne oldu?" oninput="NF.draft.abc.a=this.value">${esc(d.abc.a)}</textarea></div><div><b>B · Davranış</b><textarea rows="2" placeholder="Tam olarak ne yaptı?" oninput="NF.draft.abc.b=this.value">${esc(d.abc.b)}</textarea></div><div><b>C · Sonuç</b><textarea rows="2" placeholder="Sonra ne oldu, nasıl karşılık verdin?" oninput="NF.draft.abc.c=this.value">${esc(d.abc.c)}</textarea></div></div>` : ""}
+ <div class="nopts"><label class="tg"><input type="checkbox" ${d.veli ? "checked" : ""} onchange="NF.draft.veli=this.checked"> 👨‍👩‍👦 Veli raporunda göster</label><label class="tg"><input type="checkbox" ${d.pin ? "checked" : ""} onchange="NF.draft.pin=this.checked"> 📌 Sabitle</label><label class="btn ghost sm file">📷 ${d.photo ? "Fotoğraf ✓" : "Fotoğraf"}<input type="file" accept="image/*" onchange="notePhoto(this.files[0])"></label></div>
+ <div class="row"><button class="btn" style="flex:1" onclick="saveNote()">💾 ${NF.edit ? "Güncelle" : "Notu kaydet"}</button>${NF.edit ? '<button class="btn ghost" onclick="cancelEdit()">Vazgeç</button>' : ""}</div></section>`;
+  h += `<section class="card"><div class="row"><input placeholder="🔎 Notlarda ara…" value="${esc(NF.q)}" oninput="NF.q=this.value;clearTimeout(window._nq);window._nq=setTimeout(()=>{render();const i=document.querySelector('[data-nq]');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},250)" data-nq style="flex:1"></div><div class="ncats sm"><button class="${!NF.cat ? "on" : ""}" onclick="NF.cat='';render()">Tümü (${all.length})</button>${Object.entries(
+    NCAT,
+  )
+    .map(([k, v]) => {
+      const n = all.filter((x) => x.cat === k).length;
+      return n
+        ? `<button class="${NF.cat === k ? "on" : ""}" style="--c:${v.c}" onclick="NF.cat='${k}';render()">${v.i} ${n}</button>`
+        : "";
+    })
+    .join(
+      "",
+    )}<button class="${NF.week ? "on" : ""}" onclick="NF.week=!NF.week;render()">📅 Bu hafta</button></div>
+ <div class="grid2" style="margin-top:8px"><button class="btn ghost sm" onclick="aiNotes('ozet')">✨ Notları özetle</button><button class="btn ghost sm" onclick="aiNotes('abc')">✨ Davranış örüntüsü</button><button class="btn ghost sm" onclick="copyText(notesText(window._nlist))">📋 Kopyala</button><button class="btn ghost sm" onclick="shareTxt(whatsappBicim(notesText(window._nlist)))">📤 Paylaş</button></div></section>`;
+  h += Object.keys(groups).length
+    ? Object.entries(groups)
+        .map(([g, ns]) => `<div class="sub">${esc(g)}</div>${ns.map(noteCard).join("")}`)
+        .join("")
+    : '<section class="card"><p class="mut">Henüz not yok. Ders sırasında kısa gözlemlerini buraya yaz; haftalık raporda ve yapay zekâ önerilerinde kullanılır.</p></section>';
+  setTimeout(fillNotePhotos, 0);
+  return h;
+}
+function noteCard(n) {
+  const c = NCAT[n.cat] || NCAT.gozlem;
+  return `<div class="ncard" style="--c:${c.c}"><div class="nh"><span>${c.i} <b>${esc(c.n)}</b></span><small>${new Date(n.date).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}${n.veli ? " · 👨‍👩‍👦" : ""}${n.pin ? " · 📌" : ""}</small></div>${n.text ? `<p>${nl(esc(n.text))}</p>` : ""}${n.abc ? `<div class="abcv"><span><b>A</b>${esc(n.abc.a)}</span><span><b>B</b>${esc(n.abc.b)}</span><span><b>C</b>${esc(n.abc.c)}</span></div>` : ""}${n.photo ? `<img data-nphoto="${n.photo}" alt="">` : ""}<div class="nact"><button onclick="editNote('${n.id}')">✏️</button><button onclick="togNote('${n.id}','pin')">${n.pin ? "📌" : "📍"}</button><button onclick="togNote('${n.id}','veli')">${n.veli ? "👨‍👩‍👦" : "🙈"}</button><button onclick="delNote('${n.id}')">🗑️</button></div></div>`;
+}
+function nQuick(q) {
+  const t = $("#nText");
+  NF.draft.text = (NF.draft.text ? NF.draft.text.trim() + " " : "") + q + ".";
+  if (t) t.value = NF.draft.text;
+}
+async function notePhoto(f) {
+  if (!f) return;
+  const d = await shrinkImg(f, 900);
+  const id = uid();
+  await idbSet("nphoto:" + id, d);
+  NF.draft.photo = id;
+  render();
+}
+async function fillNotePhotos() {
+  for (const i of document.querySelectorAll("img[data-nphoto]")) {
+    try {
+      const d = await idbGet("nphoto:" + i.dataset.nphoto);
+      if (d) i.src = d;
+    } catch (e) {}
+  }
+}
+function saveNote() {
+  const d = NF.draft;
+  const t = ($("#nText") || {}).value;
+  if (t != null) d.text = t;
+  if (!d.text.trim() && !(d.abc && (d.abc.a || d.abc.b || d.abc.c)) && !d.photo) return toast("Not boş");
+  if (NF.edit) {
+    const n = (S.notebook || []).find((x) => x.id === NF.edit);
+    if (n)
+      Object.assign(n, {
+        cat: d.cat,
+        text: d.text.trim(),
+        abc: d.abc || null,
+        veli: d.veli,
+        pin: d.pin,
+        photo: d.photo,
+      });
+    save();
+  } else
+    addNote({
+      cat: d.cat,
+      text: d.text.trim(),
+      abc: d.abc || null,
+      veli: d.veli,
+      pin: d.pin,
+      photo: d.photo,
+    });
+  NF.draft = { cat: d.cat, text: "", abc: false, veli: false, pin: false, photo: null };
+  NF.edit = null;
+  render();
+  toast("📝 Not kaydedildi");
+}
+function editNote(id) {
+  const n = (S.notebook || []).find((x) => x.id === id);
+  if (!n) return;
+  NF.edit = id;
+  NF.draft = {
+    cat: n.cat,
+    text: n.text,
+    abc: n.abc ? Object.assign({}, n.abc) : false,
+    veli: !!n.veli,
+    pin: !!n.pin,
+    photo: n.photo || null,
+  };
+  render();
+  window.scrollTo(0, 0);
+}
+function cancelEdit() {
+  NF.edit = null;
+  NF.draft = { cat: "gozlem", text: "", abc: false, veli: false, pin: false, photo: null };
+  render();
+}
+function togNote(id, f) {
+  const n = (S.notebook || []).find((x) => x.id === id);
+  if (n) {
+    n[f] = !n[f];
+    save();
+    render();
+  }
+}
+function delNote(id) {
+  if (!confirm("Not silinsin mi?")) return;
+  S.notebook = (S.notebook || []).filter((x) => x.id !== id);
+  save();
+  render();
+}
+function notesText(list) {
+  return (list || S.notebook || [])
+    .map(
+      (n) =>
+        `${fmtS(n.date)} · ${(NCAT[n.cat] || {}).n || ""}\n${n.text || ""}${n.abc ? `\nÖncül: ${n.abc.a}\nDavranış: ${n.abc.b}\nSonuç: ${n.abc.c}` : ""}`,
+    )
+    .join("\n\n");
+}
+let REC_SR = null;
+function dictate() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return toast("Bu tarayıcı sesle yazmayı desteklemiyor — klavyedeki 🎤 tuşunu kullan");
+  if (REC_SR) {
+    REC_SR.stop();
+    return;
+  }
+  const r = new SR();
+  r.lang = "tr-TR";
+  r.interimResults = true;
+  r.continuous = true;
+  const t = $("#nText");
+  const base = t && t.value ? t.value.trim() + " " : "";
+  r.onresult = (e) => {
+    let s = "";
+    for (let i = 0; i < e.results.length; i++) s += e.results[i][0].transcript;
+    if (t) {
+      t.value = base + s;
+      NF.draft.text = t.value;
+    }
+  };
+  r.onend = () => {
+    REC_SR = null;
+    const b = $("#micBtn");
+    if (b) b.classList.remove("on");
+  };
+  r.onerror = (e) => toast("Ses tanıma: " + (e.error === "not-allowed" ? "mikrofon izni yok" : e.error));
+  REC_SR = r;
+  r.start();
+  const b = $("#micBtn");
+  if (b) b.classList.add("on");
+  toast("🎤 Dinliyorum… bitince tekrar dokun");
+}
+async function aiNotes(kind) {
+  const ns = (S.notebook || []).slice(0, 40);
+  if (!ns.length) return toast("Önce birkaç not ekle");
+  const body = notesText(kind === "abc" ? ns.filter((n) => n.abc || n.cat === "davranis") : ns);
+  if (!body.trim()) return toast("ABC/davranış notu yok");
+  const q =
+    kind === "abc"
+      ? "Aşağıdaki ABC (öncül-davranış-sonuç) ve davranış notlarında tekrar eden örüntüleri bul. Olası işlevini (kaçma, dikkat, nesne, duyusal) nazikçe değerlendir ve 3-5 somut olumlu davranış desteği önerisi yaz. Kesin tanı koyma.\n\nNOTLAR:\n" +
+        body
+      : "Aşağıdaki öğretmen notlarını özetle: güçlü yönler, ilerlemeler, dikkat edilecekler ve önümüzdeki dersler için 3 öneri. Kısa ve net yaz.\n\nNOTLAR:\n" +
+        body;
+  openAI();
+  setTimeout(() => askAI(q), 50);
+}
+/* rapor: veliyle paylaşılan notlar */
+const _weekInner7 = weekInner;
+weekInner = async function (wk, mode) {
+  let h = await _weekInner7(wk, mode);
+  const ns = (S.notebook || []).filter((n) => n.veli && weekKey(n.date) === wk);
+  if (!ns.length) return h;
+  let ph = "";
+  for (const n of ns) {
+    if (n.photo) {
+      try {
+        const d = await idbGet("nphoto:" + n.photo);
+        if (d) ph += `<figure><img src="${d}" alt="" style="aspect-ratio:4/3"></figure>`;
+      } catch (e) {}
+    }
+  }
+  const sec = `<div class="sec"><h2>📝 Öğretmen gözlemleri</h2>${ns.map((n) => `<p>${(NCAT[n.cat] || {}).i || "📝"} <b>${esc((NCAT[n.cat] || {}).n || "")}</b> — ${esc(n.text)}</p>`).join("")}${ph ? `<div class="gal">${ph}</div>` : ""}</div>`;
+  const k = h.indexOf('<div class="sec hm">');
+  return k >= 0 ? h.slice(0, k) + sec + h.slice(k) : h;
+};
+const _durumAI = ctx;
+
+/* ================== v7: AYARLAR (yeniden düzenlendi) ================== */
+let ayarTab = "profil";
+vAyar = function () {
+  const s = S.settings;
+  const f = (k, l, ph) =>
+    `<label>${l}</label><input value="${esc(s[k] || "")}" placeholder="${esc(ph || "")}" oninput="S.settings.${k}=this.value;save()">`;
+  const tabs = [
+    ["profil", "👤", "Profil"],
+    ["ai", "🤖", "Yapay Zekâ"],
+    ["cihaz", "📺", "Cihazlar"],
+    ["ekran", "🧩", "Ekran"],
+    ["yedek", "💾", "Yedek"],
+    ["hakkinda", "ℹ️", "Sürüm"],
+  ];
+  let h = `<div class="atabs">${tabs.map((t) => `<button class="${ayarTab === t[0] ? "on" : ""}" onclick="ayarTab='${t[0]}';render()"><span>${t[1]}</span>${t[2]}</button>`).join("")}</div>`;
+  if (ayarTab === "profil")
+    h +=
+      `<section class="card"><div class="photo">${avatarHTML(72)}<div><b style="font-size:18px">${esc(s.student)}</b><div class="mut">${hmode() ? "📕 Basara hece yöntemi" : "🔤 Ses temelli"} · ${activeSounds().length} hedef ses</div></div></div><button class="btn big" onclick="openProfile()">🎯 Profil, fotoğraf, hece tablosu, hedefler</button></section><section class="card"><h3>👥 Kişiler</h3>${f("student", "Öğrenci")}${f("parent", "Veli")}${f("teacher", "Öğretmen")}</section><section class="card"><h3>🎬 Yöntem notları</h3><p class="mut">Kullandığın yöntemi yaz; yapay zekâ önerilerinde dikkate alınır.</p><textarea rows="4" oninput="S.settings.method=this.value;save()">${esc(s.method || "")}</textarea></section>` +
+      payCard();
+  if (ayarTab === "ai") {
+    const keys = orderedKeys();
+    const okN = keys.filter((k) => keyState(k) === "ok").length;
+    const st = !keys.length
+      ? ["⚪", "Anahtar yok", "Yapay zekâ özellikleri için ücretsiz Gemini anahtarı ekle."]
+      : okN
+        ? [
+            "✅",
+            "Bağlı",
+            `${okN}/${keys.length} anahtar çalışıyor · model: ${(ZA.models || MODEL_ONCELIK)[0]}`,
+          ]
+        : aiReady()
+          ? ["🔵", "Hazır", "Anahtarlar kayıtlı; ilk kullanımda ya da “Test et” ile doğrulanır."]
+          : [
+              "🟠",
+              "Kota dolu",
+              "Tüm anahtarların kotası dolmuş görünüyor; yarın sıfırlanır ya da yeni anahtar ekle.",
+            ];
+    h += `<section class="card aistat"><div class="ais">${st[0]}</div><div><b>${st[1]}</b><span>${esc(st[2])}</span></div><button class="btn sm" onclick="testAllKeys()">⚡ Test et + sırala</button></section>
+  <section class="card"><h3>🔑 API anahtarları (${keys.length})</h3><p class="mut">Birden çok anahtar ekleyebilirsin; kotası dolan otomatik en sona, çalışan en öne alınır.</p><div class="klist">${
+    keys
+      .map((k) => {
+        const x = KST[keyState(k)];
+        return `<div class="krow"><span title="${x[1]}">${x[0]}</span><code>${esc(maskKey(k))}</code><small>${x[1]}</small><button onclick="delKey('${k}')">✕</button></div>`;
+      })
+      .join("") || '<p class="mut">Henüz anahtar yok.</p>'
+  }</div>
+  <div class="row" style="margin-top:8px"><input id="newKey" placeholder="AIza… (birden çok da yapıştırabilirsin)" style="flex:1"><button class="btn" onclick="addKeyInput()">Ekle</button></div><div class="grid3" style="margin-top:6px"><button class="btn ghost sm" onclick="pasteKeys()">📥 Panodan yapıştır</button><button class="btn ghost sm" onclick="copyKeys()">📋 Tümünü kopyala</button><button class="btn ghost sm" onclick="ensureModels(true).then(m=>{toast('Modeller: '+m.slice(0,3).join(', '));render()})">🔄 Modelleri bul</button></div>
+  <label>Model</label><select onchange="S.settings.model=this.value;save()"><option value="otomatik">Otomatik (en iyisini seç)</option>${(ZA.models || MODEL_ONCELIK).map((m) => `<option ${s.model === m ? "selected" : ""}>${m}</option>`).join("")}</select></section>
+  <section class="card"><h3>📘 Ücretsiz anahtar nasıl alınır?</h3><ol class="steps"><li>Google hesabınla <b>aistudio.google.com/apikey</b> adresine gir.</li><li><b>“Create API key”</b> düğmesine bas.</li><li>Çıkan <b>AIza…</b> ile başlayan anahtarı kopyala.</li><li>Buraya dön, <b>📥 Panodan yapıştır</b>'a bas.</li><li><b>⚡ Test et</b> — yeşil 🟢 görünce hazırsın.</li></ol><a class="btn ok" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">🔗 Ücretsiz anahtar al</a><p class="mut" style="margin-top:8px">Ücretsiz anahtarın günlük bir kotası vardır. Birden çok anahtar eklersen biri dolunca sıradakine geçilir.</p></section>
+  <section class="card"><h3>✨ Yapay zekâ ne yapıyor?</h3><ul class="steps"><li>✨ sağ alttaki asistan: ders planı, veli mesajı, ev ödevi, odak önerisi</li><li>📝 Notlar: not özeti ve davranış örüntüsü</li><li>📨 Veli: haftalık değerlendirme mektubu</li><li>📚 Hikâyeler: öğrendiği hecelerle yeni hikâye + 5N1K</li><li>📘 Kitap: PDF'ten ünite ve etkinlik çıkarma</li></ul><label class="tg"><input type="checkbox" ${s.hideAiFab ? "" : "checked"} onchange="S.settings.hideAiFab=!this.checked;save();aiFab()"> ✨ Asistan düğmesini göster</label><button class="btn ghost" style="margin-top:8px" onclick="openAI()">✨ Asistanı aç</button></section>`;
+  }
+  if (ayarTab === "cihaz")
+    h += `<section class="card"><h3>📺 Tahta ve telefon</h3><p class="mut">Sistemi tahtada aç → <b>📺 Bu cihaz tahta</b>. Telefonda <b>📱 Bu cihaz kumanda</b> ya da QR'ı okut. Kitaplar, fotoğraflar, kayıtlar ve dersler parça parça aktarılır; ilerleme ekranın üstünde görünür. Bağlantı kodu: <b>${esc(pairCode())}</b></p><div class="grid2"><button class="btn ok" onclick="boardMode()">📺 Bu cihaz tahta</button><button class="btn ghost" onclick="askRemote()">📱 Bu cihaz kumanda</button></div></section><section class="card"><h3>🛟 Bağlantı olmazsa</h3><ol class="steps"><li><b>Kitap › 📤 Dosyayı paylaş</b> ile PDF'i WhatsApp'tan kendine gönder; tahtada WhatsApp Web'den indirip <b>➕ PDF</b> ile yükle.</li><li>Ya da <b>Yedek › 📦 Kitaplarla birlikte yedek</b> dosyasını tahtada aç.</li></ol></section>`;
+  if (ayarTab === "ekran")
+    h += `<section class="card"><h3>🧩 Çocuk ekranı ve tahta</h3><label class="tg"><input type="checkbox" ${s.sound ? "checked" : ""} onchange="S.settings.sound=this.checked;save()"> 🔊 Sesli yönergeler</label><label class="tg"><input type="checkbox" ${s.calm ? "checked" : ""} onchange="S.settings.calm=this.checked;save()"> 🌙 Sakin mod (hareketli animasyon yok)</label><label class="tg"><input type="checkbox" ${s.penOnly ? "checked" : ""} onchange="S.settings.penOnly=this.checked;save()"> ✏️ Yazı tahtasında sadece kalem (iPad)</label><label>Konuşma hızı</label><input type="range" min="0.6" max="1.1" step="0.05" value="${s.rate || 0.85}" onchange="S.settings.rate=+this.value;save();say('Merhaba '+S.settings.student)"><label>Ders günü</label><select onchange="S.settings.dow=+this.value;save()">${["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"].map((d, i) => `<option value="${i}" ${s.dow === i ? "selected" : ""}>Her ${d}</option>`).join("")}</select></section>`;
+  if (ayarTab === "yedek")
+    h += `<section class="card"><h3>💾 Yedek ve aktarma</h3><p class="mut">“Kitaplarla birlikte” dosyasını başka cihazda <b>📥 Yedek yükle</b> ile açınca her şey aynen gelir.</p><div class="grid2"><button class="btn" onclick="exportData(true)">📦 Kitaplarla birlikte</button><button class="btn ghost" onclick="exportData()">📤 Kitapsız yedek</button></div><label class="btn ghost file" style="width:100%;margin-top:6px">📥 Yedek yükle<input type="file" accept=".json,application/json" onchange="importData(this.files[0])"></label></section><section class="card"><h3>⚠️ Tehlikeli bölge</h3><button class="btn danger" onclick="resetAll()">Tüm verileri sil</button></section>`;
+  if (ayarTab === "hakkinda")
+    h += `<section class="card"><div class="verbox"><b>Sürüm ${APP_VER}</b><span>${APP_DATE}</span><span>${APP_LINES.toLocaleString("tr-TR")} satır kod · ${APP_KB} KB</span></div>${CHANGELOG.map((c) => `<div class="it"><span class="ic">🏷️</span><div><b>Sürüm ${c[0]}</b><small>${c[1]} — ${esc(c[2])}</small></div></div>`).join("")}</section>`;
+  return h;
+};
+const _render7 = render;
+render = function () {
+  _render7();
+  aiFab();
+};
+const _closeBoard7 = closeBoard;
+closeBoard = function () {
+  _closeBoard7();
+  aiFab();
+};
+const _ms7 = mergeState;
+mergeState = function (R) {
+  const mine = S.notebook;
+  _ms7(R);
+  S.notebook = unionBy(
+    mine,
+    R.notebook,
+    (x) => x.id,
+    (a, b) => ((a.text || "").length >= (b.text || "").length ? a : b),
+  ).sort((a, b) => new Date(b.date) - new Date(a.date));
+  save();
 };
 
 /* ================== BAŞLAT ================== */
