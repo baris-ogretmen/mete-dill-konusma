@@ -318,6 +318,14 @@ details.card summary{cursor:pointer;list-style:none;padding:2px 0}details.card s
 .ver{text-align:center;color:var(--mut);font-size:12px;margin:16px 0 4px}
 .verbox{display:flex;flex-direction:column;gap:2px;background:linear-gradient(135deg,#eef2ff,#fdf4ff);border-radius:14px;padding:14px;margin-bottom:8px}.verbox b{font-size:22px;color:var(--pri)}.verbox span{color:var(--mut);font-size:14px}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}.cgrid>div{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}.cgrid img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f1f5f9}.cgrid b{display:block;font-size:13px;padding:4px 6px;cursor:pointer}.cgrid span{display:flex}.cgrid span button{flex:1;border:0;background:#f8fafc;padding:6px}
+
+/* ===== v6 ===== */
+#xfer{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top));transform:translateX(-50%);z-index:400;background:#1e293b;color:#fff;font-weight:700;font-size:14px;padding:10px 16px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.htab{display:flex;flex-direction:column;gap:3px;max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:6px}
+.hrow{display:grid;grid-template-columns:24px repeat(8,1fr);gap:3px;align-items:center}.hrow b{font-size:13px;color:var(--mut);text-align:center}
+.hrow button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 0;font-weight:800;font-size:14px;color:#94a3b8;font-family:"Baloo 2",Nunito,sans-serif}.hrow button.on{background:#22c55e;border-color:#22c55e;color:#fff}
+.hchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hchips span{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-weight:800;border-radius:10px;padding:6px 10px;font-family:"Baloo 2",Nunito,sans-serif;font-size:18px}
+.sandbar{background:#fff7e6}
 </style>
 </head>
 <body>
@@ -566,7 +574,7 @@ const DEF = {
     sounds: {},
     processes: [],
     goals: [],
-    letters: ["e", "l", "a", "k", "i", "n"],
+    letters: ["a", "n", "e", "t", "i", "l"],
     mathMax: 10,
   },
   cfg: { s: "", lvl: "kelime", pos: "karisik" },
@@ -7714,11 +7722,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "5.0",
+const APP_VER = "6.0",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 9234,
-  APP_KB = 728;
+  APP_LINES = 9988,
+  APP_KB = 754;
 const CHANGELOG = [
+  [
+    "6.0",
+    "10 Ekim 2026",
+    "Telefon→tahta kitap aktarımı yeniden yazıldı (parça parça, ilerlemeli, farklı ağlarda da), profil fotoğrafı eşitleme, Basara hece yöntemi ve hece tablosu, yeni ses grupları (ANETİL), kum havuzu: kumda harf, hece, çizgi ve rakam, kitabı dosya olarak paylaşma",
+  ],
   [
     "5.0",
     "10 Ekim 2026",
@@ -9213,6 +9226,747 @@ mergeState = function (R) {
   S.road = Object.assign({}, R.road || {}, k.road || {});
   S.pay = Object.assign({}, R.pay || {}, k.pay || {});
   save();
+};
+
+/* ================== v6: GÜVENİLİR AKTARIM (parça parça, ilerlemeli) ================== */
+const ICE = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:global.stun.twilio.com:3478" },
+  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+  {
+    urls: "turn:openrelay.metered.ca:443?transport=tcp",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+];
+const _loadJs6 = loadJs;
+loadJs = async function (src) {
+  await _loadJs6(src);
+  if (src === PEERJS && window.Peer && !window.Peer.__ice) {
+    const P0 = window.Peer;
+    class P extends P0 {
+      constructor(a, b) {
+        if (a && typeof a === "object") {
+          b = a;
+          a = undefined;
+        }
+        b = Object.assign({}, b || {});
+        b.config = Object.assign({ iceServers: ICE }, b.config || {});
+        if (a === undefined) super(b);
+        else super(a, b);
+      }
+    }
+    P.__ice = 1;
+    window.Peer = P;
+  }
+};
+const CH = 15000;
+const XF = { in: {}, out: { total: 0, done: 0, name: "" } };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function keyName(k) {
+  k = String(k);
+  if (k.startsWith("book:")) {
+    const b = S.books.find((x) => x.key === k);
+    return "📕 " + (b ? b.name : "kitap");
+  }
+  if (k.startsWith("rec:")) return "🎙️ ses kaydı";
+  if (k.startsWith("work:")) return "✍️ yazı";
+  if (k.startsWith("card:")) return "🖼️ görsel";
+  if (k.startsWith("photo:")) return "📸 fotoğraf";
+  if (k.startsWith("ann:")) return "✍️ sayfa notu";
+  return k;
+}
+const keyPri = (k) => (/^book:|^pdf$/.test(k) ? 3 : /^rec:|^photo:/.test(k) ? 2 : 1);
+async function encodeVal(v) {
+  if (v instanceof Blob) return { kind: "blob", type: v.type, buf: new Uint8Array(await v.arrayBuffer()) };
+  if (v instanceof ArrayBuffer) return { kind: "ab", buf: new Uint8Array(v) };
+  if (ArrayBuffer.isView(v)) return { kind: "ab", buf: new Uint8Array(v.buffer.slice(0)) };
+  return { kind: "json", buf: new TextEncoder().encode(JSON.stringify(v)) };
+}
+function decodeVal(kind, type, u8) {
+  if (kind === "blob") return new Blob([u8], { type: type || "" });
+  if (kind === "ab") return u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength);
+  return JSON.parse(new TextDecoder().decode(u8));
+}
+async function waitBuf(c) {
+  const dc = c && (c.dataChannel || c._dc);
+  let g = 0;
+  while (dc && dc.bufferedAmount > 1000000 && g++ < 600) await sleep(40);
+}
+onNeed = async function (keys) {
+  const c = RM.conn;
+  if (!c) return;
+  keys = keys.slice().sort((a, b) => keyPri(a) - keyPri(b));
+  XF.out = { total: keys.length, done: 0, name: "" };
+  for (const k of keys) {
+    if (!c.open) return;
+    let v;
+    try {
+      v = await idbGet(k);
+    } catch (e) {}
+    if (v == null) {
+      c.send({ t: "fe", k, skip: 1 });
+      continue;
+    }
+    const e = await encodeVal(v);
+    const n = Math.max(1, Math.ceil(e.buf.length / CH));
+    XF.out.name = keyName(k);
+    c.send({ t: "fh", k, kind: e.kind, type: e.type || "", size: e.buf.length, n });
+    for (let i = 0; i < n; i++) {
+      if (!c.open) return;
+      await waitBuf(c);
+      c.send({ t: "fc", k, i, d: e.buf.slice(i * CH, (i + 1) * CH) });
+      if (i % 20 === 0) {
+        xfUI(`📤 ${XF.out.name} gönderiliyor %${Math.round((100 * i) / n)}`);
+        await sleep(0);
+      }
+    }
+    c.send({ t: "fe", k });
+    XF.out.done++;
+    xfUI(`📤 ${XF.out.done}/${XF.out.total} gönderildi`);
+  }
+  xfUI(keys.length ? "✅ Gönderim tamam" : "");
+  setTimeout(() => xfUI(""), 2500);
+};
+async function onFile(d) {
+  const X = XF.in;
+  if (d.t === "fh") {
+    X[d.k] = { kind: d.kind, type: d.type, n: d.n, size: d.size, parts: new Array(d.n), got: 0 };
+    xfUI(`📥 ${keyName(d.k)} alınıyor %0`);
+    return;
+  }
+  if (d.t === "fc") {
+    const f = X[d.k];
+    if (!f) return;
+    let u = d.d;
+    if (u instanceof ArrayBuffer) u = new Uint8Array(u);
+    else if (!(u instanceof Uint8Array)) u = new Uint8Array(u.buffer || u);
+    if (!f.parts[d.i]) {
+      f.parts[d.i] = u;
+      f.got++;
+    }
+    if (f.got % 20 === 0) xfUI(`📥 ${keyName(d.k)} %${Math.round((100 * f.got) / f.n)}`);
+    return;
+  }
+  if (d.t === "fe") {
+    const f = X[d.k];
+    delete X[d.k];
+    RM.recv++;
+    if (d.skip || !f) return;
+    if (f.got < f.n) {
+      xfUI("⚠️ Eksik geldi, tekrar istenecek: " + keyName(d.k));
+      return;
+    }
+    const u = new Uint8Array(f.size);
+    let o = 0;
+    f.parts.forEach((p) => {
+      u.set(p, o);
+      o += p.length;
+    });
+    try {
+      await idbSet(d.k, decodeVal(f.kind, f.type, u));
+    } catch (e) {
+      xfUI("⚠️ Kaydedilemedi: " + e.message);
+      return;
+    }
+    if (String(d.k).startsWith("book:")) for (const kk in PDFS) delete PDFS[kk];
+    if (String(d.k).startsWith("card:")) delete CARDIMG[String(d.k).slice(5)];
+    xfUI(`📥 ${RM.recv}/${RM.need} alındı · ${keyName(d.k)} ✅`);
+    if (RM.recv >= RM.need) {
+      xfUI("✅ Kitaplar ve tüm veriler geldi");
+      setTimeout(() => xfUI(""), 3000);
+      if (!child && !B.on) render();
+    }
+  }
+}
+const _rmData6 = rmData;
+rmData = function (d) {
+  if (d && (d.t === "fh" || d.t === "fc" || d.t === "fe")) return onFile(d);
+  if (d && d.t === "blob") return;
+  return _rmData6(d);
+};
+function xfUI(t) {
+  let el = $("#xfer");
+  if (!t) {
+    if (el) el.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "xfer";
+    document.body.appendChild(el);
+  }
+  el.textContent = t;
+  const n = $("#rmNote");
+  if (n) n.textContent = t;
+}
+/* Profil fotoğrafı: en son ekleneni her iki cihazda da kullan */
+const _setPhoto6 = setPhoto;
+setPhoto = async function (f) {
+  await _setPhoto6(f);
+  S.settings.photoT = Date.now();
+  save();
+};
+const _ms6 = mergeState;
+mergeState = function (R) {
+  const mine = { p: S.settings.photo, t: S.settings.photoT || 0 };
+  _ms6(R);
+  const rp = R.settings && R.settings.photo,
+    rt = (R.settings && R.settings.photoT) || 0;
+  if (rp && (!mine.p || rt > mine.t)) {
+    S.settings.photo = rp;
+    S.settings.photoT = rt;
+  } else if (mine.p) {
+    S.settings.photo = mine.p;
+    S.settings.photoT = mine.t;
+  }
+  S.settings.readMode = S.settings.readMode;
+  save();
+  if (!child && !B.on) render();
+};
+/* Kitabı dosya olarak paylaş (her durumda çalışan yol) */
+async function shareBook(id) {
+  const b = bookOf(id);
+  if (!b) return;
+  busy("Hazırlanıyor…");
+  try {
+    const v = await idbGet(b.key);
+    if (!v) throw new Error("Kitap bu cihazda yok");
+    let blob;
+    if (b.type === "pdf") blob = new Blob([v], { type: "application/pdf" });
+    else {
+      blob = new Blob([JSON.stringify({ state: { sessions: [], books: [b] }, media: { [b.key]: v } })], {
+        type: "application/json",
+      });
+    }
+    busy(false);
+    offerShare(blob, fn(b.name) + (b.type === "pdf" ? ".pdf" : "_kitap.json"), blob.type);
+  } catch (e) {
+    busy(false);
+    toast(e.message);
+  }
+}
+
+/* ================== v6: OKUMA YÖNTEMİ (Basara hece yöntemi + yeni ses grupları ANETİL) ================== */
+LGROUPS.splice(
+  0,
+  LGROUPS.length,
+  ["a", "n", "e", "t", "i", "l"],
+  ["o", "k", "u", "r", "ı", "m"],
+  ["ü", "s", "ö", "y", "d", "z"],
+  ["ç", "b", "g", "c", "ş"],
+  ["p", "h", "v", "ğ", "f", "j"],
+);
+ALLL.splice(0, ALLL.length, ...LGROUPS.flat());
+const HV = ["a", "e", "ı", "i", "o", "ö", "u", "ü"];
+const HC = [
+  "b",
+  "s",
+  "r",
+  "k",
+  "l",
+  "m",
+  "n",
+  "t",
+  "d",
+  "y",
+  "z",
+  "ç",
+  "c",
+  "g",
+  "ş",
+  "p",
+  "h",
+  "v",
+  "f",
+  "j",
+];
+const hmode = () => (S.settings.readMode || "hece") === "hece";
+function learnedSyl() {
+  const h = S.profile.hece && S.profile.hece.length ? S.profile.hece : ["ba", "a", "o"];
+  return h;
+}
+const _learned6 = learned;
+learned = function () {
+  if (!hmode()) return _learned6();
+  const set = new Set();
+  learnedSyl().forEach((s) => [...s].forEach((c) => set.add(c)));
+  return ALLL.filter((l) => set.has(l));
+};
+const EXTRA_HECE =
+  "👨baba 🧥aba ⛺oba 🚗araba 🐝arı 💛sarı 🪑masa 🗃️kasa 👩ana 👴dede 👵nine 🧢bere 🍳tava 💧su 🛶sal 🍯bal 🏰kale 🌷lale 🌿nane 🐱kedi 📦kutu 👶bebek 🦷diş 🐟balık 🍋limon 🍎elma 🥚yumurta 🍉karpuz 🐄inek 🧸ayı 🍌muz 🥕havuç 🐸kurbağa 🎈balon ⚽top 🏠ev 🦁aslan 🐻ayı 🐠balık 🍓çilek 🌞güneş";
+EXTRA_HECE.split(/\s+/).forEach((t) => {
+  const m = t.match(/^(\P{L}+)(\p{L}+)$/u);
+  if (m && !TRW.some((x) => x.w === m[2])) TRW.push({ e: m[1], w: m[2] });
+});
+const _readable6 = readable;
+readable = function () {
+  if (!hmode()) return _readable6();
+  const H = new Set(learnedSyl().map(low));
+  return TRW.filter((x) => heceOf(x.w).every((h) => H.has(low(h))));
+};
+const _sentR6 = sentReadable;
+sentReadable = function (s) {
+  if (!hmode()) return _sentR6(s);
+  const H = new Set(learnedSyl().map(low));
+  return low(s)
+    .replace(/[^\p{L}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((w) => heceOf(w).every((h) => H.has(low(h))));
+};
+TOP.tr_hece.gen = ((g0) => () => {
+  if (!hmode()) return g0();
+  const L = learnedSyl();
+  const t = L[ri(L.length)];
+  const opts = shuffle([
+    t,
+    ...pickN(
+      L.filter((x) => x !== t),
+      2,
+    ),
+  ]);
+  while (opts.length < 3) {
+    const c = HC[ri(6)] + HV[ri(4)];
+    if (!opts.includes(c)) opts.push(c);
+  }
+  return {
+    say: `${t}. Hangisi ${t}?`,
+    show: big("👂"),
+    opts: shuffle(opts).map((h) => T(`<span class="qletter">${esc(h)}</span>`, h === t, h)),
+    after: `Evet, ${t}!`,
+  };
+})(TOP.tr_hece.gen);
+pickWords = function () {
+  const R = readable();
+  const syl = hmode()
+    ? learnedSyl()
+    : (() => {
+        const L = learned();
+        const V = L.filter((c) => VOW.includes(c)),
+          C = L.filter((c) => !VOW.includes(c));
+        const o = [];
+        C.forEach((c) => V.forEach((v) => o.push(c + v)));
+        return o;
+      })();
+  pickerModal(
+    "🧩 Hece ve kelime seç",
+    `<div class="pkh">Öğrendiği heceler</div>${syl
+      .slice(0, 60)
+      .map(
+        (s) =>
+          `<button class="pk" onclick='doPick(${JSON.stringify(JSON.stringify({ t: "text", text: s, kind: "hece" }))})'>${esc(s)}</button>`,
+      )
+      .join(
+        "",
+      )}<div class="pkh">Okuyabildiği kelimeler ${R.length ? "" : "(henüz yok — genel liste)"}</div>${(R.length
+      ? R
+      : TRW.slice(0, 24)
+    )
+      .slice(0, 40)
+      .map(
+        (x) =>
+          `<button class="pk wide" onclick='doPick(${JSON.stringify(JSON.stringify({ t: "text", text: x.w, e: x.e, kind: "kelime" }))})'>${x.e} ${esc(x.w)}</button>`,
+      )
+      .join(
+        "",
+      )}<div class="pkh">Kendi kelimen</div><div class="row"><input id="pkw" placeholder="ör. baba" style="flex:1"><button class="btn" onclick="const v=$('#pkw').value.trim();if(v)doPick({t:'text',text:v,kind:'kelime'})">Yaz</button></div>`,
+  );
+};
+function heceTable() {
+  const H = new Set(learnedSyl());
+  return `<div class="htab"><div class="hrow"><b></b>${HV.map((v) => `<button class="${H.has(v) ? "on" : ""}" onclick="togHece('${v}')">${v}</button>`).join("")}</div>${HC.map(
+    (c) =>
+      `<div class="hrow"><b>${c}</b>${HV.map((v) => {
+        const s = c + v;
+        return `<button class="${H.has(s) ? "on" : ""}" onclick="togHece('${s}')">${s}</button>`;
+      }).join("")}</div>`,
+  ).join("")}</div><label>Kapalı / ek heceler (virgülle: bal, sar, kar…)</label><input value="${esc(
+    learnedSyl()
+      .filter((s) => !(HV.includes(s) || (s.length === 2 && HC.includes(s[0]) && HV.includes(s[1]))))
+      .join(", "),
+  )}" onchange="setExtraHece(this.value)">`;
+}
+function togHece(s) {
+  const a = learnedSyl().slice();
+  const i = a.indexOf(s);
+  if (i >= 0) a.splice(i, 1);
+  else a.push(s);
+  S.profile.hece = a;
+  save();
+  openProfile();
+}
+function setExtraHece(v) {
+  const base = learnedSyl().filter(
+    (s) => HV.includes(s) || (s.length === 2 && HC.includes(s[0]) && HV.includes(s[1])),
+  );
+  const ex = v
+    .split(/[,\s]+/)
+    .map(low)
+    .filter(Boolean);
+  S.profile.hece = [...new Set(base.concat(ex))];
+  save();
+  openProfile();
+}
+function setMode(m) {
+  S.settings.readMode = m;
+  save();
+  openProfile();
+}
+const _lettersEdit6 = lettersEdit;
+lettersEdit = function () {
+  const h = hmode();
+  return `<div class="seg" style="margin-bottom:8px"><button class="${h ? "on" : ""}" onclick="setMode('hece')">📕 Hece yöntemi (Basara)</button><button class="${h ? "" : "on"}" onclick="setMode('ses')">🔤 Ses temelli (ANETİL)</button></div>${h ? `<p class="mut">Kitapta öğrettiğin heceleri işaretle (ba, sa, ra…). Okuma oyunları, dikte ve hikâyeler yalnızca bu hecelerle kurulan kelimeleri kullanır.</p>${heceTable()}` : _lettersEdit6()}<style>.mbox .row:has(button[onclick^="setGroups"]){display:${h ? "none" : "flex"}}</style>`;
+};
+const _lettersCard6 = lettersCard;
+lettersCard = function () {
+  if (!hmode()) return _lettersCard6();
+  const L = learnedSyl();
+  const R = readable();
+  return `<section class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">📕 Hece yolculuğu (Basara)</h3><button class="btn ghost sm" onclick="openProfile()">✏️</button></div><p class="mut">${L.length} hece · okuyabildiği ${R.length} kelime</p><div class="hchips">${L.map((s) => `<span>${esc(s)}</span>`).join("")}</div>${
+    R.length
+      ? `<p class="mut" style="margin-top:8px">Okuyabildikleri: ${R.slice(0, 14)
+          .map((x) => x.e + " " + esc(x.w))
+          .join(" · ")}</p>`
+      : ""
+  }</section>`;
+};
+const _lettersRep6 = lettersRep;
+lettersRep = function () {
+  if (!hmode()) return _lettersRep6();
+  const L = learnedSyl();
+  const R = readable();
+  return `<div class="sec"><h2>📕 Hece yolculuğu · ${L.length} hece</h2><div class="lg2">${L.map((s) => `<span class="on" style="width:auto;padding:0 10px">${esc(s)}</span>`).join("")}</div><p class="m" style="margin-top:6px">Basara hece yöntemiyle ilerliyoruz. Bu hecelerle okuyabildiği kelimeler: ${
+    R.slice(0, 16)
+      .map((x) => x.e + " " + esc(x.w))
+      .join(", ") || "—"
+  }</p></div>`;
+};
+const _roadState6 = roadState;
+roadState = function () {
+  ROAD[1].n = hmode() ? "Heceler (Basara)" : "Sesler ve harfler";
+  ROAD[1].items = hmode()
+    ? [
+        ["r2h1", "İlk 10 hece", "H:10"],
+        ["r2h2", "25 hece", "H:25"],
+        ["r2h3", "50 hece", "H:50"],
+        ["r2h4", "90 hece", "H:90"],
+        ["r2h5", "Tüm açık heceler", "H:150"],
+      ]
+    : LGROUPS.map((g, i) => ["r2" + "abcde"[i], `${i + 1}. grup: ${g.join(" ")}`, "L:" + (i + 1)]);
+  return _roadState6();
+};
+const _roadItem6 = roadItem;
+roadItem = function (it, st) {
+  if (String(it[2]).startsWith("H:")) {
+    const man = (S.road || {})[it[0]];
+    if (man === true) return ["⭐", "tamam"];
+    if (man === false) return ["⚪", "yok"];
+    const need = +it[2].slice(2),
+      n = learnedSyl().length;
+    return n >= need ? ["⭐", "tamam"] : n > 0 ? ["🟡", "devam"] : ["⚪", "yok"];
+  }
+  return _roadItem6(it, st);
+};
+const _ctx6 = ctx;
+ctx = function () {
+  const s = _ctx6();
+  return hmode()
+    ? s.replace(
+        /okuma-yazmaya ses temelli cümle yöntemiyle başlıyor \(öğrendiği harfler: [^)]*\)/,
+        `okuma-yazmayı Basara hece yöntemiyle öğreniyor (öğrendiği heceler: ${learnedSyl().join(", ")})`,
+      )
+    : s;
+};
+
+/* ================== v6: KUM HAVUZU (kumda harf ve çizgi) ================== */
+function makeSand(spec) {
+  const W = 1600,
+    H = 1000;
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  const gr = g.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, 900);
+  gr.addColorStop(0, "#f1dcae");
+  gr.addColorStop(1, "#d9b97c");
+  g.fillStyle = gr;
+  g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 70000; i++) {
+    const x = Math.random() * W,
+      y = Math.random() * H,
+      r = Math.random();
+    g.fillStyle =
+      r < 0.5 ? `rgba(150,110,55,${Math.random() * 0.25})` : `rgba(255,248,225,${Math.random() * 0.35})`;
+    g.fillRect(x, y, 1.6, 1.6);
+  }
+  g.strokeStyle = "rgba(120,85,40,.10)";
+  g.lineWidth = 14;
+  g.strokeRect(7, 7, W - 14, H - 14);
+  if (spec && spec.t !== "blank") {
+    const tmp = document.createElement("canvas");
+    tmp.width = W;
+    tmp.height = H;
+    const t = tmp.getContext("2d");
+    if (spec.t === "pattern") {
+      const R = [{ hi: H * 0.25, base: H * 0.62 }];
+      t.strokeStyle = "rgba(110,75,35,.30)";
+      t.lineWidth = 10;
+      t.setLineDash([2, 18]);
+      t.lineCap = "round";
+      const r = R[0];
+      const w = (r.base - r.hi) * 0.8;
+      for (let x = 120; x + w < W - 100; x += w * 1.15) patPath(t, spec.p, x, r.hi, r.base, w);
+    } else {
+      const txt = String(spec.text);
+      t.font = `bold ${Math.round(H * 0.62)}px ${GFONT}`;
+      t.textAlign = "center";
+      t.textBaseline = "middle";
+      t.setLineDash([3, 22]);
+      t.lineWidth = 14;
+      t.lineCap = "round";
+      t.strokeStyle = "rgba(110,75,35,.32)";
+      t.strokeText(txt, W / 2, H * 0.52);
+    }
+    g.drawImage(tmp, 0, 0);
+  }
+  if (spec && spec.e) {
+    g.font = '110px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    g.textBaseline = "top";
+    g.fillText(spec.e, 40, 30);
+  }
+  return c.toDataURL("image/jpeg", 0.88);
+}
+const _drawStroke6 = drawStroke;
+drawStroke = function (g, s, W, H) {
+  if (s.m !== "sand") return _drawStroke6(g, s, W, H);
+  const p = s.pts;
+  if (!p.length) return;
+  const w = Math.max(10, s.w * W * 3.2);
+  const path = (dx, dy) => {
+    g.beginPath();
+    g.moveTo(p[0][0] * W + dx, p[0][1] * H + dy);
+    if (p.length === 1) g.lineTo(p[0][0] * W + dx + 0.1, p[0][1] * H + dy);
+    for (let i = 1; i < p.length; i++) g.lineTo(p[i][0] * W + dx, p[i][1] * H + dy);
+    g.stroke();
+  };
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  g.globalCompositeOperation = "source-over";
+  g.globalAlpha = 1;
+  g.strokeStyle = "rgba(255,246,222,.75)";
+  g.lineWidth = w * 1.18;
+  path(-w * 0.12, -w * 0.12);
+  g.strokeStyle = "rgba(112,78,36,.55)";
+  g.lineWidth = w;
+  path(w * 0.06, w * 0.08);
+  g.strokeStyle = "rgba(160,118,62,.95)";
+  g.lineWidth = w * 0.72;
+  path(0, 0);
+  g.strokeStyle = "rgba(130,92,45,.5)";
+  g.lineWidth = w * 0.25;
+  path(w * 0.05, w * 0.05);
+};
+const _openBoard6 = openBoard;
+openBoard = function (o) {
+  B.sand = !!o.sand;
+  if (B.sand) {
+    B.mode = "sand";
+    B.size = 2;
+  } else if (B.mode === "sand") {
+    B.mode = "pen";
+    B.size = 1;
+  }
+  return _openBoard6(o);
+};
+const _bUI6 = bUI;
+bUI = function () {
+  _bUI6();
+  if (!B.sand) return;
+  const tb = document.querySelector(".btool");
+  if (!tb) return;
+  tb.querySelectorAll(".sw,.sz").forEach((x) => x.remove());
+  [...tb.querySelectorAll("button")].forEach((b) => {
+    if (/bSet\('mode'/.test(b.getAttribute("onclick") || "")) b.remove();
+  });
+  const sv = tb.querySelector(".save");
+  if (sv)
+    sv.insertAdjacentHTML(
+      "beforebegin",
+      '<button onclick="sandShake()" style="background:#fde68a">🫳 Düzle</button>',
+    );
+  tb.classList.add("sandbar");
+};
+function sandShake() {
+  const pg = $("#bpage");
+  if (pg) {
+    pg.classList.add("shake");
+    setTimeout(() => pg.classList.remove("shake"), 450);
+  }
+  try {
+    const a = ac();
+    if (a) {
+      const n = a.createBufferSource(),
+        b = a.createBuffer(1, a.sampleRate * 0.5, a.sampleRate),
+        d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.4 * (1 - i / d.length);
+      n.buffer = b;
+      const f = a.createBiquadFilter();
+      f.type = "bandpass";
+      f.frequency.value = 1400;
+      n.connect(f).connect(a.destination);
+      n.start();
+    }
+  } catch (e) {}
+  B.strokes = [];
+  bRedraw();
+  bSend({ t: "clear" });
+  bPersist();
+}
+/* kum sesi */
+let SN = null;
+function sandSound(on, v) {
+  if (!S.settings.sound) return;
+  try {
+    const a = ac();
+    if (!a) return;
+    if (on && !SN) {
+      const n = a.createBufferSource(),
+        b = a.createBuffer(1, a.sampleRate * 2, a.sampleRate),
+        d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      n.buffer = b;
+      n.loop = true;
+      const f = a.createBiquadFilter();
+      f.type = "bandpass";
+      f.frequency.value = 1800;
+      f.Q.value = 0.7;
+      const gn = a.createGain();
+      gn.gain.value = 0;
+      n.connect(f).connect(gn).connect(a.destination);
+      n.start();
+      SN = { n, gn };
+    }
+    if (SN) {
+      SN.gn.gain.setTargetAtTime(on ? Math.min(0.18, v || 0) : 0, a.currentTime, 0.05);
+      if (!on) {
+        const s = SN;
+        SN = null;
+        setTimeout(() => {
+          try {
+            s.n.stop();
+          } catch (e) {}
+        }, 300);
+      }
+    }
+  } catch (e) {}
+}
+document.addEventListener(
+  "pointermove",
+  (e) => {
+    if (B.on && B.sand && B.cur) {
+      const sp = Math.hypot(e.movementX || 0, e.movementY || 0);
+      sandSound(true, sp / 180);
+    }
+  },
+  { passive: true },
+);
+document.addEventListener(
+  "pointerup",
+  () => {
+    if (SN) sandSound(false);
+  },
+  { passive: true },
+);
+const _openGuide6 = openGuide;
+openGuide = function (spec, o) {
+  o = o || {};
+  if (spec.sand || o.sand) {
+    const so = Object.assign({}, o, { sand: true });
+    openBoard(
+      Object.assign(
+        {
+          bg: makeSand(spec),
+          title: "🏖️ Kum: " + (spec.t === "pattern" ? PATTERNS[spec.p][0] : spec.text || "serbest"),
+          kind: spec.t === "pattern" ? "cizgi" : guideKind(spec),
+          guide: spec,
+        },
+        so,
+      ),
+    );
+    if (o.fromChild) say("Kumda yazalım! Parmağınla izin üstünden git.");
+    return;
+  }
+  return _openGuide6(spec, o);
+};
+const _doPick6 = doPick;
+doPick = function (spec) {
+  if (typeof spec === "string") spec = JSON.parse(spec);
+  if (pickMode === "sand") {
+    closeModal();
+    return openGuide(Object.assign({}, spec, { sand: true }));
+  }
+  return _doPick6(spec);
+};
+const _pickerModal6 = pickerModal;
+pickerModal = function (title, items) {
+  _pickerModal6(title, items);
+  const seg = document.querySelector("#modal .seg");
+  if (seg && !seg.querySelector("[data-sand]"))
+    seg.insertAdjacentHTML(
+      "beforeend",
+      `<button data-sand class="${pickMode === "sand" ? "on" : ""}" onclick="pickMode='sand';this.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===this))">🏖️ Kumda</button>`,
+    );
+};
+topic("tr_kum", "tr", "Kumda Yaz", "🏖️", null, {
+  type: "guide",
+  spec: () => {
+    if (hmode()) {
+      const L = learnedSyl();
+      return { t: "text", text: L[ri(L.length)], kind: "hece", sand: true };
+    }
+    const L = learned();
+    const l = L[ri(L.length)];
+    return { t: "text", text: l.toLocaleUpperCase("tr") + l, kind: "harf", sand: true };
+  },
+});
+topic("tr_kumcizgi", "tr", "Kumda Çizgi", "〰️", null, {
+  type: "guide",
+  spec: () => ({ t: "pattern", p: ri(PATTERNS.length), sand: true }),
+});
+topic("mat_kumrakam", "mat", "Kumda Rakam", "🏖️", null, {
+  type: "guide",
+  spec: () => ({ t: "text", text: String(ri(10)), kind: "rakam", sand: true }),
+});
+MAT_MAP[0][1].push("mat_kumrakam");
+
+/* ---- Yazı atölyesine kum havuzu ve kitap paylaşma ---- */
+const _vYazi6 = vYazi;
+vYazi = function () {
+  let h = _vYazi6();
+  h = h.replace(
+    "<button onclick=\"openGuide({t:'lines'})\">",
+    "<button onclick=\"pickMode='sand';sandMenu()\"><span>🏖️</span><b>Kum havuzu</b><small>kumda harf, hece, çizgi</small></button><button onclick=\"openGuide({t:'lines'})\">",
+  );
+  h = h.replace(
+    '<button class="btn danger sm" onclick="delBook(',
+    `<button class="btn ghost sm" onclick="shareBook(pvBook)">📤 Dosyayı paylaş</button><button class="btn danger sm" onclick="delBook(`,
+  );
+  return h;
+};
+function sandMenu() {
+  modal(
+    `<h3>🏖️ Kum havuzu</h3><p class="mut">Parmakla kumda yazma: iz bırakır, ses çıkarır, “🫳 Düzle” ile silinir.</p><div class="wgrid"><button onclick="closeModal();pickMode='sand';${hmode() ? "pickWords()" : "pickLetters()"}"><span>${hmode() ? "📕" : "🔤"}</span><b>${hmode() ? "Hece / kelime" : "Harf"}</b></button><button onclick="closeModal();pickMode='sand';pickPatterns()"><span>〰️</span><b>Çizgi</b></button><button onclick="closeModal();pickMode='sand';pickDigits()"><span>🔢</span><b>Rakam</b></button><button onclick="closeModal();openGuide({t:'blank',sand:true})"><span>🏝️</span><b>Serbest kum</b></button></div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeModal()">Kapat</button>`,
+  );
+}
+const _subHTML6 = subHTML;
+subHTML = function (k) {
+  let h = _subHTML6(k);
+  if (k === "tr" && hmode())
+    h = h.replace(/Öğrendiğimiz harfler:[^<]*/, "Öğrendiğimiz heceler: " + esc(learnedSyl().join(" ")));
+  return h;
 };
 
 /* ================== BAŞLAT ================== */
