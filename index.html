@@ -7788,11 +7788,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "10.0",
+const APP_VER = "11.0",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 13653,
-  APP_KB = 900;
+  APP_LINES = 15121,
+  APP_KB = 969;
 const CHANGELOG = [
+  [
+    "11.0",
+    "22 Ekim 2026",
+    "ANETİL Okuma-Yazma Merkezi: MEB ses sırası (ANETİL · OKURIM · ÜSÖYDZ · ÇBGŞCP · HĞVFJ), sınıfın geldiği sese göre kendiliğinden süzülen kelime, cümle ve metinler; 29 sesin ses hikâyesi ve yazım ipucu; hece tablosu; 12 tür tahtada açılan etkinlik sayfası (ses kartı, sesi bul, hece, harf/hece yazma, kelime, okuma piramidi, eksik harf, eşleştirme, cümle, metin + 5N1K, dikte) ve cevap anahtarı; tahtayla eşzamanlı okuma kartları ve okuma hızı kaydı; ses bazlı ilerleme tablosu ve veli raporu; 11 yeni ANETİL oyunu; yapay zekâ ile öğrenilen seslere uygun cümle; Basara yöntemi korunur; Model Eğitim 1. sınıf akıllı tahta kütüphanesi anahtar kodla tek dokunuşta (tahtada da) açılır",
+  ],
   [
     "10.0",
     "10 Ekim 2026",
@@ -13633,6 +13638,1469 @@ vDers = function () {
 @media (max-width:600px){.stfly{right:56px;width:calc(100% - 66px)}.tfr{grid-template-columns:repeat(5,44px)}.tfr button{width:44px;height:44px}.tfr i{width:30px;height:30px}.die{width:64px;height:64px}}`;
   document.head.appendChild(s);
 })();
+
+/* ================== v11.0 ANETİL OKUMA-YAZMA MERKEZİ — VERİ ==================
+   MEB ses temelli cümle yöntemi sırası, ses hikâyeleri, yazım ipuçları, geniş kelime/cümle/metin bankası.
+   Kelime, cümle ve metinler öğrenilen seslere göre KENDİLİĞİNDEN süzülür. */
+const AN_SIRA = [
+  "a",
+  "n",
+  "e",
+  "t",
+  "i",
+  "l",
+  "o",
+  "k",
+  "u",
+  "r",
+  "ı",
+  "m",
+  "ü",
+  "s",
+  "ö",
+  "y",
+  "d",
+  "z",
+  "ç",
+  "b",
+  "g",
+  "ş",
+  "c",
+  "p",
+  "h",
+  "ğ",
+  "v",
+  "f",
+  "j",
+];
+const AN_GRUP = [
+  [0, 6],
+  [6, 12],
+  [12, 18],
+  [18, 24],
+  [24, 29],
+];
+/* MEB grupları: ANETİL · OKURIM · ÜSÖYDZ · ÇBGŞCP · HĞVFJ */
+LGROUPS.splice(0, LGROUPS.length, ...AN_GRUP.map((g) => AN_SIRA.slice(g[0], g[1])));
+ALLL.splice(0, ALLL.length, ...AN_SIRA);
+const AN_SES = {
+  a: [
+    "👄",
+    'Doktor "Ağzını aç" dedi. Mete ağzını kocaman açtı: Aaaa!',
+    "Önce yuvarlağı çiz, sonra sağına yukarıdan aşağı düz çizgi çek.",
+  ],
+  n: [
+    "👶",
+    "Anne bebeğine ninni söylüyor: Nnnn…",
+    "Yukarıdan aşağı kısa düz çizgi çek, geri çık, kemer yapıp aşağı in.",
+  ],
+  e: [
+    "👴",
+    "Dede iyi duymadı: Eee? Ne dedin?",
+    "Ortadan sağa düz çizgi çek, yukarı kıvrılıp yuvarlakla bitir.",
+  ],
+  t: [
+    "⏰",
+    "Duvardaki saat çalışıyor: Tik tak, t t t.",
+    "Yukarıdan aşağı in, altta sağa kıvrıl; sonra ortadan yatay çizgi çek.",
+  ],
+  i: ["🐭", "Fare kediyi görünce korktu: İiii!", "Kısa düz çizgiyi aşağı çek, üstüne nokta koy."],
+  l: ["🎵", "Ela şarkı söylüyor: La la la, lllll.", "Yukarıdan aşağı uzun düz çizgi çek, altta sağa kıvrıl."],
+  o: [
+    "🎈",
+    "Mete kocaman bir balon gördü: Ooo, ne büyük!",
+    "Yukarıdan başla, sola doğru yuvarlak çiz, başladığın yerde bitir.",
+  ],
+  k: [
+    "🐦",
+    "Karga dalda bağırıyor: Ka ka, k k k.",
+    "Uzun düz çizgi çek; ortadan sağa yukarı, sonra sağa aşağı eğik çizgi.",
+  ],
+  u: ["🐺", "Kurt dağda uluyor: Uuuu!", "Aşağı in, kıvrılıp yukarı çık, sonra düz aşağı in."],
+  r: ["🏍️", "Motor çalıştı: Rrrrr!", "Kısa düz çizgi aşağı, geri çıkıp sağa küçük kavis yap."],
+  ı: ["🐱", "Kedi ılık sütü içip mırıldandı: Iııı.", "Kısa düz çizgi aşağı. Noktası yok!"],
+  m: ["🍲", "Anne lezzetli çorba yaptı: Mmmm!", "Düz aşağı in, iki kemer yaparak aşağı in."],
+  ü: ["🥶", "Kışın dışarıda üşüdük: Üüüü!", "u gibi yaz, üstüne iki nokta koy."],
+  s: ["🐍", "Yılan otların arasında: Ssss!", "Yukarıdan sola kıvrıl, ortadan sağa dön, altta sola bitir."],
+  ö: ["🥾", "Mete çamura bastı: Öööö!", "o gibi yaz, üstüne iki nokta koy."],
+  y: [
+    "🪀",
+    "Yoyo iniyor, çıkıyor: Yo yo, y y y.",
+    "Sol üstten aşağı kısa eğik; sağ üstten uzun eğik çizgiyle satır altına in.",
+  ],
+  d: ["🥁", "Davul çalıyor: Dum dum, d d d.", "Yuvarlak çiz, sağına yukarıdan uzun çizgi çek."],
+  z: ["🐝", "Arı çiçeğe kondu: Zzzz!", "Üstte yatay, çapraz aşağı, altta yatay çizgi."],
+  ç: ["🚂", "Tren raylarda gidiyor: Çuf çuf, ç ç ç.", "c gibi yaz, altına küçük çengel ekle."],
+  b: ["💥", "Balon patladı: Bam! b b b.", "Uzun çizgi aşağı, alttan sağa yuvarlak."],
+  g: ["🕊️", "Güvercin ötüyor: Gu gu, g g g.", "Yuvarlak çiz, sağından aşağı inip sola kıvrıl."],
+  ş: ["🚰", "Musluktan su akıyor: Şşşş!", "s gibi yaz, altına küçük çengel ekle."],
+  c: ["🐤", "Civciv yemini arıyor: Cik cik, c c c.", "Yukarıdan sola doğru yarım yuvarlak çiz."],
+  p: [
+    "🍿",
+    "Mısırlar patlıyor: Pıt pıt, p p p.",
+    "Aşağı uzun çizgi (satır altına iner), üstten sağa yuvarlak.",
+  ],
+  h: ["🐕", "Köpek koştu, soluyor: Hah hah, h h h.", "Uzun çizgi aşağı, ortadan kemer yapıp aşağı in."],
+  ğ: [
+    "⛰️",
+    "Yumuşak g kelimenin başında olmaz; önündeki sesi uzatır: dağ, ağaç, yağmur.",
+    "g gibi yaz, üstüne küçük şapka koy.",
+  ],
+  v: ["🌀", "Vantilatör dönüyor: Vvvv!", "Sol üstten aşağı eğik, sonra yukarı eğik çizgi."],
+  f: ["🕯️", "Mete mumu üflüyor: Ffff!", "Yukarıdan sola kıvrılıp aşağı in, ortadan yatay çizgi çek."],
+  j: ["🍮", "Jöle tabakta titriyor: Jjjj!", "Kısa çizgi aşağı, altta sola kıvrıl, üstüne nokta koy."],
+};
+/* Resimli kelimeler (emoji + kelime) */
+const AN_PIC =
+  "🐴at 👵nine 🌿nane 🌷lale ✋el 🥩et 🧲nal 🔧alet 👩anne 👴dede 🎈balon 🍎elma 🏫okul ✏️kalem 🕯️mum 🏰kule 🐑koyun 🌙ay 🔥ateş 🐟balık 🐱kedi 🐶köpek 🐦kuş 🌳ağaç 🏠ev 🚗araba 🚌otobüs 🚲bisiklet 🍌muz 🍐armut 🍇üzüm 🥕havuç 🧀peynir 🥛süt 🍯bal 🍞ekmek 🧂tuz 🫖çay 🍉karpuz 🍋limon 🍊portakal 🍓çilek 🍒kiraz 🥔patates 🧅soğan 🍅domates 🥒salatalık 🌽mısır 🍪kurabiye 🍰pasta 🎂kek 🍬şeker 🍫çikolata 🍦dondurma 🥚yumurta 🍲çorba 🐄inek 🐓horoz 🐔tavuk 🦆ördek 🐸kurbağa 🐢kaplumbağa 🐇tavşan 🐭fare 🐻ayı 🦁aslan 🐯kaplan 🐘fil 🦒zürafa 🐒maymun 🐍yılan 🐝arı 🦋kelebek 🐞uğurböceği 🐜karınca 🕷️örümcek 🦉baykuş 🐧penguen 🐬yunus 🐳balina 🦈köpekbalığı 🐙ahtapot 🦀yengeç 🐌salyangoz 🌞güneş ⭐yıldız ☁️bulut 🌧️yağmur ❄️kar 🌈gökkuşağı ⛰️dağ 🌊deniz 🏝️ada 🌸çiçek 🍁yaprak 🌲çam 🌵kaktüs 🍄mantar 👁️göz 👂kulak 👃burun 👄dudak 🦷diş 🦶ayak 💪kol 👕tişört 👖pantolon 👗elbise 🧦çorap 👟ayakkabı 🧢şapka 🧤eldiven 🧣atkı 👓gözlük ⌚saat 🔑anahtar 🚪kapı 🪟pencere 🪑sandalye 🛏️yatak 🛁küvet 🧸oyuncak 🪁uçurtma ⚽top 🥁davul 🎸gitar 🎻keman 🎺trompet 📕kitap 📒defter 🖍️boya 🎒çanta ✂️makas 📏cetvel 🧽sünger 🧹süpürge 🪣kova 🧺sepet 🔨çekiç 🪜merdiven 🚂tren ✈️uçak 🚀roket 🚢gemi ⛵yelken 🚁helikopter 🚜traktör 🚒itfaiye 🚑ambulans 🚓polis 🤖robot 💻bilgisayar 📱telefon 📺televizyon 💡lamba 🔦fener ⏰alarm 🎁hediye 🎀kurdele 🎨resim 🖼️tablo 🧩yapboz ♟️satranç 🎲zar 🏀basket 🥇madalya 🏆kupa 🍼biberon 👶bebek 👦oğlan 👧kız 👨baba 👩‍🏫öğretmen 👨‍⚕️doktor 👮polis 👨‍🍳aşçı 🧑‍🚒itfaiyeci 🦊tilki 🐺kurt 🦌geyik 🦔kirpi 🐿️sincap 🦜papağan 🐊timsah 🦓zebra 🐪deve 🐐keçi 🐖domuz 🐕‍🦺rehber 🌰kestane 🥜fıstık 🫘fasulye 🍆patlıcan 🌶️biber 🥑avokado 🥥hindistancevizi 🍑şeftali 🍈kavun 🍏yeşilelma 🍝makarna 🍕pizza 🍔hamburger 🥪sandviç 🧃meyvesuyu 🍵ıhlamur 🧁kek 🍩simit 🥨kraker 🧇gofret 🐿️sincap 🪨taş 🪵odun 🔔zil 🪥fırça 🧼sabun 🪞ayna 🧴krem 🧷iğne 🧵iplik 🪡dikiş 🧶yün 🪢ip 🛶kano 🛴scooter 🛹kaykay 🏍️motor 🚦lamba 🧭pusula 🗺️harita 🌍dünya 🌕dolunay 🌋yanardağ 🏔️tepe 🏞️nehir 🦢kuğu 🦩flamingo 🦚tavuskuşu 🦭fok 🦦susamuru 🐆leopar 🦏gergedan 🦛suaygırı 🐋balina 🦞ıstakoz 🍢şiş 🥟mantı 🥙dürüm 🥗salata 🧈tereyağı 🍳omlet 🥞krep 🫒zeytin 🍯reçel 🫐yabanmersini 🍍ananas 🥭mango 🥝kivi";
+/* Resimsiz okuma kelimeleri (ses temelli yöntemde sık kullanılanlar) */
+const AN_KEL =
+  "a al ala alan alt ana anne at ata alet atlet ant ne net nal nane nine ninni el ele eli elle elli et etli ilan ile ilet in inat inan it itti lale lala tane tat tatil tel telli ten inle ilk alet anla anlat ateş " +
+  "o ok oku okul okur oklu ol ola olan olta oto otel on ona onu ot oyun koku kol kola kale kalem kalk kar kara kare kart kat kel kek kil kim kina kilo kim kum kule kuru kurt kutu kuru kel kek kira kral kırk kır kırmızı kalın kitap kulak kulaklık kum kumru kuzu kol koli konu konak kova köy kural küre " +
+  "u un uç uçak umut unut ur uzun uslu ılık ılık ırak ırmak ıslak ışık ılık rakam ram renk rol roket rota ruh rulo mum mama mamut maral mart masa mat mavi mel melek mermer meyve mısır mi mil mine minik mola mor motor müze " +
+  "üzüm ütü üç ün üst üşü süt sütlü sal salı salata saat sana sarı sel ses sıra sırt sinek soru su sulu sus söz sözlük sırt sevgi sevin ses sen seni sol solak ön önlük ördek örtü öykü öz özlem öykü öyle ölç " +
+  "yat yatak yaz yazı yaka yan yanak yarım yayla yel yelek yem yemek yer yeni yol yolcu yön yüz yüzük yıl yıldız dal dede dere deri derin dil diz dolu dut duman dur duvar düz düdük dünya zil zar zarf zeki zeytin zor zürafa zaman " +
+  "çam çay çanta çorba çarşı çatı çiçek çilek çit çocuk çok çorap çukur çuval baba bal balık balon bebek bel ben benek bir biz bil bilet bulut boru boya böcek buz büyük gel gemi gece göl göz gül gün güneş güzel gelin genç gezi gitar şeker şapka şarkı şehir şimdi şiş şöyle şu şurası cam can ceket cep cetvel cevap cici cin civciv cuma pazar pasta patates pul pamuk pencere peri peynir pide pil pilot pire " +
+  "hava hal hala halı hamur hasta hece hediye hemen her hız horoz hoş huzur dağ ağaç ağır ağız ağla yağ yağmur doğa soğuk ağabey sağ değil eğik öğren öğretmen yoğurt boğa vapur var ver vazo vatan vişne vuruş virgül fare fener fil fındık fırın fırça futbol fiyat fotoğraf jöle jilet judo jeton jet jüri";
+const AN_AD =
+  "Ali Ela Nil Nail Nalan Talat Tan Lale Lena Neta Atila Elif Mete Barış Sinan Kerem Kemal Melek Okan Ömer Emre Deniz Zeynep Can Cem Ece Efe Arda Ayşe Murat Selin Tuna Umut Yusuf Mert Nur Oya Rana Rüya Uğur Gül Hale Hakan Volkan Fatma Jale Elanur Tolga Tülin Meral Sema Defne Ozan Kaan";
+/* Elle yazılmış cümleler — sıraya göre ilerler, sistem öğrenilen seslere göre süzer */
+const AN_CUM = `Anne, ninni. | Nine, nane. | Ne tat! | Tan, inan. | Anne, ten. | Tan, ata. | Ela, al. | Ali, at. | Ela, el at. | Ali, nal at. | Nil, nane al. | Ela, lale al. | Ali, ata nal at. | Nalan, nane al. | Talat, at al. | Lale, tel al. | Ela, ne al? | Ali, et al. | Anne, nane al. | Nine, lale al. | Ela ile Ali. | Nil ile Nail. | Anne ile nine. | Ela, ata nane at. | Talat, alet al. | Nalan, tel at. | Ela ile Lale, lale al. | Ali, ilet. | Nine, ninni. | Anne, Ela ile Nil ne al? | Nail, tatil.
+Mete, okula kalem al. | Okan, ok at. | Kerem kitap okur. | Mete, okul ile kalem. | Kemal kule ile kale. | Ela, kalem al. | Okul, okul. | Ali, kek al. | Kerem, Ela, Okan okur. | Nine kek alır. | Anne, Mete ile Ela. | Mete kalem al, oku. | Kale ile kule. | Ela, kum al. | Mete, mum al. | Tarık, kalem al. | Anne mantı alır. | Mete okulda okur. | Okul tam, kalem tam. | Mete, Kerem ile oku. | Ela, Mete'ye kalem ilet. | Nine, Mete'ye mum al. | Ali, kırmızı kalem al. | Mete, kurt ile kuzu. | Umut kurt maketi alır. | Melek ile Ömer, kitap okur.
+Mete süt içer. | Ece sulu üzüm yer. | Söz ver Mete. | Sema, ütü al. | Mete dede ile yürür. | Deniz, dere ile göl. | Zeynep, zil sesi. | Ördek yüzer. | Mete sarı yelek alır. | Yusuf, yıldız say. | Dede, Mete'ye düdük alır. | Ela ile Mete, yeni oyun oyna. | Mete, ödevini yaz. | Duvar sarı, kapı mavi. | Anne, süt ile kek. | Mete ödülünü aldı. | Zeki ördek, suda yüzer. | Selin üzüm ile süt al. | Mete okulda resim yaptı. | Yusuf dedesini sever.
+Mete çiçek sever. | Baba, bebek ile oyna. | Can civciv besler. | Güneş doğdu, gün başladı. | Çocuklar bahçede oynar. | Pelin pasta yer. | Şule şarkı söyler. | Mete gemi çizdi. | Cem çanta al. | Gece gökyüzünde yıldız var. | Bugün pazar, okul yok. | Babam bana balon aldı. | Mete bisiklete biner. | Çorba sıcak, üfle. | Pilot uçak uçurur. | Bulut gelir, yağmur yağar. | Mete robot yapmayı çok sever. | Şemsiyeni al Mete. | Kediye süt ver.
+Hava çok güzel. | Mete, hediyeni aç. | Ağaçta kuş var. | Yağmur yağıyor, şemsiye aç. | Fil çok büyük. | Vapur denizde gider. | Jale jöle yer. | Hakan horoz çizdi. | Fare fındık yer. | Volkan futbol oynar. | Dağda kar var. | Mete fotoğraf çekti. | Öğretmen bize hikâye okur. | Ağabeyim bana kitap verdi. | Vişne kırmızıdır. | Fırından sıcak ekmek aldık. | Mete, Barış öğretmen ile ders yapar. | Her gün kitap okuruz.`;
+/* Kısa metinler + 5N1K soruları (soruları öğretmen okur) */
+const AN_MET = [
+  {
+    t: "Nane",
+    m: "Ela, al. Ela, nane al. Ali, lale al. Ela ile Ali, nane ile lale al. Anne, nane al. Nine, lale al.",
+    q: ["Kim nane aldı?", "Ali ne aldı?", "Nine ne aldı?"],
+  },
+  {
+    t: "Talat ile At",
+    m: "Talat, at al. Talat ata nal at. Nalan, alet al. Nalan ile Talat, ata nane at.",
+    q: ["Kim at aldı?", "Talat ata ne attı?", "Nalan ne aldı?"],
+  },
+  {
+    t: "Okul",
+    m: "Mete, okula kalem al. Okul tam. Kerem okur. Ela okur. Mete okur.",
+    q: ["Mete nereye gidiyor?", "Okulda kim okuyor?", "Mete ne aldı?"],
+  },
+  {
+    t: "Mum",
+    m: "Nine, mum al. Mete mum ile kek al. Anne kek ile mum. Mete, mumu üfle!",
+    q: ["Nine ne aldı?", "Mete mumu ne yaptı?", "Kekte ne vardı?"],
+  },
+  {
+    t: "Kale ile Kule",
+    m: "Kemal kum al. Kemal kum ile kale. Kerem kum ile kule. Kale ile kule tamam.",
+    q: ["Kemal ne yaptı?", "Kerem ne yaptı?", "Kumdan ne yapılır?"],
+  },
+  {
+    t: "Üzüm",
+    m: "Dede üzüm al. Dede, Mete ile Ece üzüm ye. Üzüm sulu. Mete, süt ile üzüm sever.",
+    q: ["Dede ne aldı?", "Üzümü kim yedi?", "Üzüm nasıl?"],
+  },
+  {
+    t: "Ördek",
+    m: 'Göl derin. Ördek yüzer. Mete ördek izler. Ördek dalar, suda yüzer. Mete ördeğe "selam" der.',
+    q: ["Ördek nerede?", "Mete ne yaptı?", "Ördek ne yapar?"],
+  },
+  {
+    t: "Civciv",
+    m: "Can bahçede civciv gördü. Civciv sarı, küçük. Can civcive yem verdi. Civciv cik cik dedi.",
+    q: ["Can ne gördü?", "Civciv ne renk?", "Can civcive ne verdi?"],
+  },
+  {
+    t: "Robot Mete",
+    m: "Mete robot yapmayı çok sever. Bugün yeni bir robot yaptı. Robot ileri gitti, sağa döndü. Mete çok sevindi.",
+    q: ["Mete ne yapmayı sever?", "Robot hangi yöne döndü?", "Mete nasıl hissetti?"],
+  },
+  {
+    t: "Yağmurlu Gün",
+    m: "Hava bulutlu. Yağmur yağıyor. Mete şemsiyesini aldı. Okula giderken su birikintisine bastı: Şap!",
+    q: ["Hava nasıl?", "Mete ne aldı?", "Mete nereye gidiyordu?"],
+  },
+  {
+    t: "Fil ile Fare",
+    m: "Fil çok büyük, fare çok küçük. Fil ağır yürür, fare hızlı koşar. Fil ile fare iyi arkadaş.",
+    q: ["Hangisi büyük?", "Kim hızlı koşar?", "Fil ile fare nasıl arkadaş?"],
+  },
+  {
+    t: "Satranç",
+    m: "Mete satranç oynamayı öğreniyor. At zıplar, kale düz gider. Mete bugün ilk kez şah dedi. Barış öğretmen alkışladı.",
+    q: ["Mete ne öğreniyor?", "At nasıl gider?", "Kim alkışladı?"],
+  },
+];
+
+/* ================== v11.0 ANETİL OKUMA-YAZMA MERKEZİ — MANTIK ================== */
+const anLow = (s) => String(s).toLocaleLowerCase("tr");
+const anLet = (s) => [...anLow(s)].filter((c) => /\p{L}/u.test(c));
+function anOK(s, L) {
+  L = L || new Set(learned());
+  return anLet(s).every((c) => L.has(c));
+}
+if (!S.profile.method) {
+  S.profile.method = "anetil";
+  if (S.profile.anIdx == null) S.profile.anIdx = 4;
+  save();
+}
+if (S.profile.anIdx == null) S.profile.anIdx = 4;
+const _learned11 = learned;
+learned = function () {
+  if (S.profile.method === "anetil") return AN_SIRA.slice(0, (S.profile.anIdx || 0) + 1);
+  return _learned11();
+};
+const anCur = () =>
+  S.profile.method === "anetil" ? AN_SIRA[S.profile.anIdx || 0] : learned().slice(-1)[0] || "a";
+const anGrpOf = (i) => AN_GRUP.findIndex((g) => i >= g[0] && i < g[1]);
+const AN_COL = ["#e11d48", "#f59e0b", "#10b981", "#0ea5e9", "#8b5cf6"];
+/* veri hazırlığı */
+const AN_PICS = (() => {
+  const seen = new Set();
+  return AN_PIC.split(/\s+/)
+    .map((t) => {
+      const m = t.match(/^(\P{L}+)(\p{L}+)$/u);
+      return m ? { e: m[1], w: m[2] } : null;
+    })
+    .filter((x) => x && !seen.has(x.w) && seen.add(x.w));
+})();
+AN_PICS.forEach((x) => {
+  if (!TRW.some((y) => y.w === x.w)) TRW.push(x);
+});
+const AN_NAMES = AN_AD.split(/\s+/).filter(Boolean);
+const picOf = (w) => {
+  const x = TRW.find((y) => y.w === w);
+  return x ? x.e : "";
+};
+const anAllWords = () =>
+  [...new Set([...AN_KEL.split(/\s+/), ...TRW.map((x) => x.w), ...(S.profile.anCustomW || [])])].filter(
+    Boolean,
+  );
+function anWords() {
+  const L = new Set(learned());
+  return anAllWords().filter((w) => anOK(w, L));
+}
+function anNames() {
+  const L = new Set(learned());
+  return AN_NAMES.filter((n) => anOK(n, L));
+}
+const AN_VERB = ["al", "ver", "tut", "getir", "bul", "sev", "çiz", "izle", "göster"];
+function anSentences() {
+  const L = new Set(learned());
+  const cur = AN_CUM.split(/[|\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .concat(S.profile.anCustomS || [])
+    .filter((s) => anOK(s, L));
+  const N = anNames(),
+    V = AN_VERB.filter((v) => anOK(v, L)),
+    O = TRW.filter((x) => anOK(x.w, L) && x.w.length > 1).map((x) => x.w);
+  const gen = new Set();
+  let g = 0;
+  while (gen.size < 14 && g++ < 200 && N.length && V.length && O.length) {
+    gen.add(`${N[ri(N.length)]}, ${O[ri(O.length)]} ${V[ri(V.length)]}.`);
+  }
+  return [...new Set([...cur, ...gen])];
+}
+function anTexts() {
+  const L = new Set(learned());
+  const t = AN_MET.filter((x) => anOK(x.m, L) && anOK(x.t, L));
+  if (t.length) return t;
+  const s = anSentences().slice(0, 5);
+  return s.length
+    ? [
+        {
+          t: "Benim Metnim",
+          m: s.join(" "),
+          q: ["Metinde kimler var?", "Ne aldılar?", "Sen olsan ne alırdın?"],
+        },
+      ]
+    : [];
+}
+function anSyl() {
+  const L = learned();
+  const V = L.filter((c) => VOW.includes(c)),
+    C = L.filter((c) => !VOW.includes(c) && c !== "ğ");
+  return { open: C.flatMap((c) => V.map((v) => c + v)), closed: V.flatMap((v) => C.map((c) => v + c)), V, C };
+}
+const anHas = (w, c) => anLow(w).includes(c);
+const anHL = (w, c) =>
+  esc(w).replace(
+    new RegExp(c === "i" ? "[iİ]" : c === "ı" ? "[ıI]" : `[${c}${c.toLocaleUpperCase("tr")}]`, "g"),
+    (m) => `<b class="anhl">${m}</b>`,
+  );
+/* yöntem ve ilerleme */
+function anSet(i) {
+  S.profile.anIdx = i;
+  S.profile.method = "anetil";
+  save();
+  toast(`🔤 Sınıf şimdi ${AN_SIRA[i].toLocaleUpperCase("tr")} sesinde · ${i + 1} ses öğrenildi`);
+  anRender();
+  if (typeof render === "function" && !child) render();
+}
+function anMethod(m) {
+  S.profile.method = m;
+  save();
+  anRender();
+  render();
+}
+const _togLetter11 = togLetter;
+togLetter = function (l) {
+  if (S.profile.method === "anetil") {
+    const i = AN_SIRA.indexOf(l);
+    if (i >= 0) {
+      S.profile.anIdx = i;
+      save();
+      openProfile();
+    }
+    return;
+  }
+  return _togLetter11(l);
+};
+const _setGroups11 = setGroups;
+setGroups = function (n) {
+  if (S.profile.method === "anetil") {
+    S.profile.anIdx = AN_GRUP[n - 1][1] - 1;
+    save();
+    openProfile();
+    return;
+  }
+  return _setGroups11(n);
+};
+const AN_SK = [
+  ["ses", "👂", "Sesi tanır"],
+  ["yaz", "✍️", "Harfi yazar"],
+  ["hece", "🧱", "Hece okur"],
+  ["kel", "📗", "Kelime okur"],
+  ["cum", "📜", "Cümle okur"],
+];
+const anProg = () => S.profile.anProg || (S.profile.anProg = {});
+function anTog(l, k) {
+  const p = anProg();
+  const x = p[l] || (p[l] = {});
+  x[k] = x[k] ? 0 : 1;
+  save();
+  anRender();
+}
+
+/* ================== PANEL ================== */
+const AN = { tab: "ses", dk: null };
+function anOpen(tab) {
+  if (tab) AN.tab = tab;
+  anRender();
+}
+function anClose() {
+  const e = $("#anp");
+  if (e) e.remove();
+}
+const AN_TABS = [
+  ["ses", "👂", "Ses"],
+  ["hece", "🧱", "Hece"],
+  ["kelime", "📗", "Kelime"],
+  ["cumle", "📜", "Cümle"],
+  ["metin", "📖", "Metin"],
+  ["yazma", "✍️", "Yazma"],
+  ["sayfa", "📄", "Sayfalar"],
+  ["oyun", "🎮", "Oyunlar"],
+  ["ilerleme", "📈", "İlerleme"],
+  ["model", "📚", "Model Kütüphane"],
+];
+function anRender() {
+  let el = $("#anp");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "anp";
+    document.body.appendChild(el);
+  }
+  const idx = S.profile.anIdx || 0,
+    c = anCur(),
+    isAn = S.profile.method === "anetil";
+  const se = AN_SES[c] || ["🔤", "", ""];
+  const path = AN_GRUP.map(
+    (g, gi) =>
+      `<div class="anrow"><small style="color:${AN_COL[gi]}">${gi + 1}. grup</small>${AN_SIRA.slice(
+        g[0],
+        g[1],
+      )
+        .map((l, k) => {
+          const i = g[0] + k;
+          return `<button class="anch ${isAn && i < idx ? "ok" : ""} ${isAn && i === idx ? "cur" : ""}" style="--c:${AN_COL[gi]}" onclick="anSet(${i})">${l.toLocaleUpperCase("tr")}${l}</button>`;
+        })
+        .join("")}</div>`,
+  ).join("");
+  el.innerHTML = `<div class="anin"><div class="anhd"><b>🔤 ANETİL Okuma-Yazma Merkezi</b><div class="seg mini"><button class="${isAn ? "on" : ""}" onclick="anMethod('anetil')">ANETİL</button><button class="${!isAn ? "on" : ""}" onclick="anMethod('basara')">Basara</button></div><button class="x" onclick="anClose()">✕</button></div>
+ ${isAn ? `<div class="anpath">${path}<p class="mut">Sınıfın geldiği sese dokun. Kelimeler, cümleler, oyunlar ve sayfalar yalnızca öğrenilen seslerle hazırlanır.</p></div>` : `<div class="anpath"><p>Basara hece yöntemi açık. Öğrenilen heceler ve harfler profilden yönetilir. <button class="btn ghost" onclick="openProfile()">Profili aç</button></p></div>`}
+ <div class="ancur" style="--c:${AN_COL[Math.max(0, anGrpOf(idx))]}"><div class="anbig">${c.toLocaleUpperCase("tr")}${c}</div><div><b>${se[0]} Bu haftanın sesi</b><p>${esc(se[1])}</p><div class="anbtns"><button onclick="say('${Q(se[1])}')">🔊 Hikâyeyi dinle</button><button onclick="say('${c}. ${c}. ${c}')">🔊 Sesi dinle</button><button onclick="anPgSes()">📺 Ses kartı</button><button onclick="anLetterBoard()">✍️ Tahtada yaz</button></div></div></div>
+ <div class="antabs">${AN_TABS.map((t) => `<button class="${AN.tab === t[0] ? "on" : ""}" onclick="anOpen('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join("")}</div>
+ <div class="anbody">${(AN_BODY[AN.tab] || AN_BODY.ses)()}</div></div>`;
+}
+const anCards = (arr, cls) =>
+  `<div class="anwords ${cls || ""}">${arr.map((w) => `<button onclick="say('${Q(w)}')">${picOf(w) ? `<i>${picOf(w)}</i>` : ""}<span>${anHL(w, anCur())}</span></button>`).join("") || '<p class="mut">Henüz yok — biraz daha ses öğrenince açılacak.</p>'}</div>`;
+const AN_BODY = {
+  ses: () => {
+    const c = anCur();
+    const P = TRW.filter((x) => anHas(x.w, c));
+    const pos = (k) =>
+      P.filter((x) => {
+        const i = anLow(x.w).indexOf(c);
+        return k === 0 ? i === 0 : k === 2 ? i === x.w.length - 1 : i > 0 && i < x.w.length - 1;
+      })
+        .slice(0, 10)
+        .map((x) => x.w);
+    return `<div class="ancol"><h4>✍️ Nasıl yazılır?</h4><p>${esc((AN_SES[c] || [])[2] || "")}</p></div><h4>📍 Başında ${c} olanlar</h4>${anCards(pos(0))}<h4>📍 Ortasında ${c} olanlar</h4>${anCards(pos(1))}<h4>📍 Sonunda ${c} olanlar</h4>${anCards(pos(2))}
+  <div class="anact"><button class="btn" onclick="anPgSes()">📺 Ses kartı sayfası</button><button class="btn ghost" onclick="anPgBul()">🔍 Sesi bul sayfası</button><button class="btn ghost" onclick="anGame('an_var')">🎮 Bu ses var mı?</button><button class="btn ghost" onclick="anGame('an_yer')">🎮 Ses nerede?</button></div>`;
+  },
+  hece: () => {
+    const s = anSyl(),
+      c = anCur();
+    const row = (a) =>
+      `<div class="ansyl">${a.map((h) => `<button class="${h.includes(c) ? "hl" : ""}" onclick="say('${h}')">${h}</button>`).join("")}</div>`;
+    return `<h4>🔓 Açık heceler (ünsüz + ünlü)</h4>${row(s.open)}<h4>🔒 Kapalı heceler (ünlü + ünsüz)</h4>${row(s.closed)}<div class="anact"><button class="btn" onclick="anPgHece()">📺 Hece tablosu</button><button class="btn ghost" onclick="akStart('hece')">🃏 Hece kartları</button><button class="btn ghost" onclick="anPgHeceYaz()">✍️ Hece yazma sayfası</button><button class="btn ghost" onclick="anGame('an_hece')">🎮 Heceyi bul</button><button class="btn ghost" onclick="anGame('an_kur')">🎮 Hece birleştir</button></div>`;
+  },
+  kelime: () => {
+    const W = anWords(),
+      c = anCur();
+    const withC = W.filter((w) => anHas(w, c));
+    return `<p class="mut">${W.length} kelime okunabilir · ${withC.length} tanesinde ${c} sesi var</p><h4>⭐ İçinde ${c} olanlar</h4>${anCards(withC.slice(0, 60))}<h4>📗 Diğer okunabilir kelimeler</h4>${anCards(W.filter((w) => !anHas(w, c)).slice(0, 60))}
+  <div class="anadd"><input id="anAddW" placeholder="Kendi kelimeni ekle (ör. Nalan)"><button class="btn ghost" onclick="anAdd('W')">➕</button></div>
+  <div class="anact"><button class="btn" onclick="anPgKelime()">📺 Kelime okuma sayfası</button><button class="btn ghost" onclick="akStart('kelime')">🃏 Kelime kartları</button><button class="btn ghost" onclick="anPgPiramit()">🔺 Okuma piramidi</button><button class="btn ghost" onclick="anPgEksik()">🧩 Eksik harf sayfası</button><button class="btn ghost" onclick="anPgEsle()">🔗 Eşleştirme sayfası</button><button class="btn ghost" onclick="anGame('an_oku')">🎮 Oku, resmi bul</button></div>`;
+  },
+  cumle: () => {
+    const S2 = anSentences();
+    return `<p class="mut">${S2.length} cümle okunabilir. Sistem yalnızca öğrenilen seslerle yazılmış cümleleri gösterir.</p><div class="ansent">${
+      S2.slice(0, 40)
+        .map((s) => `<button onclick="say('${Q(s)}')">${anHL(s, anCur())}</button>`)
+        .join("") || '<p class="mut">Henüz cümle yok.</p>'
+    }</div>
+  <div class="anadd"><input id="anAddS" placeholder="Kendi cümleni yaz (ör. Ela, nane al.)"><button class="btn ghost" onclick="anAdd('S')">➕</button></div><div id="anAiOut"></div>
+  <div class="anact"><button class="btn" onclick="anPgCumle()">📺 Cümle okuma sayfası</button><button class="btn ghost" onclick="akStart('cumle')">🃏 Cümle kartları</button><button class="btn ghost" onclick="anAI()">✨ Yapay zekâ ile yeni cümleler</button><button class="btn ghost" onclick="anGame('an_cumle')">🎮 Cümleyi oku</button><button class="btn ghost" onclick="anGame('an_sira')">🎮 Cümle kur</button></div>`;
+  },
+  metin: () => {
+    const T2 = anTexts();
+    return (
+      T2.map(
+        (x, i) =>
+          `<div class="anmet"><h4>📖 ${esc(x.t)}</h4><p>${anHL(x.m, anCur())}</p><ol>${x.q.map((q) => `<li>${esc(q)}</li>`).join("")}</ol><div class="anbtns"><button onclick="say('${Q(x.m)}')">🔊 Oku</button><button onclick="anPgMetin(${i})">📺 Tahtada aç</button></div></div>`,
+      ).join("") || '<p class="mut">Metin için biraz daha ses gerekiyor.</p>'
+    );
+  },
+  yazma: () =>
+    `<div class="anact col"><button class="btn" onclick="anLetterBoard()">✍️ ${anCur()} harfini tahtada yaz (noktalı)</button><button class="btn ghost" onclick="anPgYazma()">📄 Harf yazma sayfası (çizgili)</button><button class="btn ghost" onclick="anPgHeceYaz()">📄 Hece yazma sayfası</button><button class="btn ghost" onclick="anPgDikte()">📝 Dikte sayfası + dikte listesi</button></div>${AN.dk ? `<h4>📝 Dikte listesi</h4><div class="ansent">${AN.dk.map((w, i) => `<button onclick="say('${Q(w)}')">${i + 1}. 🔊 ${esc(w)}</button>`).join("")}</div><p class="mut">Kelimeye dokun, sistem söylesin; Mete tahtada yazsın. ✅ Cevaplar ile kontrol et.</p>` : ""}`,
+  sayfa: () =>
+    `<p class="mut">Her sayfa yalnızca öğrenilen seslerle, yeniden karıştırılarak üretilir ve tahtada açılır. Spot, şerit, perde ve kazı-kazan araçları bu sayfalarda da çalışır.</p><div class="anpages">${[
+      ["anPgSes", "👂", "Ses kartı"],
+      ["anPgBul", "🔍", "Sesi bul, daire içine al"],
+      ["anPgHece", "🧱", "Hece tablosu"],
+      ["anPgHeceYaz", "✍️", "Hece yazma"],
+      ["anPgYazma", "✏️", "Harf yazma"],
+      ["anPgKelime", "📗", "Kelime okuma"],
+      ["anPgPiramit", "🔺", "Okuma piramidi"],
+      ["anPgEksik", "🧩", "Eksik harf"],
+      ["anPgEsle", "🔗", "Kelime–resim eşleştirme"],
+      ["anPgCumle", "📜", "Cümle okuma"],
+      ["anPgMetin", "📖", "Metin + 5N1K"],
+      ["anPgDikte", "📝", "Dikte"],
+    ]
+      .map((p) => `<button onclick="${p[0]}()"><span>${p[1]}</span>${p[2]}</button>`)
+      .join("")}</div>`,
+  oyun: () =>
+    `<p class="mut">Oyunlar çocuk ekranında açılır; tahtada oynanır, telefon kumanda olur.</p><div class="anpages">${subTopics(
+      "an",
+    )
+      .map((t) => `<button onclick="anGame('${t.k}')"><span>${t.i}</span>${esc(t.n)}</button>`)
+      .join("")}</div>`,
+  ilerleme: () => {
+    const p = anProg(),
+      L = learned();
+    const reads = (S.profile.anReads || []).slice(-6).reverse();
+    return `<p class="mut">Her öğrenilen ses için Mete'nin yaptıklarını işaretle. Veli raporuna da eklenir.</p><div class="anprog"><div class="aph"><b>Ses</b>${AN_SK.map((s) => `<span title="${s[2]}">${s[1]}</span>`).join("")}</div>${L.map((l) => `<div class="apr"><b>${l.toLocaleUpperCase("tr")}${l}</b>${AN_SK.map((s) => `<button class="${(p[l] || {})[s[0]] ? "on" : ""}" onclick="anTog('${l}','${s[0]}')">${(p[l] || {})[s[0]] ? "✓" : ""}</button>`).join("")}</div>`).join("")}</div>
+  <p class="mut">${AN_SK.map((s) => s[1] + " " + s[2]).join(" · ")}</p><h4>⏱️ Okuma kartı kayıtları</h4>${reads.length ? `<ul class="anreads">${reads.map((r) => `<li>${new Date(r.d).toLocaleDateString("tr-TR")} · ${{ hece: "Hece", kelime: "Kelime", cumle: "Cümle" }[r.k]} · ${r.ok}/${r.n} doğru · ${r.sec} sn${r.k !== "cumle" && r.sec ? ` · dakikada ${Math.round((r.ok * 60) / r.sec)}` : ""}</li>`).join("")}</ul>` : '<p class="mut">Henüz kayıt yok. 🃏 Okuma kartlarıyla başla.</p>'}`;
+  },
+  model:
+    () => `<div class="anmodel"><div class="mlh"><b>📚 Model Eğitim Yayınları · 1. Sınıf Akıllı Tahta Kütüphanesi</b><p>Anahtar kod: <code>${esc(mlCode())}</code> <button onclick="copyText('${Q(mlCode())}')">📋 Kopyala</button></p></div>
+  <div class="anact"><button class="btn" onclick="mlOpen()">📖 Kütüphaneyi burada aç</button><button class="btn ghost" onclick="mlOpen(true)">📺 Tahtada aç</button><button class="btn ghost" onclick="window.open(mlUrl(),'_blank')">↗ Yeni sekmede aç</button></div>
+  <h4>⬇️ Model Eğitim indirmeleri</h4><div class="anact col"><a class="btn ghost" target="_blank" href="https://fernusfirstblob.blob.core.windows.net/uploadstore/58/zk/media/model-egitim-okuma-yazma-seti.zip">📦 Okuma Yazma Setini indir</a><a class="btn ghost" target="_blank" href="https://apps.apple.com/us/app/model-mobil-k%C3%BCt%C3%BCphane/id1504875354">📱 Model Mobil Kütüphane (iPhone)</a><a class="btn ghost" target="_blank" href="https://www.modelogretmen.com/sayfa-icerik.php?kid=cl1">🌐 1. Sınıflar sayfası</a></div>
+  <p class="mut">Model'in kitapları kendi kütüphanesinde, anahtar kodla açılır; buradan tek dokunuşla açabilirsin. Kitaplardan PDF olarak indirdiklerini 📖 Kitap bölümüne yüklersen yazma tahtası, spot ve diğer araçlarla birlikte kullanırsın.</p>
+  <div class="anadd"><input id="mlKod" value="${esc(mlCode())}"><button class="btn ghost" onclick="S.settings.modelKod=$('#mlKod').value.trim();save();toast('Kod kaydedildi');anRender()">Kodu kaydet</button></div></div>`,
+};
+function anAdd(k) {
+  const i = $("#anAdd" + k);
+  const v = ((i && i.value) || "").trim();
+  if (!v) return;
+  const L = new Set(learned());
+  const bad = [...new Set(anLet(v).filter((c) => !L.has(c)))];
+  if (
+    bad.length &&
+    !confirm(
+      `Bu yazıda henüz öğrenilmemiş sesler var: ${bad.join(", ")}. Yine de eklensin mi? (O sesler öğrenilince görünür.)`,
+    )
+  )
+    return;
+  const key = k === "W" ? "anCustomW" : "anCustomS";
+  (S.profile[key] = S.profile[key] || []).push(v);
+  save();
+  toast("➕ Eklendi");
+  anRender();
+}
+async function anAI() {
+  const out = $("#anAiOut");
+  const L = learned();
+  out.innerHTML = '<p class="mut">✨ Yazılıyor…</p>';
+  let txt = "";
+  try {
+    await zStream(
+      `1. sınıf ilk okuma-yazma (ses temelli cümle yöntemi) için yalnızca şu harfleri kullanarak 12 kısa, anlamlı, çocuğa uygun Türkçe cümle yaz: ${L.join(", ")}. Bu listede olmayan HİÇBİR harfi kullanma (büyük harfler dahil). Özel isim kullanabilirsin (ör. Ela, Ali, Nil) ama yine sadece bu harflerle. Her satıra bir cümle yaz, numara koyma, açıklama yazma.`,
+      (t) => {
+        txt = t;
+      },
+    );
+    const lines = txt
+      .split(/\n+/)
+      .map((s) => s.replace(/^[\s\-•*\d.)]+/, "").trim())
+      .filter(Boolean);
+    const Ls = new Set(L);
+    const ok = lines.filter((s) => anOK(s, Ls));
+    out.innerHTML = `<h4>✨ Yapay zekâ önerileri · ${ok.length} uygun${lines.length - ok.length ? ` (${lines.length - ok.length} tanesi öğrenilmemiş ses içerdiği için elendi)` : ""}</h4><div class="ansent">${ok.map((s) => `<button onclick="(S.profile.anCustomS=S.profile.anCustomS||[]).push('${Q(s)}');save();this.disabled=true;this.textContent='✓ '+this.textContent">➕ ${esc(s)}</button>`).join("")}</div>`;
+  } catch (e) {
+    out.innerHTML = `<p class="mut">⚠️ ${esc(e.message)}</p>`;
+  }
+}
+function anGame(k) {
+  anClose();
+  if (RM.role === "phone" && RM.open && typeof rmCmd === "function") {
+    rmCmd("act", { a: "t:" + k });
+    return toast("📺 Oyun tahtada açıldı");
+  }
+  if (!child) startChild();
+  setTimeout(() => {
+    child.act = "sub";
+    child.sub = "an";
+    startTopic(k);
+  }, 250);
+}
+function anLetterBoard() {
+  openLetterBoard(false, learned());
+}
+
+/* ================== SAYFA ÜRETİCİ (tahtada açılır) ================== */
+const ANTF = '"Andika","Comic Sans MS","Segoe UI",sans-serif',
+  ANEF = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+function anPage(title) {
+  const W = 1400,
+    H = 1980,
+    c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, W, H);
+  const col = AN_COL[Math.max(0, anGrpOf(S.profile.anIdx || 0))];
+  g.fillStyle = col + "22";
+  g.fillRect(0, 0, W, 150);
+  g.fillStyle = col;
+  g.fillRect(0, 146, W, 6);
+  g.fillStyle = "#0f172a";
+  g.font = `800 56px ${ANTF}`;
+  g.textAlign = "left";
+  g.textBaseline = "middle";
+  g.fillText(title, 60, 76);
+  g.font = `600 30px ${ANTF}`;
+  g.textAlign = "right";
+  g.fillStyle = col;
+  g.fillText(`${S.settings.student || "Mete"} · ${new Date().toLocaleDateString("tr-TR")}`, W - 60, 76);
+  g.textAlign = "left";
+  return { c, g, W, H, col };
+}
+function anShow(P, title, ans) {
+  const id = uid();
+  if (ans) {
+    WSANS[id] = ans;
+    idbSet("wsans:" + id, ans).catch(() => {});
+  }
+  openBoard({ bg: P.c.toDataURL("image/jpeg", 0.9), title, key: "ann:ws:" + id, kind: "okuma" });
+  toast("📺 Sayfa tahtada açıldı" + (ans ? " · ✅ Cevaplar Matematik grubunda" : ""));
+}
+function hlText(g, t, x, y, cur, base, hl, align) {
+  const tot = g.measureText(t).width;
+  const ta = g.textAlign;
+  g.textAlign = "left";
+  const x0 = align === "center" ? x - tot / 2 : x;
+  g.fillStyle = base;
+  g.fillText(t, x0, y);
+  if (cur) {
+    const ch = [...t];
+    let pre = "";
+    ch.forEach((c) => {
+      if (anLow(c) === cur) {
+        g.fillStyle = "#fff";
+        const w = g.measureText(c).width,
+          px = g.measureText(pre).width;
+        g.fillStyle = hl;
+        g.fillText(c, x0 + px, y);
+      }
+      pre += c;
+    });
+  }
+  g.textAlign = ta;
+  return tot;
+}
+function wrapT(g, t, x, y, maxW, lh, cur) {
+  const words = t.split(" ");
+  let line = "";
+  const lines = [];
+  words.forEach((w) => {
+    const tt = line ? line + " " + w : w;
+    if (g.measureText(tt).width > maxW && line) {
+      lines.push(line);
+      line = w;
+    } else line = tt;
+  });
+  if (line) lines.push(line);
+  lines.forEach((l, i) => hlText(g, l, x, y + i * lh, cur, "#0f172a", "#e11d48"));
+  return y + lines.length * lh;
+}
+function lines4(g, x, y, w, h) {
+  g.save();
+  g.lineWidth = 2;
+  g.strokeStyle = "#93c5fd";
+  g.beginPath();
+  g.moveTo(x, y);
+  g.lineTo(x + w, y);
+  g.moveTo(x, y + h);
+  g.lineTo(x + w, y + h);
+  g.stroke();
+  g.strokeStyle = "#fca5a5";
+  g.setLineDash([10, 8]);
+  g.beginPath();
+  g.moveTo(x, y + h * 0.33);
+  g.lineTo(x + w, y + h * 0.33);
+  g.stroke();
+  g.setLineDash([]);
+  g.strokeStyle = "#ef4444";
+  g.beginPath();
+  g.moveTo(x, y + h * 0.66);
+  g.lineTo(x + w, y + h * 0.66);
+  g.stroke();
+  g.restore();
+}
+function dotted(g, t, x, y, size) {
+  g.save();
+  g.font = `500 ${size}px ${ANTF}`;
+  g.setLineDash([2, 10]);
+  g.lineWidth = 6;
+  g.strokeStyle = "#64748b";
+  g.lineCap = "round";
+  g.strokeText(t, x, y);
+  g.restore();
+}
+function anPgSes() {
+  const c = anCur(),
+    se = AN_SES[c] || ["🔤", "", ""];
+  const P = anPage(`${c.toLocaleUpperCase("tr")} ${c} Sesi`);
+  const { g, W } = P;
+  g.font = `800 400px ${ANTF}`;
+  g.textAlign = "center";
+  g.fillStyle = P.col;
+  g.fillText(c.toLocaleUpperCase("tr") + c, W / 2 - 140, 470);
+  g.font = `220px ${ANEF}`;
+  g.fillText(se[0], W - 260, 470);
+  g.font = `500 46px ${ANTF}`;
+  g.textAlign = "left";
+  wrapT(g, se[1], 90, 760, W - 180, 62, c);
+  const P2 = pickN(
+    TRW.filter((x) => anHas(x.w, c)),
+    6,
+  );
+  P2.forEach((x, i) => {
+    const cx = 240 + (i % 3) * 460,
+      cy = 1120 + Math.floor(i / 3) * 430;
+    g.fillStyle = "#f8fafc";
+    g.strokeStyle = "#e2e8f0";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.roundRect(cx - 200, cy - 170, 400, 370, 30);
+    g.fill();
+    g.stroke();
+    g.font = `170px ${ANEF}`;
+    g.textAlign = "center";
+    g.fillText(x.e, cx, cy);
+    g.font = `700 64px ${ANTF}`;
+    hlText(g, x.w, cx, cy + 140, c, "#0f172a", "#e11d48", "center");
+  });
+  g.textAlign = "left";
+  anShow(P, `${c.toLocaleUpperCase("tr")} sesi`);
+}
+function anPgBul() {
+  const c = anCur();
+  const yes = pickN(
+      TRW.filter((x) => anHas(x.w, c)),
+      6,
+    ),
+    no = pickN(
+      TRW.filter((x) => !anHas(x.w, c)),
+      6,
+    );
+  const all = shuffle([...yes, ...no]);
+  const P = anPage(`İçinde ${c.toLocaleUpperCase("tr")} sesi olanları daire içine al`);
+  const { g, W } = P;
+  const ans = [];
+  g.font = `500 40px ${ANTF}`;
+  g.fillStyle = "#475569";
+  g.fillText("Resmin adını söyle. Sesi duyarsan daire çiz ⭕", 70, 210);
+  all.forEach((x, i) => {
+    const cx = 250 + (i % 3) * 450,
+      cy = 420 + Math.floor(i / 3) * 390;
+    g.font = `200px ${ANEF}`;
+    g.textAlign = "center";
+    g.fillText(x.e, cx, cy);
+    g.font = `600 44px ${ANTF}`;
+    g.fillStyle = "#64748b";
+    g.fillText(x.w, cx, cy + 150);
+    if (anHas(x.w, c)) ans.push([+(cx / W).toFixed(3), +((cy - 60) / 1980).toFixed(3), "⭕"]);
+  });
+  g.textAlign = "left";
+  anShow(P, `${c} sesini bul`, ans);
+}
+function anPgHece() {
+  const s = anSyl(),
+    c = anCur();
+  const P = anPage("Hece Tablosu");
+  const { g, W } = P;
+  const V = s.V,
+    C = s.C;
+  const cw = Math.min(240, (W - 220) / (V.length + 1)),
+    ch = Math.min(170, (1700 - 160) / (C.length + V.length + 2));
+  const grid = (rows, cols, y0, f, lbl) => {
+    g.font = `800 ${Math.min(64, ch * 0.55)}px ${ANTF}`;
+    g.textAlign = "center";
+    g.fillStyle = "#94a3b8";
+    g.fillText(lbl, 100, y0 - 10);
+    cols.forEach((v, j) => {
+      g.fillStyle = "#e11d48";
+      g.fillText(v, 100 + (j + 1) * cw, y0 + ch * 0.55);
+    });
+    rows.forEach((r, i) => {
+      const y = y0 + (i + 1) * ch;
+      g.fillStyle = "#0f172a";
+      g.fillText(r, 100, y + ch * 0.55);
+      cols.forEach((v, j) => {
+        const h = f(r, v);
+        g.fillStyle = h.includes(c) ? "#fef3c7" : "#f8fafc";
+        g.fillRect(100 + (j + 1) * cw - cw / 2 + 6, y + 6, cw - 12, ch - 12);
+        hlText(g, h, 100 + (j + 1) * cw, y + ch * 0.6, c, "#0f172a", "#e11d48", "center");
+      });
+    });
+    return y0 + (rows.length + 1) * ch;
+  };
+  let y = grid(C, V, 200, (r, v) => r + v, "açık");
+  grid(V, C, y + 60, (r, v) => r + v, "kapalı");
+  g.textAlign = "left";
+  anShow(P, "Hece tablosu");
+}
+function anPgKelime() {
+  const c = anCur();
+  const W0 = anWords();
+  const w = shuffle(W0.filter((x) => anHas(x, c)))
+    .slice(0, 16)
+    .concat(shuffle(W0.filter((x) => !anHas(x, c))).slice(0, 8))
+    .slice(0, 24);
+  const P = anPage("Kelimeleri Oku");
+  const { g, W } = P;
+  w.forEach((x, i) => {
+    const cx = 260 + (i % 3) * 440,
+      cy = 300 + Math.floor(i / 3) * 205;
+    g.fillStyle = i % 2 ? "#f8fafc" : "#eef2ff";
+    g.beginPath();
+    g.roundRect(cx - 200, cy - 80, 400, 160, 24);
+    g.fill();
+    g.font = `700 ${x.length > 7 ? 58 : 72}px ${ANTF}`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    hlText(g, x, cx, cy, c, "#0f172a", "#e11d48", "center");
+  });
+  g.textAlign = "left";
+  anShow(P, "Kelime okuma");
+}
+function anPgPiramit() {
+  const c = anCur();
+  const W0 = anWords().filter((x) => anHas(x, c) && heceOf(x).length >= 2);
+  const N = anNames(),
+    V = AN_VERB.filter((v) => anOK(v));
+  const P = anPage("Okuma Piramidi");
+  const { g, W } = P;
+  let y = 260;
+  pickN(W0, 3).forEach((w) => {
+    const h = heceOf(w);
+    const rows = [h[0], h.slice(0, 2).join(""), w];
+    if (V.length) rows.push(`${w} ${V[ri(V.length)]}`);
+    if (N.length && V.length) rows.push(`${N[ri(N.length)]}, ${w} ${V[ri(V.length)]}.`);
+    rows.forEach((r, i) => {
+      g.font = `700 ${60}px ${ANTF}`;
+      g.textAlign = "center";
+      hlText(g, r, W / 2, y + i * 82, c, "#0f172a", "#e11d48", "center");
+    });
+    y += rows.length * 82 + 90;
+    g.strokeStyle = "#e2e8f0";
+    g.beginPath();
+    g.moveTo(200, y - 60);
+    g.lineTo(W - 200, y - 60);
+    g.stroke();
+  });
+  g.textAlign = "left";
+  anShow(P, "Okuma piramidi");
+}
+function anPgEksik() {
+  const c = anCur();
+  const L = new Set(learned());
+  let pool = TRW.filter((x) => anLow(x.w).split(c).length === 2 && x.w.length <= 7 && anOK(x.w, L));
+  if (pool.length < 6) pool = TRW.filter((x) => anLow(x.w).split(c).length === 2 && x.w.length <= 7);
+  const it = pickN(pool, 8);
+  const P = anPage(`Eksik harfi yaz: ${c}`);
+  const { g, W, H } = P;
+  const ans = [];
+  it.forEach((x, i) => {
+    const cy = 290 + i * 205;
+    g.font = `130px ${ANEF}`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(x.e, 200, cy);
+    g.font = `700 80px ${ANTF}`;
+    g.textAlign = "left";
+    let xx = 380;
+    [...x.w].forEach((ch) => {
+      if (anLow(ch) === c) {
+        g.strokeStyle = "#6366f1";
+        g.lineWidth = 5;
+        g.setLineDash([10, 8]);
+        g.strokeRect(xx, cy - 55, 80, 110);
+        g.setLineDash([]);
+        ans.push([+((xx + 40) / W).toFixed(3), +(cy / H).toFixed(3), c]);
+        xx += 100;
+      } else {
+        g.fillStyle = "#0f172a";
+        g.fillText(ch, xx, cy);
+        xx += g.measureText(ch).width + 2;
+      }
+    });
+  });
+  anShow(P, "Eksik harf", ans);
+}
+function anPgEsle() {
+  const L = new Set(learned());
+  let pool = TRW.filter((x) => anOK(x.w, L));
+  if (pool.length < 5) pool = TRW.filter((x) => anHas(x.w, anCur()));
+  const seenE = new Set();
+  const it = shuffle(pool)
+    .filter((x) => !seenE.has(x.e) && seenE.add(x.e))
+    .slice(0, 6);
+  const rt = shuffle(it.slice());
+  const P = anPage("Kelimeyi resmiyle eşleştir");
+  const { g, W, H } = P;
+  const ans = [];
+  it.forEach((x, i) => {
+    const y = 330 + i * 260;
+    g.font = `700 70px ${ANTF}`;
+    g.textAlign = "left";
+    g.textBaseline = "middle";
+    hlText(g, x.w, 120, y, anCur(), "#0f172a", "#e11d48");
+    g.fillStyle = "#6366f1";
+    g.beginPath();
+    g.arc(560, y, 16, 0, 7);
+    g.fill();
+    const j = rt.indexOf(x);
+    ans.push([0.42, +(y / H).toFixed(3), "→" + (j + 1)]);
+  });
+  rt.forEach((x, i) => {
+    const y = 330 + i * 260;
+    g.fillStyle = "#6366f1";
+    g.beginPath();
+    g.arc(860, y, 16, 0, 7);
+    g.fill();
+    g.font = `170px ${ANEF}`;
+    g.textAlign = "center";
+    g.fillText(x.e, 1100, y);
+    g.font = `700 36px ${ANTF}`;
+    g.fillStyle = "#94a3b8";
+    g.fillText(String(i + 1), 1290, y - 80);
+  });
+  g.textAlign = "left";
+  anShow(P, "Eşleştirme", ans);
+}
+function anPgCumle() {
+  const S2 = pickN(anSentences(), 10);
+  const P = anPage("Cümleleri Oku");
+  const { g, W } = P;
+  let y = 270;
+  S2.forEach((s, i) => {
+    g.fillStyle = AN_COL[i % 5];
+    g.beginPath();
+    g.arc(105, y, 28, 0, 7);
+    g.fill();
+    g.fillStyle = "#fff";
+    g.font = `800 30px ${ANTF}`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(i + 1, 105, y + 2);
+    g.textAlign = "left";
+    g.font = `600 60px ${ANTF}`;
+    y = wrapT(g, s, 160, y, W - 220, 76, anCur()) + 80;
+  });
+  anShow(P, "Cümle okuma");
+}
+function anPgMetin(i) {
+  const T2 = anTexts();
+  const x = T2[i || 0] || T2[0];
+  if (!x) return toast("Metin için biraz daha ses gerekiyor");
+  const P = anPage("📖 " + x.t);
+  const { g, W } = P;
+  g.font = `600 62px ${ANTF}`;
+  g.textBaseline = "middle";
+  let y = wrapT(g, x.m, 90, 280, W - 180, 96, anCur()) + 70;
+  g.fillStyle = "#4f46e5";
+  g.font = `800 48px ${ANTF}`;
+  g.fillText("Soruları cevaplayalım (5N1K)", 90, y);
+  y += 90;
+  x.q.forEach((q, k) => {
+    g.fillStyle = "#0f172a";
+    g.font = `600 46px ${ANTF}`;
+    g.fillText(`${k + 1}. ${q}`, 90, y);
+    lines4(g, 90, y + 40, W - 180, 110);
+    y += 200;
+  });
+  anShow(P, x.t);
+}
+function anPgYazma() {
+  const c = anCur();
+  const P = anPage(`${c.toLocaleUpperCase("tr")} ${c} harfini yazalım`);
+  const { g, W } = P;
+  g.font = `600 36px ${ANTF}`;
+  g.fillStyle = "#475569";
+  g.fillText("✏️ " + ((AN_SES[c] || [])[2] || ""), 70, 210);
+  for (let r = 0; r < 7; r++) {
+    const y = 300 + r * 230,
+      h = 170;
+    lines4(g, 70, y, W - 140, h);
+    const sz = h * 1.05;
+    for (let k = 0; k < (r < 2 ? 7 : r < 5 ? 4 : 0); k++) {
+      dotted(g, r === 0 ? c.toLocaleUpperCase("tr") : c, 110 + k * 180, y + h * 0.66, sz);
+    }
+    if (r === 0 || r === 1) {
+      g.fillStyle = "#16a34a";
+      g.beginPath();
+      g.arc(110 + 8, y + h * 0.3, 10, 0, 7);
+      g.fill();
+    }
+  }
+  anShow(P, `${c} yazma`);
+}
+function anPgHeceYaz() {
+  const s = anSyl(),
+    c = anCur();
+  const H0 = shuffle(s.open.filter((h) => h.includes(c)))
+    .concat(shuffle(s.open))
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .slice(0, 7);
+  const P = anPage("Heceleri yazalım");
+  const { g, W } = P;
+  H0.forEach((h, r) => {
+    const y = 230 + r * 245,
+      hh = 170;
+    lines4(g, 70, y, W - 140, hh);
+    for (let k = 0; k < 4; k++) dotted(g, h, 110 + k * 320, y + hh * 0.66, hh * 1.0);
+  });
+  anShow(P, "Hece yazma");
+}
+function anPgDikte() {
+  const W0 = anWords().filter((w) => w.length <= 6);
+  const c = anCur();
+  const d = shuffle(W0.filter((w) => anHas(w, c)))
+    .slice(0, 5)
+    .concat(shuffle(W0.filter((w) => !anHas(w, c))).slice(0, 3))
+    .slice(0, 8);
+  AN.dk = d;
+  const P = anPage("Dikte");
+  const { g, W, H } = P;
+  const ans = [];
+  d.forEach((w, i) => {
+    const y = 230 + i * 215;
+    g.fillStyle = "#6366f1";
+    g.font = `800 40px ${ANTF}`;
+    g.fillText(`${i + 1}.`, 70, y + 100);
+    lines4(g, 140, y + 30, W - 210, 150);
+    ans.push([0.6, +((y + 110) / H).toFixed(3), w]);
+  });
+  anShow(P, "Dikte", ans);
+  AN.tab = "yazma";
+  if ($("#anp")) anRender();
+  say("Dikte başlıyor. Birinci kelime: " + (d[0] || ""));
+}
+
+/* ================== OKUMA KARTLARI (tahta ile eşzamanlı) ================== */
+let AK = null;
+function akStart(kind) {
+  const s = anSyl();
+  const items =
+    kind === "hece"
+      ? shuffle(s.open.concat(s.closed)).slice(0, 20)
+      : kind === "kelime"
+        ? shuffle(anWords()).slice(0, 20)
+        : shuffle(anSentences()).slice(0, 10);
+  if (!items.length) return toast("Henüz yeterli içerik yok");
+  AK = { on: 1, kind, items, i: 0, res: {}, t0: Date.now(), cur: anCur(), end: 0 };
+  akRender();
+  akSend();
+}
+function akSend() {
+  mrSend({ t: "ak", ak: AK });
+}
+function akRender() {
+  let el = $("#ankart");
+  if (!AK || !AK.on) {
+    if (el) el.remove();
+    return;
+  }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "ankart";
+    document.body.appendChild(el);
+  }
+  if (AK.end) {
+    const n = AK.items.length,
+      ok = Object.values(AK.res).filter((v) => v === 1).length,
+      sec = Math.round((AK.end - AK.t0) / 1000);
+    el.innerHTML = `<div class="akin"><h2>🎉 Bitti!</h2><p class="akres">${ok} / ${n} doğru · ${sec} saniye${AK.kind !== "cumle" && sec ? ` · dakikada ${Math.round((ok * 60) / sec)} ${AK.kind === "hece" ? "hece" : "kelime"}` : ""}</p><div class="akb"><button onclick="akStart(AK.kind)">🔁 Yeniden</button><button onclick="akClose()">✕ Kapat</button></div></div>`;
+    return;
+  }
+  const t = AK.items[AK.i];
+  const fs = t.length > 18 ? "6vw" : t.length > 8 ? "10vw" : "18vw";
+  const sec = Math.round((Date.now() - AK.t0) / 1000);
+  el.innerHTML = `<div class="akin"><div class="akt"><span>${{ hece: "🧱 Hece", kelime: "📗 Kelime", cumle: "📜 Cümle" }[AK.kind]} kartları · ${AK.i + 1}/${AK.items.length}</span><span id="aksec">⏱️ ${sec} sn</span><button onclick="akClose()">✕</button></div><div class="akw" style="font-size:${fs}">${anHL(t, AK.cur)}</div><div class="akb"><button onclick="akGo(-1)">◀</button><button onclick="say('${Q(t)}')">🔊</button><button class="ok" onclick="akMark(1)">✅ Okudu</button><button class="re" onclick="akMark(0)">🔁 Tekrar</button><button onclick="akGo(1)">▶</button></div></div>`;
+  clearInterval(akRender._t);
+  akRender._t = setInterval(() => {
+    const s = $("#aksec");
+    if (!s || !AK || AK.end) {
+      clearInterval(akRender._t);
+      return;
+    }
+    s.textContent = `⏱️ ${Math.round((Date.now() - AK.t0) / 1000)} sn`;
+  }, 1000);
+}
+function akMark(v) {
+  AK.res[AK.i] = v;
+  try {
+    v ? tone(880, 0.08) : tone(420, 0.08);
+  } catch (e) {}
+  if (AK.i >= AK.items.length - 1) return akEnd();
+  AK.i++;
+  akRender();
+  akSend();
+}
+function akGo(d) {
+  AK.i = Math.max(0, Math.min(AK.items.length - 1, AK.i + d));
+  akRender();
+  akSend();
+}
+function akEnd() {
+  AK.end = Date.now();
+  const n = AK.items.length,
+    ok = Object.values(AK.res).filter((v) => v === 1).length;
+  (S.profile.anReads = S.profile.anReads || []).push({
+    d: new Date().toISOString(),
+    k: AK.kind,
+    n,
+    ok,
+    sec: Math.round((AK.end - AK.t0) / 1000),
+  });
+  save();
+  if (ok >= n * 0.7) stCele("Harika okudun " + (S.settings.student || "Mete") + "!");
+  akRender();
+  akSend();
+}
+function akClose() {
+  if (AK) AK.on = 0;
+  akRender();
+  akSend();
+  AK = null;
+}
+
+/* ================== MODEL KÜTÜPHANE ================== */
+const mlCode = () => S.settings.modelKod || "9EMM42ZE";
+const mlUrl = () => "https://www.modelogretmen.com/zkitapx.php?code=" + btoa(mlCode());
+function mlOpen(onBoard) {
+  if (onBoard) {
+    if (!mrOn()) return toast("Önce telefonu tahtaya bağla (📱 Kumanda)");
+    mrSend({ t: "mlib" });
+    return toast("📺 Kütüphane tahtada açılıyor");
+  }
+  let el = $("#mlib");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "mlib";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<div class="mlbar"><b>📚 Model Kütüphane · 1. Sınıf</b><span>Kod: <code>${esc(mlCode())}</code> <button onclick="copyText('${Q(mlCode())}')">📋</button></span><button onclick="window.open(mlUrl(),'_blank')">↗ Yeni sekme</button><button onclick="mlClose()">✕</button></div><iframe src="${mlUrl()}" allow="fullscreen; autoplay" referrerpolicy="no-referrer-when-downgrade"></iframe><p class="mlnote">Sayfa açılmazsa "↗ Yeni sekme"ye dokun. Kod istenirse 📋 ile kopyalayıp yapıştır.</p>`;
+}
+function mlClose(send) {
+  const e = $("#mlib");
+  if (e) e.remove();
+  if (send !== false && mrOn()) mrSend({ t: "mlibx" });
+}
+
+/* ================== ÇOCUK EKRANI: ANETİL OYUNLARI ================== */
+(function () {
+  const old = Object.assign({}, SUBJ);
+  Object.keys(SUBJ).forEach((k) => delete SUBJ[k]);
+  SUBJ.an = { n: "ANETİL Okuma", i: "🔤", c: "#e11d48" };
+  Object.assign(SUBJ, old);
+})();
+const anOpt = (l) => T(`<span class="qletter">${esc(l.toLocaleUpperCase("tr"))}${esc(l)}</span>`, false, l);
+topic("an_ses", "an", "İlk Sesi Bul", "👂", () => {
+  const L = learned(),
+    c = anCur();
+  const pool = TRW.filter((x) => L.includes(anLow(x.w)[0]) && anLow(x.w)[0] !== "ğ");
+  const pc = pool.filter((x) => anLow(x.w)[0] === c);
+  const x = (ri(2) && pc.length ? pc : pool)[ri((ri(2) && pc.length ? pc : pool).length)] || TRW[0];
+  const f = anLow(x.w)[0];
+  const others = pickN(
+    L.filter((l) => l !== f),
+    2,
+  );
+  return {
+    say: `${x.w}. ${x.w} hangi sesle başlıyor?`,
+    show: big(x.e),
+    opts: shuffle([f, ...others]).map((l) => Object.assign(anOpt(l), { ok: l === f })),
+    after: `Evet! ${x.w}, ${f} sesiyle başlıyor.`,
+  };
+});
+topic("an_var", "an", "Bu Ses Var mı?", "🔍", () => {
+  const c = anCur();
+  const has = !!ri(2);
+  const pool = TRW.filter((x) => anHas(x.w, c) === has);
+  const x = pool[ri(pool.length)];
+  return {
+    say: `${x.w}. ${x.w} kelimesinde ${c} sesi var mı?`,
+    show: big(x.e) + `<div class="qhint">${c.toLocaleUpperCase("tr")}${c} sesi</div>`,
+    opts: [
+      T('<span class="qtxt">✅ Var</span>', has, "var"),
+      T('<span class="qtxt">❌ Yok</span>', !has, "yok"),
+    ],
+    wide: true,
+    after: has ? `Evet, ${x.w} kelimesinde ${c} var!` : `Doğru, ${x.w} kelimesinde ${c} yok.`,
+  };
+});
+topic("an_yer", "an", "Ses Nerede?", "📍", () => {
+  const c = anCur();
+  const pool = TRW.filter((x) => anLow(x.w).split(c).length === 2 && x.w.length >= 3);
+  const x = pool[ri(pool.length)] || TRW[0];
+  const i = anLow(x.w).indexOf(c);
+  const p = i === 0 ? 0 : i === x.w.length - 1 ? 2 : 1;
+  return {
+    say: `${x.w}. ${c} sesi ${x.w} kelimesinin neresinde?`,
+    show: big(x.e),
+    opts: [
+      T('<span class="qtxt">⬅️ Başında</span>', p === 0, "başında"),
+      T('<span class="qtxt">⏺️ Ortasında</span>', p === 1, "ortasında"),
+      T('<span class="qtxt">➡️ Sonunda</span>', p === 2, "sonunda"),
+    ],
+    wide: true,
+    after: `Evet, ${["başında", "ortasında", "sonunda"][p]}!`,
+  };
+});
+topic("an_hece", "an", "Heceyi Bul", "🗣️", () => {
+  const s = anSyl(),
+    c = anCur();
+  const all = s.open.concat(s.closed);
+  const pc = all.filter((h) => h.includes(c));
+  const t = (pc.length ? pc : all)[ri((pc.length ? pc : all).length)] || "a";
+  const set = new Set([t]);
+  let g = 0;
+  while (set.size < 3 && g++ < 50) set.add(all[ri(all.length)]);
+  return {
+    say: `${t}. Hangisi ${t}?`,
+    show: big("👂"),
+    opts: shuffle([...set]).map((h) => T(`<span class="qletter">${esc(h)}</span>`, h === t, h)),
+    after: `Evet, ${t}!`,
+  };
+});
+topic("an_eksik", "an", "Eksik Harf", "🧩", () => {
+  const c = anCur(),
+    L = learned();
+  const pool = TRW.filter((x) => anLow(x.w).split(c).length === 2 && x.w.length <= 6);
+  const x = pool[ri(pool.length)] || TRW[0];
+  const shown = [...x.w].map((ch) => (anLow(ch) === c ? "_" : ch)).join("");
+  const others = pickN(
+    L.filter((l) => l !== c),
+    2,
+  );
+  return {
+    say: `${x.w}. Hangi harf eksik?`,
+    show: big(x.e) + `<div class="qword">${esc(shown)}</div>`,
+    opts: shuffle([c, ...others]).map((l) => Object.assign(anOpt(l), { ok: l === c })),
+    after: `Evet! ${x.w}.`,
+  };
+});
+topic("an_oku", "an", "Oku, Resmi Bul", "📗", () => TOP.tr_oku.gen());
+topic("an_cumle", "an", "Cümleyi Oku", "📜", () => {
+  const L = new Set(learned());
+  const O = TRW.filter((x) => anOK(x.w, L) && x.w.length > 1);
+  const pool = O.length >= 3 ? O : TRW.slice(0, 30);
+  const N = anNames();
+  const V = AN_VERB.filter((v) => anOK(v, L));
+  const opts = pickN(pool, 3);
+  const x = opts[0];
+  const s = `${N.length ? N[ri(N.length)] : "Ela"}, ${x.w} ${V.length ? V[ri(V.length)] : "al"}.`;
+  return {
+    say: "Cümleyi oku. Hangi resim?",
+    sayBtn: s,
+    show: `<div class="qword" style="font-size:clamp(28px,6vw,64px)">${esc(s)}</div>`,
+    opts: shuffle(opts).map((o) => T(o.e, o === x, o.w)),
+    after: `Harika okudun! ${s}`,
+  };
+});
+topic("an_kur", "an", "Hece Birleştir", "🧱", null, { type: "build", rounds: 4 });
+topic("an_sira", "an", "Cümle Kur", "🧩", null, { type: "order", rounds: 3 });
+topic("an_yaz", "an", "Harf Yaz", "✍️", null, { type: "write" });
+topic("an_dikte", "an", "Dikte", "📝", null, { type: "dikte" });
+function actOrder(t) {
+  const st = child.st || (child.st = { r: 0 });
+  if (st.r >= t.rounds) return finishTopic();
+  if (!st.s) {
+    const S2 = anSentences().filter((s) => {
+      const n = s.replace(/[.,!?]/g, "").split(/\s+/).length;
+      return n >= 2 && n <= 5;
+    });
+    const s = S2.length ? S2[ri(S2.length)] : "Ela, al.";
+    st.s = s;
+    st.toks = s.replace(/[.,!?]/g, "").split(/\s+/);
+    st.cards = shuffle(st.toks.map((w, i) => ({ w, i })));
+    st.n = 0;
+    st.first = true;
+    setTimeout(() => {
+      if (child && child.st === st) say(s);
+    }, 300);
+  }
+  kid(
+    `<div class="kq"><button class="kbig" onclick="say('${Q(st.s)}')">🔊</button>${dots(st.r, t.rounds)}</div><div class="qcard"><div class="osent">${st.toks.map((w, i) => `<span class="oslot ${i < st.n ? "on" : ""}">${i < st.n ? esc(w) : "&nbsp;"}</span>`).join("")}</div></div><div class="kopts wide">${st.cards.map((c, k) => (c.used ? "" : `<button class="kcard wide" onclick="ordPick(${k})"><span class="qtxt">${esc(c.w)}</span></button>`)).join("")}</div>`,
+  );
+}
+function ordPick(k) {
+  const st = child.st;
+  if (!st || st.lock) return;
+  const c = st.cards[k];
+  if (c.w === st.toks[st.n]) {
+    c.used = true;
+    st.n++;
+    try {
+      tone(700 + st.n * 80, 0.08);
+    } catch (e) {}
+    if (st.n >= st.toks.length) {
+      qLog(st.first);
+      addStar(1);
+      st.lock = true;
+      say("Harika! " + st.s);
+      setTimeout(() => {
+        st.lock = false;
+        st.r++;
+        st.s = null;
+        render();
+      }, 1700);
+    }
+    render();
+  } else {
+    if (st.first) {
+      qLog(false);
+      st.first = false;
+    }
+    say("Bir daha dene.");
+  }
+}
+const _rt11 = renderTopic;
+renderTopic = function () {
+  const t = TOP[child.topic];
+  if (t && t.type === "order") return actOrder(t);
+  return _rt11();
+};
+const _stt11 = startTopic;
+startTopic = function (k) {
+  const t = TOP[k];
+  if (t && t.type === "dikte") {
+    child.topic = k;
+    return anDikteBoard();
+  }
+  return _stt11(k);
+};
+function anDikteBoard() {
+  const W0 = anWords().filter((w) => w.length <= 6);
+  const c = anCur();
+  AN.dq = shuffle(W0.filter((w) => anHas(w, c))).slice(0, 4);
+  if (!AN.dq.length) AN.dq = ["ana"];
+  AN.di = 0;
+  openBoard({
+    bg: makePaper(null),
+    title: "Dikte",
+    fromChild: true,
+    topic: "an_dikte",
+    extra:
+      '<button onclick="anDikteSay()" title="Kelimeyi dinle">🔊</button><button onclick="anDikteNext()" title="Sonraki kelime">⏭️</button>',
+  });
+  setTimeout(anDikteSay, 600);
+}
+function anDikteSay() {
+  const w = AN.dq && AN.dq[AN.di];
+  if (w) say(`${AN.di + 1}. kelime: ${w}. ${w}.`);
+}
+function anDikteNext() {
+  if (!AN.dq) return;
+  AN.di++;
+  if (AN.di >= AN.dq.length) {
+    AN.di = AN.dq.length - 1;
+    return say("Dikte bitti! Bitti düğmesine bas.");
+  }
+  anDikteSay();
+}
+const _subHTML11 = subHTML;
+subHTML = function (k) {
+  let h = _subHTML11(k);
+  if (k === "an") {
+    const c = anCur();
+    h = h.replace(
+      "Bir oyun seç",
+      `Bu haftanın sesi: ${c.toLocaleUpperCase("tr")}${c} · Öğrendiklerimiz: ${learned()
+        .map((l) => l.toLocaleUpperCase("tr"))
+        .join(" ")}`,
+    );
+  }
+  return h;
+};
+
+/* ================== EŞİTLEME, GİRİŞLER, RAPOR ================== */
+const _rmData11 = rmData;
+rmData = function (d) {
+  if (d && d.t === "ak") {
+    AK = d.ak && d.ak.on ? d.ak : null;
+    akRender();
+    return;
+  }
+  if (d && d.t === "mlib") {
+    mlOpen();
+    return;
+  }
+  if (d && d.t === "mlibx") {
+    mlClose(false);
+    return;
+  }
+  return _rmData11(d);
+};
+const _vDers11 = vDers;
+vDers = function () {
+  const c = anCur();
+  return (
+    `<section class="card ancard" onclick="anOpen()"><div class="anbadge">${c.toLocaleUpperCase("tr")}${c}</div><div><h3>🔤 ANETİL Okuma-Yazma Merkezi</h3><p class="mut">${S.profile.method === "anetil" ? `Sınıf ${c.toLocaleUpperCase("tr")} sesinde · ${learned().length} ses · ${anWords().length} kelime · ${anSentences().length} cümle` : "Basara hece yöntemi açık"}</p></div><span class="go">›</span></section>` +
+    _vDers11()
+  );
+};
+const _vAna11 = vAna;
+vAna = function () {
+  const h = _vAna11();
+  const c = anCur();
+  const card = `<section class="card ancard" onclick="anOpen()"><div class="anbadge">${c.toLocaleUpperCase("tr")}${c}</div><div><h3>🔤 ANETİL Merkezi</h3><p class="mut">Ses, hece, kelime, cümle, metin, sayfalar, okuma kartları · 📚 Model Kütüphane</p></div><span class="go">›</span></section>`;
+  const i = h.indexOf("<section");
+  return i >= 0 ? h.slice(0, i) + card + h.slice(i) : card + h;
+};
+const _lettersRep11 = lettersRep;
+lettersRep = function () {
+  const base = _lettersRep11();
+  if (S.profile.method !== "anetil") return base;
+  const p = anProg(),
+    L = learned();
+  const cnt = (k) => L.filter((l) => (p[l] || {})[k]).length;
+  const r = (S.profile.anReads || []).slice(-1)[0];
+  const c = anCur();
+  return (
+    base +
+    `<div class="sec"><h2>📚 ANETİL okuma-yazma · sınıf ${c.toLocaleUpperCase("tr")} sesinde</h2><p class="m">${AN_SK.map((s) => `${s[1]} ${s[2]}: <b>${cnt(s[0])}/${L.length}</b>`).join(" · ")}</p>${r ? `<p class="m">Son okuma kartı: ${{ hece: "hece", kelime: "kelime", cumle: "cümle" }[r.k]} · ${r.ok}/${r.n} doğru · ${r.sec} sn</p>` : ""}<p class="m">Okuyabildiği kelime sayısı: <b>${anWords().length}</b> · cümle: <b>${anSentences().length}</b></p></div>`
+  );
+};
+const _rmUI11 = rmUI;
+rmUI = function () {
+  _rmUI11();
+  const el = $("#remote");
+  if (!el || RM.fold || el.querySelector(".rman")) return;
+  el.insertAdjacentHTML(
+    "beforeend",
+    `<div class="rman"><button onclick="anOpen()">🔤 ANETİL Merkezi</button><button onclick="akStart('kelime')">🃏 Okuma kartları</button><button onclick="mlOpen(true)">📚 Model (tahtada)</button></div>`,
+  );
+};
+
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+#anp{position:fixed;inset:0;z-index:110;background:#f8fafc;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.anin{max-width:980px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 14px 120px}
+.anhd{display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#f8fafc;padding:8px 0;z-index:2}.anhd b{flex:1;font-size:19px}.anhd .x{border:0;background:#e2e8f0;border-radius:12px;width:42px;height:42px;font-size:18px}
+.seg.mini{margin:0}.seg.mini button{padding:6px 10px;font-size:13px}
+.anpath{background:#fff;border-radius:18px;padding:10px;box-shadow:0 2px 10px #0f172a0d;margin-bottom:10px}.anrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:4px 0}.anrow small{width:56px;font-weight:800;font-size:11px}
+.anch{border:2px solid #e2e8f0;background:#fff;border-radius:10px;min-width:48px;height:42px;font-weight:800;font-size:16px;color:#64748b;cursor:pointer}.anch.ok{background:var(--c);border-color:var(--c);color:#fff}.anch.cur{background:#fff;border-color:var(--c);color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 25%,transparent);transform:scale(1.08)}
+.ancur{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 14%,#fff),#fff);border:2px solid color-mix(in srgb,var(--c) 30%,#fff);border-radius:22px;padding:14px;margin-bottom:10px}
+.anbig{font-size:clamp(64px,12vw,110px);font-weight:900;color:var(--c);line-height:1;min-width:1.6em;text-align:center}.ancur p{margin:4px 0 8px}
+.anbtns{display:flex;gap:6px;flex-wrap:wrap}.anbtns button{border:0;background:#fff;border-radius:10px;padding:8px 10px;font-weight:700;box-shadow:0 1px 4px #0f172a1a;cursor:pointer}
+.antabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;position:sticky;top:58px;background:#f8fafc;z-index:2}.antabs button{flex:none;border:0;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;display:flex;gap:6px;align-items:center;box-shadow:0 1px 4px #0f172a14;cursor:pointer}.antabs button.on{background:#4f46e5;color:#fff}
+.anbody h4{margin:14px 0 6px}.ancol{background:#fff;border-radius:14px;padding:10px 12px}
+.anwords{display:flex;flex-wrap:wrap;gap:6px}.anwords button{border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 12px;font-size:20px;font-weight:700;cursor:pointer;display:flex;gap:6px;align-items:center}.anwords i{font-style:normal}
+.anhl{color:#e11d48}
+.ansyl{display:flex;flex-wrap:wrap;gap:6px}.ansyl button{border:0;background:#fff;border-radius:10px;min-width:58px;height:50px;font-size:22px;font-weight:800;box-shadow:0 1px 4px #0f172a14;cursor:pointer}.ansyl button.hl{background:#fef3c7}
+.ansent{display:flex;flex-direction:column;gap:6px}.ansent button{text-align:left;border:0;background:#fff;border-radius:12px;padding:10px 14px;font-size:20px;font-weight:600;box-shadow:0 1px 4px #0f172a14;cursor:pointer}
+.anmet{background:#fff;border-radius:16px;padding:12px 14px;margin-bottom:10px}.anmet p{font-size:21px;line-height:1.6}
+.anact{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.anact.col{flex-direction:column}.anact .btn{text-decoration:none;text-align:center}
+.anadd{display:flex;gap:6px;margin-top:10px}.anadd input{flex:1}
+.anpages{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}.anpages button{border:0;background:#fff;border-radius:16px;padding:14px 8px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 2px 8px #0f172a14;cursor:pointer}.anpages span{font-size:30px}
+.anprog{background:#fff;border-radius:16px;padding:8px;overflow-x:auto}.aph,.apr{display:grid;grid-template-columns:70px repeat(5,1fr);gap:6px;align-items:center;padding:3px 0}.aph span{text-align:center;font-size:20px}.apr b{font-size:18px}.apr button{height:38px;border:2px solid #e2e8f0;background:#fff;border-radius:10px;font-weight:900;color:#16a34a;cursor:pointer}.apr button.on{background:#dcfce7;border-color:#16a34a}
+.anreads{padding-left:18px}.anmodel .mlh{background:linear-gradient(135deg,#fee2e2,#fff);border:2px solid #fecaca;border-radius:16px;padding:12px}.anmodel code{font-size:18px;font-weight:800;color:#b91c1c;background:#fff;padding:2px 8px;border-radius:8px}.anmodel .mlh button{border:0;background:#fff;border-radius:8px;padding:4px 8px}
+.ancard{display:flex;align-items:center;gap:14px;cursor:pointer;background:linear-gradient(135deg,#fff1f2,#fff)!important;border:2px solid #fecdd3}.ancard h3{margin:0}.ancard p{margin:4px 0 0}.anbadge{font-size:40px;font-weight:900;color:#e11d48;background:#fff;border-radius:16px;min-width:76px;height:76px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #e11d4826}.ancard .go{margin-left:auto;font-size:28px;color:#e11d48}
+#ankart{position:fixed;inset:0;z-index:260;background:linear-gradient(160deg,#fff7ed,#fff);display:flex;align-items:center;justify-content:center}.akin{width:100%;max-width:1200px;padding:16px;text-align:center}
+.akt{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;color:#64748b}.akt button{border:0;background:#f1f5f9;border-radius:10px;width:40px;height:40px}
+.akw{font-weight:900;color:#0f172a;margin:6vh 0;line-height:1.15;font-family:"Andika","Comic Sans MS",sans-serif;word-break:break-word}.akw .anhl{color:#e11d48}
+.akb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.akb button{border:0;background:#eef2ff;color:#312e81;border-radius:16px;padding:14px 20px;font-size:22px;font-weight:800;cursor:pointer}.akb .ok{background:#16a34a;color:#fff}.akb .re{background:#f59e0b;color:#fff}.akres{font-size:28px;font-weight:800}
+#mlib{position:fixed;inset:0;z-index:240;background:#fff;display:flex;flex-direction:column}.mlbar{display:flex;align-items:center;gap:8px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:#b91c1c;color:#fff;flex-wrap:wrap}.mlbar b{flex:1}.mlbar code{background:#fff;color:#b91c1c;padding:2px 8px;border-radius:6px;font-weight:800}.mlbar button{border:0;background:#ffffff26;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700}
+#mlib iframe{flex:1;border:0;width:100%}.mlnote{margin:0;padding:6px 10px;font-size:12px;color:#64748b;background:#f8fafc}
+.osent{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.oslot{min-width:90px;padding:10px 14px;border-bottom:5px solid #cbd5e1;font-size:clamp(26px,5vw,48px);font-weight:800}.oslot.on{border-color:#16a34a;color:#16a34a}
+.qhint{font-size:28px;font-weight:800;color:#e11d48;margin-top:6px}
+.rman{display:flex;gap:6px;margin-top:8px;overflow-x:auto}.rman button{flex:none;border:1px solid #fecdd3;background:#fff1f2;color:#9f1239;border-radius:12px;padding:10px 12px;font-weight:700;font-size:15px}
+@media (max-width:600px){.ancur{flex-direction:column;text-align:center}.anbtns{justify-content:center}.antabs{top:54px}}`;
+  document.head.appendChild(s);
+})();
+const anStable = (a, c) => a.filter((x) => anHas(x, c)).concat(a.filter((x) => !anHas(x, c)));
+/* Oyun atölyesine ANETİL listeleri (öğrenilen seslere göre kendiliğinden) */
+const _setsAll11 = setsAll;
+setsAll = function () {
+  const a = _setsAll11();
+  if (S.profile.method !== "anetil") return a;
+  const s = anSyl(),
+    c = anCur();
+  const W = anWords();
+  const extra = [
+    {
+      id: "an_h",
+      name: `🔤 ANETİL heceleri (${c})`,
+      items: anStable(s.open.concat(s.closed), c).slice(0, 24),
+      auto: 1,
+    },
+    { id: "an_k", name: "🔤 ANETİL kelimeleri", items: anStable(W, c).slice(0, 24), auto: 1 },
+    {
+      id: "an_c",
+      name: "🔤 ANETİL cümleleri",
+      items: anSentences()
+        .filter(
+          (x) => !/^\p{Lu}\p{Ll}+, \p{Ll}+ (al|ver|tut|getir|bul|sev|çiz|izle|göster)\.$/u.test(x) || true,
+        )
+        .slice(0, 12),
+      auto: 1,
+    },
+  ].filter((x) => x.items.length);
+  return extra.concat(a.filter((x) => x.id !== "auto" || hmode()));
+};
 
 /* ================== BAŞLAT ================== */
 (function boot() {
