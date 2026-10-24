@@ -7788,11 +7788,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "11.0",
+const APP_VER = "12.0",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 15121,
-  APP_KB = 969;
+  APP_LINES = 18067,
+  APP_KB = 1075;
 const CHANGELOG = [
+  [
+    "12.0",
+    "24 Ekim 2026",
+    "Boyama Dünyası (satranç taşları, at, robot, uzay, araçlar, hayvanlar, doğa, tatlılar, 10 mandala, piksel, sayıya göre toplama-çıkarma boyama, heceye göre Basara boyama, hece ve sayı boyama, serbest çizim; renk adını söyler, gökkuşağı, desen, fırça, çıkartma, tahtayla eşzamanlı, veli raporuna kayıt); 11 okuma oyunu (fare, futbol, şut, baloncuk, düello, kelime tahmin, eşitlik terazisi, dinle-oku, ritmik okuma, resimli dikte, çizgi çalışmaları) hece/kelime/matematik kipli; Basara hece oyunları ve Basara öncelikli yöntem; her ekranda belirgin Geri ve Ana ekran; çocuk ana ekranında Oyun Dünyası; Kod Yolu renkli ve yazılı yönler; yıl sonuna kadar haftalık program (bu hafta sarı)",
+  ],
   [
     "11.0",
     "22 Ekim 2026",
@@ -14919,13 +14924,13 @@ function ordPick(k) {
 const _rt11 = renderTopic;
 renderTopic = function () {
   const t = TOP[child.topic];
-  if (t && t.type === "order") return actOrder(t);
+  if (t && t.k === "an_sira") return actOrder(t);
   return _rt11();
 };
 const _stt11 = startTopic;
 startTopic = function (k) {
   const t = TOP[k];
-  if (t && t.type === "dikte") {
+  if (t && t.k === "an_dikte") {
     child.topic = k;
     return anDikteBoard();
   }
@@ -14995,16 +15000,16 @@ rmData = function (d) {
 };
 const _vDers11 = vDers;
 vDers = function () {
-  const c = anCur();
+  const c = AN_SIRA[S.profile.anIdx || 0];
   return (
-    `<section class="card ancard" onclick="anOpen()"><div class="anbadge">${c.toLocaleUpperCase("tr")}${c}</div><div><h3>🔤 ANETİL Okuma-Yazma Merkezi</h3><p class="mut">${S.profile.method === "anetil" ? `Sınıf ${c.toLocaleUpperCase("tr")} sesinde · ${learned().length} ses · ${anWords().length} kelime · ${anSentences().length} cümle` : "Basara hece yöntemi açık"}</p></div><span class="go">›</span></section>` +
+    `<section class="card ancard" onclick="anOpen()"><div class="anbadge">${c.toLocaleUpperCase("tr")}${c}</div><div><h3>🔤 ANETİL Okuma-Yazma Merkezi</h3><p class="mut">${S.profile.method === "anetil" ? `Sınıf ${c.toLocaleUpperCase("tr")} sesinde · ${learned().length} ses · ${anWords().length} kelime · ${anSentences().length} cümle` : `Sınıf ${c.toLocaleUpperCase("tr")} sesinde · Mete Basara ile ilerliyor (oyunlar Basara ağırlıklı)`}</p></div><span class="go">›</span></section>` +
     _vDers11()
   );
 };
 const _vAna11 = vAna;
 vAna = function () {
   const h = _vAna11();
-  const c = anCur();
+  const c = AN_SIRA[S.profile.anIdx || 0];
   const card = `<section class="card ancard" onclick="anOpen()"><div class="anbadge">${c.toLocaleUpperCase("tr")}${c}</div><div><h3>🔤 ANETİL Merkezi</h3><p class="mut">Ses, hece, kelime, cümle, metin, sayfalar, okuma kartları · 📚 Model Kütüphane</p></div><span class="go">›</span></section>`;
   const i = h.indexOf("<section");
   return i >= 0 ? h.slice(0, i) + card + h.slice(i) : card + h;
@@ -15030,7 +15035,7 @@ rmUI = function () {
   if (!el || RM.fold || el.querySelector(".rman")) return;
   el.insertAdjacentHTML(
     "beforeend",
-    `<div class="rman"><button onclick="anOpen()">🔤 ANETİL Merkezi</button><button onclick="akStart('kelime')">🃏 Okuma kartları</button><button onclick="mlOpen(true)">📚 Model (tahtada)</button></div>`,
+    `<div class="rman"><button onclick="anOpen()">🔤 ANETİL Merkezi</button><button onclick="akStart('kelime')">🃏 Okuma kartları</button><button onclick="mlOpen(true)">📚 Model (tahtada)</button><button onclick="byMenu()">🎨 Boyama</button><button onclick="plPanel()">📅 Bu hafta</button></div>`,
   );
 };
 
@@ -15101,6 +15106,2947 @@ setsAll = function () {
   ].filter((x) => x.items.length);
   return extra.concat(a.filter((x) => x.id !== "auto" || hmode()));
 };
+
+/* ================== v12.0 GEZİNME · BASARA ÖNCELİKLİ · OYUN DÜNYASI · RENKLİ YÖNLER ================== */
+/* Basara'ya geri dön (bir kez): ANETİL merkezi duruyor, oyunlar Basara ağırlıklı */
+if (!S.profile.v12) {
+  S.profile.v12 = 1;
+  S.profile.method = "basara";
+  S.settings.readMode = "hece";
+  save();
+}
+const bsSyl = () => {
+  const h = learnedSyl();
+  return h.length ? h : ["ba", "a", "o"];
+};
+const bsSet = () => new Set(bsSyl());
+function bsWords() {
+  const H = bsSet();
+  return [...new Set(anAllWords())].filter((w) => {
+    const h = heceOf(anLow(w));
+    return h.length && h.every((x) => H.has(x));
+  });
+}
+function bsNext() {
+  const H = bsSet();
+  const o = [];
+  HC.forEach((c) =>
+    HV.forEach((v) => {
+      const s = c + v;
+      if (!H.has(s)) o.push(s);
+    }),
+  );
+  return o;
+}
+const mixSyl = (n) => {
+  const L = bsSyl();
+  const o = L.slice();
+  const nx = bsNext();
+  let i = 0;
+  while (o.length < n && i < nx.length) o.push(nx[i++]);
+  return o;
+};
+
+/* ---------- 1) HER EKRANDA BELİRGİN GERİ / ANA EKRAN ---------- */
+const _kid12 = kid;
+kid = function (inner) {
+  _kid12(inner);
+  if (!child) return;
+  const bar = document.querySelector(".kbar");
+  if (!bar || bar.querySelector(".kback")) return;
+  if (child.act) {
+    bar.insertAdjacentHTML("afterbegin", `<button class="kback" onclick="childBack()">⬅ Geri</button>`);
+    const r = bar.lastElementChild;
+    if (r && !r.querySelector(".khome"))
+      r.insertAdjacentHTML(
+        "beforeend",
+        `<button class="khome" onclick="goHome()" title="Ana ekran">🏠 Ana ekran</button>`,
+      );
+    bar.querySelectorAll(".kb").forEach((x) => {
+      if (x.textContent.trim() === "🏠") x.remove();
+    });
+  }
+};
+function goHome() {
+  try {
+    $("#sp").classList.remove("on");
+  } catch (e) {}
+  if (child.st && child.st.tm) clearInterval(child.st.tm);
+  child.act = null;
+  child.st = null;
+  child.topic = null;
+  render();
+}
+/* oyun alt ekranından girilen konular geri tuşunda doğru yere dönsün */
+function kGo(k) {
+  const t = TOP[k];
+  if (!t) return;
+  child.sub = t.s;
+  child.fromHub = false;
+  child.act = "sub";
+  startTopic(k);
+}
+
+/* ---------- 2) BASARA HECE OYUNLARI ---------- */
+(function () {
+  const old = Object.assign({}, SUBJ);
+  Object.keys(SUBJ).forEach((k) => delete SUBJ[k]);
+  SUBJ.bs = { n: "Basara Hece", i: "📕", c: "#f97316" };
+  Object.assign(SUBJ, old);
+})();
+const hOpt = (h) => T(`<span class="qletter">${esc(h)}</span>`, false, h);
+topic("bs_dinle", "bs", "Heceyi Dinle, Bul", "👂", () => {
+  const L = mixSyl(4);
+  const t = bsSyl()[ri(bsSyl().length)];
+  const o = new Set([t]);
+  let g = 0;
+  while (o.size < 3 && g++ < 40) o.add(L[ri(L.length)]);
+  return {
+    say: `${t}. Hangisi ${t}?`,
+    show: big("👂"),
+    opts: shuffle([...o]).map((h) => Object.assign(hOpt(h), { ok: h === t })),
+    after: `Evet, ${t}!`,
+  };
+});
+topic("bs_ilk", "bs", "İlk Heceyi Bul", "🔎", () => {
+  const H = mixSyl(3);
+  const pool = TRW.filter((x) => H.includes(heceOf(anLow(x.w))[0]));
+  const P = pool.length ? pool : TRW;
+  const x = P[ri(P.length)];
+  const f = heceOf(anLow(x.w))[0];
+  const o = new Set([f]);
+  let g = 0;
+  while (o.size < 3 && g++ < 40) o.add(H[ri(H.length)] || bsNext()[ri(10)]);
+  return {
+    say: `${x.w}. ${x.w} hangi heceyle başlıyor?`,
+    show: big(x.e),
+    opts: shuffle([...o]).map((h) => Object.assign(hOpt(h), { ok: h === f })),
+    after: `Evet! ${x.w}, ${f} ile başlıyor.`,
+  };
+});
+topic("bs_resim", "bs", "Hece ile Başlayan Resim", "🖼️", () => {
+  const H = bsSyl();
+  const t = H[ri(H.length)];
+  const yes = TRW.filter((x) => heceOf(anLow(x.w))[0] === t);
+  const no = TRW.filter((x) => heceOf(anLow(x.w))[0] !== t);
+  if (!yes.length) return TOP.bs_ilk.gen();
+  const x = yes[ri(yes.length)];
+  const opts = shuffle([x, ...pickN(no, 2)]);
+  return {
+    say: `${t}. Hangi resim ${t} ile başlıyor?`,
+    show: `<div class="qword">${esc(t)}</div>`,
+    opts: opts.map((o) => T(o.e, o === x, o.w)),
+    after: `Evet, ${x.w}!`,
+  };
+});
+topic("bs_kelime", "bs", "Kelimeyi Oku", "📗", () => {
+  const W = bsWords().filter((w) => picOf(w));
+  let pool = W.map((w) => ({ w, e: picOf(w) }));
+  if (pool.length < 3) pool = TRW.filter((x) => bsSet().has(heceOf(anLow(x.w))[0])).concat(TRW.slice(0, 10));
+  const opts = pickN(pool, 3);
+  const x = opts[0];
+  return {
+    say: "Oku bakalım. Hangi resim?",
+    sayBtn: x.w,
+    show: `<div class="qword">${esc(x.w)}</div>`,
+    opts: shuffle(opts).map((o) => T(o.e, o === x, o.w)),
+    after: `Harika okudun! ${x.w}.`,
+  };
+});
+topic("bs_eksik", "bs", "Eksik Hece", "🧩", () => {
+  const pool = TRW.filter((x) => {
+    const h = heceOf(anLow(x.w));
+    return h.length >= 2 && h.length <= 3 && h.some((s) => bsSet().has(s));
+  });
+  const P = pool.length ? pool : TRW.filter((x) => heceOf(x.w).length === 2);
+  const x = P[ri(P.length)];
+  const h = heceOf(anLow(x.w));
+  let k = h.findIndex((s) => bsSet().has(s));
+  if (k < 0) k = 0;
+  const shown = h.map((s, i) => (i === k ? "＿" : s)).join("");
+  const o = new Set([h[k]]);
+  const L = mixSyl(6);
+  let g = 0;
+  while (o.size < 3 && g++ < 40) o.add(L[ri(L.length)]);
+  return {
+    say: `${x.w}. Hangi hece eksik?`,
+    show: big(x.e) + `<div class="qword">${esc(shown)}</div>`,
+    opts: shuffle([...o]).map((s) => Object.assign(hOpt(s), { ok: s === h[k] })),
+    after: `Evet! ${x.w}.`,
+  };
+});
+topic("bs_say", "bs", "Kaç Hece? (Alkışla)", "👏", () => {
+  const P = TRW.filter((y) => heceOf(y.w).length <= 4);
+  const x = P[ri(P.length)] || TRW[0];
+  const n = heceOf(anLow(x.w)).length;
+  return {
+    say: `${x.w}. Alkışla: ${heceOf(x.w).join(", ")}. Kaç hece?`,
+    show: big(x.e),
+    opts: [1, 2, 3, 4].map((k) => T(`<span class="qletter">${"👏".repeat(k)}</span>`, k === n, String(k))),
+    wide: true,
+    after: `Evet, ${n} hece: ${heceOf(x.w).join(" - ")}!`,
+  };
+});
+topic("bs_kur", "bs", "Hece Birleştir", "🧱", null, { type: "build", rounds: 4 });
+topic("bs_yaz", "bs", "Hece Yaz", "✍️", null, { type: "write" });
+
+/* ---------- 3) ÇOCUK ANA EKRANI: OYUN DÜNYASI ---------- */
+const WORLD = () => [
+  {
+    t: "📕 Basara Hece Oyunları",
+    c: "#f97316",
+    items: subTopics("bs")
+      .map((t) => [t.i, t.n, `kGo('${t.k}')`])
+      .concat([
+        ["🚂", "Hece Treni", "startAct('hece')"],
+        ["🏖️", "Kum Havuzu", "typeof sandMenu==='function'?sandMenu():0"],
+      ]),
+  },
+  {
+    t: "🎮 Okuma Oyunları",
+    c: "#8b5cf6",
+    items: (typeof OG_LIST !== "undefined" ? OG_LIST : [])
+      .map((g) => [g.i, g.n, `ogStart('${g.k}')`])
+      .concat(subTopics("oyun").map((t) => [t.i, t.n, `kGo('${t.k}')`])),
+  },
+  {
+    t: "🎨 Boyama Dünyası",
+    c: "#ec4899",
+    items: (typeof BY_CATS !== "undefined" ? BY_CATS : []).map((c) => [c.i, c.n, `byMenu('${c.k}')`]),
+  },
+  {
+    t: "🔢 Matematik",
+    c: "#3b82f6",
+    items: [
+      "mat_say",
+      "mat_topla",
+      "mat_cikar",
+      "mat_ona",
+      "mat_eksik",
+      "mat_isaret",
+      "mat_dogru",
+      "mat_ndogru",
+      "mat_tf",
+      "mat_problem",
+      "mat_saat",
+      "mat_para",
+    ]
+      .filter((k) => TOP[k])
+      .map((k) => [TOP[k].i, TOP[k].n, `kGo('${k}')`])
+      .concat([["📚", "Tüm matematik", "openSub('mat')"]]),
+  },
+  {
+    t: "🔤 ANETİL (sınıfla birlikte)",
+    c: "#e11d48",
+    items: subTopics("an").map((t) => [t.i, t.n, `kGo('${t.k}')`]),
+  },
+  {
+    t: "🤖 Kodlama · ♟️ Satranç · 🧠 Akıl",
+    c: "#0d9488",
+    items: [
+      ["🤖", "Kod Yolu", "startAct('robot')"],
+      ["🧩", "Yapboz", "startAct('puzzle')"],
+    ].concat(
+      subTopics("kod").map((t) => [t.i, t.n, `kGo('${t.k}')`]),
+      subTopics("sat").map((t) => [t.i, t.n, `kGo('${t.k}')`]),
+      subTopics("az").map((t) => [t.i, t.n, `kGo('${t.k}')`]),
+    ),
+  },
+  {
+    t: "🌍 Hayat Bilgisi · 🎵 Müzik · 🎨 Sanat",
+    c: "#16a34a",
+    items: subTopics("hb")
+      .concat(subTopics("muz"), subTopics("gs"))
+      .map((t) => [t.i, t.n, `kGo('${t.k}')`]),
+  },
+];
+const _childHome12 = childHome;
+childHome = function () {
+  _childHome12();
+  const m = document.querySelector(".kmain");
+  if (!m || m.querySelector(".kworld")) return;
+  const sec = WORLD()
+    .filter((s) => s.items.length)
+    .map(
+      (s, i) =>
+        `<section class="kws" style="--c:${s.c}"><h3>${s.t}<small>${s.items.length}</small></h3><div class="kwr">${s.items.map((x) => `<button class="kwt" onclick="${x[2]}"><span>${x[0]}</span><b>${esc(x[1])}</b></button>`).join("")}</div></section>`,
+    )
+    .join("");
+  m.insertAdjacentHTML("beforeend", `<div class="kworld"><h2>🌈 Oyun Dünyası</h2>${sec}</div>`);
+};
+
+/* ---------- 4) KOD YOLU: RENKLİ, YAZILI YÖNLER ---------- */
+DIRS.u[2] = '<i class="dir du"><b>⬆</b><small>YUKARI</small></i>';
+DIRS.d[2] = '<i class="dir dd"><b>⬇</b><small>AŞAĞI</small></i>';
+DIRS.l[2] = '<i class="dir dl"><b>⬅</b><small>SOL</small></i>';
+DIRS.r[2] = '<i class="dir dr"><b>➡</b><small>SAĞ</small></i>';
+DIRS.l[3] = "sola";
+DIRS.r[3] = "sağa";
+
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+.kback{border:0;background:#4f46e5;color:#fff;font-weight:900;font-size:20px;border-radius:16px;padding:0 18px;height:52px;box-shadow:0 4px 0 #3730a3;cursor:pointer;margin-right:auto}
+.khome{border:0;background:#fff;color:#0f172a;font-weight:800;font-size:17px;border-radius:14px;padding:0 14px;height:48px;box-shadow:0 3px 0 #dfe3f3;cursor:pointer}
+.kbar .lock{opacity:.35}
+.kworld{width:100%;max-width:1100px;margin:22px auto 40px;padding:0 8px}.kworld h2{font-size:26px;margin:6px 4px 10px}
+.kws{background:#fff;border-radius:22px;padding:12px;margin-bottom:12px;border-top:6px solid var(--c);box-shadow:0 4px 16px #0f172a12}
+.kws h3{margin:0 4px 10px;display:flex;align-items:center;gap:8px;font-size:20px}.kws h3 small{background:var(--c);color:#fff;border-radius:999px;padding:1px 9px;font-size:13px}
+.kwr{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.kwt{border:0;background:color-mix(in srgb,var(--c) 9%,#fff);border-radius:18px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:0 3px 0 color-mix(in srgb,var(--c) 25%,#fff);transition:transform .1s}
+.kwt:active{transform:scale(.95)}.kwt span{font-size:38px;line-height:1}.kwt b{font-size:14px;text-align:center;color:#1e293b}
+.dir{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;font-style:normal;border-radius:14px;color:#fff;line-height:1;padding:4px 8px;min-width:54px}
+.dir b{font-size:30px}.dir small{font-size:11px;font-weight:900;letter-spacing:.5px}
+.du{background:#16a34a}.dd{background:#dc2626}.dl{background:#2563eb}.dr{background:#f59e0b}
+.pad button{background:transparent!important;box-shadow:none;padding:0}.pad button .dir{width:100%;height:100%;box-shadow:0 5px 0 #0003}
+.pad .go{background:#22c55e!important;box-shadow:0 5px 0 #15803d!important}.pad .del{background:#fee2e2!important}
+.pc .dir{min-width:40px;padding:2px 5px;border-radius:9px}.pc .dir b{font-size:18px}.pc .dir small{font-size:8px}
+.pc.on .dir{outline:3px solid #0f172a}.pc.bad .dir{outline:3px solid #dc2626;filter:grayscale(.4)}`;
+  document.head.appendChild(s);
+})();
+
+/* ================== v12.0 BOYAMA DÜNYASI ==================
+   Dokun-doldur boyama: satranç taşları, araçlar, hayvanlar, robot/uzay, doğa, tatlılar, mandala, piksel,
+   sayıya göre (toplama-çıkarma), heceye göre (Basara), harf-hece-sayı boyama, serbest çizim.
+   Renk adını söyler, desen/simli/gökkuşağı boya, fırça, çıkartma, geri al, kaydet (veli raporu), tahtayla eşzamanlı. */
+const BYC = [
+  ["#ef4444", "kırmızı"],
+  ["#f97316", "turuncu"],
+  ["#facc15", "sarı"],
+  ["#22c55e", "yeşil"],
+  ["#86efac", "açık yeşil"],
+  ["#3b82f6", "mavi"],
+  ["#7dd3fc", "açık mavi"],
+  ["#1e3a8a", "lacivert"],
+  ["#a855f7", "mor"],
+  ["#f472b6", "pembe"],
+  ["#92400e", "kahverengi"],
+  ["#fcd9b6", "ten rengi"],
+  ["#9ca3af", "gri"],
+  ["#111827", "siyah"],
+  ["#ffffff", "beyaz"],
+  ["#fde047", "altın sarısı"],
+  ["#14b8a6", "turkuaz"],
+  ["#be123c", "bordo"],
+];
+const RAINBOW = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#3b82f6", "#1e3a8a", "#a855f7"];
+/* ---- vektör çizimler (200x200): ['c',cx,cy,r] ['e',cx,cy,rx,ry,rot] ['r',x,y,w,h,rx] ['p',d] ['l',d]=çizgi ---- */
+const BASE = [
+  ["r", 40, 166, 120, 22, 7],
+  ["r", 55, 150, 90, 18, 6],
+];
+const KR = [
+  ["p", "M70 150 Q78 110 88 98 L112 98 Q122 110 130 150 Z"],
+  ["e", 100, 96, 28, 8],
+];
+const BYV = {
+  piyon: {
+    n: "Piyon",
+    cat: "satranc",
+    s: [
+      ...BASE,
+      ["p", "M74 150 Q80 112 92 102 L108 102 Q120 112 126 150 Z"],
+      ["e", 100, 100, 26, 7],
+      ["c", 100, 72, 25],
+    ],
+  },
+  kale: {
+    n: "Kale",
+    cat: "satranc",
+    s: [
+      ...BASE,
+      ["p", "M68 150 L74 82 L126 82 L132 150 Z"],
+      ["p", "M62 82 L62 44 L78 44 L78 58 L92 58 L92 44 L108 44 L108 58 L122 58 L122 44 L138 44 L138 82 Z"],
+      ["r", 93, 100, 14, 24, 7],
+    ],
+  },
+  at: {
+    n: "At",
+    cat: "satranc",
+    s: [
+      ...BASE,
+      ["p", "M56 150 L62 118 Q46 100 54 84 L72 48 L92 40 L80 52 L62 88 Q58 104 70 118 L66 150 Z"],
+      [
+        "p",
+        "M66 150 L70 118 Q58 104 62 88 L80 52 L92 40 L96 22 L108 36 Q140 40 156 76 L166 102 Q170 116 156 118 L136 108 Q124 112 128 126 L142 150 Z",
+      ],
+      ["p", "M96 22 L100 6 L110 32 Z"],
+      ["c", 118, 64, 7],
+      ["c", 154, 104, 4],
+      ["l", "M108 36 Q122 46 126 60"],
+    ],
+  },
+  fil: {
+    n: "Fil",
+    cat: "satranc",
+    s: [
+      ...BASE,
+      ["p", "M72 150 Q78 116 90 106 L110 106 Q122 116 128 150 Z"],
+      ["e", 100, 104, 27, 7],
+      ["p", "M100 30 Q132 56 122 82 Q112 98 100 98 Q88 98 78 82 Q68 56 100 30 Z"],
+      ["c", 100, 24, 8],
+      ["l", "M104 50 L116 72"],
+    ],
+  },
+  vezir: {
+    n: "Vezir",
+    cat: "satranc",
+    s: [
+      ...BASE,
+      ...KR,
+      ["p", "M72 88 L64 50 L84 70 L92 42 L100 66 L108 42 L116 70 L136 50 L128 88 Z"],
+      ["c", 64, 46, 6],
+      ["c", 92, 38, 6],
+      ["c", 108, 38, 6],
+      ["c", 136, 46, 6],
+    ],
+  },
+  sah: {
+    n: "Şah",
+    cat: "satranc",
+    s: [
+      ...BASE,
+      ...KR,
+      ["p", "M74 90 L68 56 Q100 44 132 56 L126 90 Z"],
+      ["r", 94, 14, 12, 36, 3],
+      ["r", 84, 22, 32, 11, 3],
+    ],
+  },
+  robot: {
+    n: "Robot",
+    cat: "robot",
+    s: [
+      ["r", 26, 104, 22, 52, 10],
+      ["r", 152, 104, 22, 52, 10],
+      ["r", 66, 166, 24, 28, 6],
+      ["r", 110, 166, 24, 28, 6],
+      ["r", 50, 98, 100, 72, 14],
+      ["r", 78, 112, 44, 30, 6],
+      ["c", 86, 156, 5],
+      ["c", 100, 156, 5],
+      ["c", 114, 156, 5],
+      ["l", "M100 30 L100 16"],
+      ["c", 100, 14, 7],
+      ["r", 60, 30, 80, 62, 12],
+      ["c", 82, 58, 10],
+      ["c", 118, 58, 10],
+      ["r", 80, 76, 40, 8, 4],
+      ["r", 52, 52, 8, 18, 3],
+      ["r", 140, 52, 8, 18, 3],
+    ],
+  },
+  robot2: {
+    n: "Mini Robot",
+    cat: "robot",
+    s: [
+      ["e", 100, 150, 46, 40],
+      ["c", 100, 82, 40],
+      ["e", 100, 86, 28, 20],
+      ["c", 88, 84, 7],
+      ["c", 112, 84, 7],
+      ["l", "M100 42 L100 26"],
+      ["c", 100, 24, 6],
+      ["e", 52, 150, 10, 22, -20],
+      ["e", 148, 150, 10, 22, 20],
+      ["r", 80, 186, 16, 10, 4],
+      ["r", 104, 186, 16, 10, 4],
+      ["c", 100, 150, 12],
+    ],
+  },
+  roket: {
+    n: "Roket",
+    cat: "robot",
+    s: [
+      ["p", "M80 120 L100 178 L120 120 Z"],
+      ["p", "M72 100 L46 142 L72 134 Z"],
+      ["p", "M128 100 L154 142 L128 134 Z"],
+      ["p", "M100 20 Q132 52 128 122 L72 122 Q68 52 100 20 Z"],
+      ["p", "M100 20 Q114 32 119 46 L81 46 Q86 32 100 20 Z"],
+      ["c", 100, 74, 15],
+      ["r", 90, 122, 20, 8, 2],
+    ],
+  },
+  gezegen: {
+    n: "Gezegen",
+    cat: "robot",
+    s: [
+      ["e", 100, 104, 92, 20, -12],
+      ["c", 100, 96, 52],
+      ["p", "M50 90 Q100 110 150 86 L152 96 Q100 122 48 100 Z"],
+      ["c", 82, 76, 8],
+      ["c", 120, 112, 6],
+      ["p", "M8 112 Q100 140 192 92 L192 100 Q100 150 10 122 Z"],
+      ["p", "M160 30 L164 40 L174 42 L166 48 L168 58 L160 52 L152 58 L154 48 L146 42 L156 40 Z"],
+      ["p", "M30 40 L33 47 L40 48 L35 53 L36 60 L30 56 L24 60 L25 53 L20 48 L27 47 Z"],
+    ],
+  },
+  ufo: {
+    n: "Uzay Gemisi",
+    cat: "robot",
+    s: [
+      ["e", 100, 70, 34, 30],
+      ["e", 100, 100, 86, 24],
+      ["c", 60, 100, 7],
+      ["c", 100, 104, 7],
+      ["c", 140, 100, 7],
+      ["p", "M70 120 L50 170 L150 170 L130 120 Z"],
+      ["c", 88, 64, 6],
+      ["c", 112, 64, 6],
+    ],
+  },
+  araba: {
+    n: "Araba",
+    cat: "arac",
+    s: [
+      [
+        "p",
+        "M20 130 L30 100 Q40 92 60 92 L80 70 Q86 64 96 64 L140 64 Q150 64 156 72 L172 92 Q188 94 186 112 L186 130 Z",
+      ],
+      ["p", "M90 74 L100 74 L100 92 L74 92 Z"],
+      ["p", "M108 74 L138 74 L152 92 L108 92 Z"],
+      ["c", 60, 134, 20],
+      ["c", 150, 134, 20],
+      ["c", 60, 134, 8],
+      ["c", 150, 134, 8],
+      ["c", 180, 112, 6],
+      ["r", 22, 112, 12, 8, 3],
+    ],
+  },
+  tren: {
+    n: "Tren",
+    cat: "arac",
+    s: [
+      ["r", 30, 96, 82, 46, 10],
+      ["r", 42, 64, 18, 32, 3],
+      ["c", 52, 48, 10],
+      ["c", 68, 34, 8],
+      ["r", 110, 66, 62, 76, 6],
+      ["r", 104, 56, 74, 12, 4],
+      ["r", 122, 78, 38, 28, 4],
+      ["c", 50, 150, 14],
+      ["c", 86, 150, 14],
+      ["c", 142, 148, 20],
+      ["c", 24, 120, 8],
+      ["r", 28, 140, 148, 6, 2],
+    ],
+  },
+  ucak: {
+    n: "Uçak",
+    cat: "arac",
+    s: [
+      ["p", "M88 100 L62 36 L82 36 L122 100 Z"],
+      ["p", "M88 100 L62 164 L82 164 L122 100 Z"],
+      ["p", "M30 100 L18 66 L34 66 L50 96 Z"],
+      ["e", 100, 100, 82, 18],
+      ["c", 130, 96, 5],
+      ["c", 145, 96, 5],
+      ["c", 160, 96, 5],
+      ["p", "M168 92 Q182 100 168 108 Z"],
+    ],
+  },
+  gemi: {
+    n: "Gemi",
+    cat: "arac",
+    s: [
+      ["r", 110, 56, 18, 32, 3],
+      ["r", 60, 88, 80, 32, 4],
+      ["c", 80, 104, 6],
+      ["c", 100, 104, 6],
+      ["c", 120, 104, 6],
+      ["p", "M20 120 L180 120 L160 160 L40 160 Z"],
+      ["p", "M0 172 Q25 162 50 172 Q75 182 100 172 Q125 162 150 172 Q175 182 200 172 L200 200 L0 200 Z"],
+    ],
+  },
+  otobus: {
+    n: "Otobüs",
+    cat: "arac",
+    s: [
+      ["r", 18, 60, 166, 90, 14],
+      ["r", 30, 72, 30, 30, 4],
+      ["r", 66, 72, 30, 30, 4],
+      ["r", 102, 72, 30, 30, 4],
+      ["r", 140, 72, 32, 58, 4],
+      ["c", 52, 152, 16],
+      ["c", 148, 152, 16],
+      ["c", 52, 152, 6],
+      ["c", 148, 152, 6],
+      ["r", 18, 118, 120, 10, 2],
+    ],
+  },
+  bisiklet: {
+    n: "Bisiklet",
+    cat: "arac",
+    s: [
+      ["c", 52, 130, 34],
+      ["c", 148, 130, 34],
+      ["c", 52, 130, 10],
+      ["c", 148, 130, 10],
+      ["l", "M52 130 L88 80 L130 80 L148 130 M88 80 L104 130 L130 80 M100 64 L88 80"],
+      ["r", 90, 58, 26, 8, 4],
+      ["r", 122, 66, 20, 8, 4],
+    ],
+  },
+  at2: {
+    n: "At",
+    cat: "hayvan",
+    s: [
+      ["r", 56, 128, 14, 52, 6],
+      ["r", 78, 128, 14, 52, 6],
+      ["r", 128, 128, 14, 52, 6],
+      ["r", 150, 128, 14, 52, 6],
+      ["e", 110, 118, 62, 32],
+      ["p", "M140 98 Q150 60 160 44 L178 34 Q194 40 190 58 L176 70 L162 104 Z"],
+      ["p", "M150 52 Q136 66 140 98 L130 96 Q128 62 146 44 Z"],
+      ["p", "M48 110 Q20 120 26 160 Q38 140 52 126 Z"],
+      ["c", 176, 46, 4],
+      ["p", "M166 36 L170 22 L176 34 Z"],
+    ],
+  },
+  kedi: {
+    n: "Kedi",
+    cat: "hayvan",
+    s: [
+      ["p", "M52 72 L60 24 L92 56 Z"],
+      ["p", "M148 72 L140 24 L108 56 Z"],
+      ["c", 100, 102, 58],
+      ["e", 78, 92, 9, 12],
+      ["e", 122, 92, 9, 12],
+      ["p", "M93 112 L107 112 L100 120 Z"],
+      [
+        "l",
+        "M100 120 Q90 132 80 126 M100 120 Q110 132 120 126 M60 112 L30 106 M60 120 L30 124 M140 112 L170 106 M140 120 L170 124",
+      ],
+    ],
+  },
+  ayi: {
+    n: "Ayıcık",
+    cat: "hayvan",
+    s: [
+      ["c", 58, 52, 22],
+      ["c", 142, 52, 22],
+      ["c", 58, 52, 11],
+      ["c", 142, 52, 11],
+      ["c", 100, 104, 60],
+      ["e", 100, 126, 28, 22],
+      ["e", 100, 114, 11, 8],
+      ["c", 78, 92, 7],
+      ["c", 122, 92, 7],
+    ],
+  },
+  baykus: {
+    n: "Baykuş",
+    cat: "hayvan",
+    s: [
+      ["p", "M46 50 L64 34 L74 58 Z"],
+      ["p", "M154 50 L136 34 L126 58 Z"],
+      ["e", 100, 114, 62, 74],
+      ["e", 100, 136, 38, 46],
+      ["c", 78, 82, 21],
+      ["c", 122, 82, 21],
+      ["c", 78, 82, 9],
+      ["c", 122, 82, 9],
+      ["p", "M92 100 L108 100 L100 116 Z"],
+      ["r", 78, 184, 14, 10, 4],
+      ["r", 108, 184, 14, 10, 4],
+    ],
+  },
+  balik: {
+    n: "Balık",
+    cat: "hayvan",
+    s: [
+      ["p", "M150 100 L192 68 L192 132 Z"],
+      ["p", "M86 62 L110 36 L122 66 Z"],
+      ["e", 96, 100, 62, 40],
+      ["p", "M100 62 Q112 100 100 138 L114 138 Q126 100 114 62 Z"],
+      ["c", 62, 92, 8],
+      ["c", 62, 92, 3],
+    ],
+  },
+  kelebek: {
+    n: "Kelebek",
+    cat: "hayvan",
+    s: [
+      ["e", 68, 80, 36, 42, -15],
+      ["e", 132, 80, 36, 42, 15],
+      ["e", 74, 142, 26, 30, 15],
+      ["e", 126, 142, 26, 30, -15],
+      ["c", 68, 78, 11],
+      ["c", 132, 78, 11],
+      ["c", 74, 142, 8],
+      ["c", 126, 142, 8],
+      ["e", 100, 112, 8, 52],
+      ["c", 100, 56, 11],
+      ["l", "M96 48 Q88 30 80 26 M104 48 Q112 30 120 26"],
+    ],
+  },
+  dinozor: {
+    n: "Dinozor",
+    cat: "hayvan",
+    s: [
+      ["p", "M46 120 L4 152 L52 138 Z"],
+      ["r", 70, 140, 18, 38, 7],
+      ["r", 114, 140, 18, 38, 7],
+      ["e", 100, 120, 58, 36],
+      ["p", "M120 102 Q130 52 150 40 Q178 36 180 56 Q178 72 156 70 L142 108 Z"],
+      ["p", "M58 90 L68 70 L80 86 L90 66 L100 84 L110 66 L120 86 L112 92 Z"],
+      ["c", 162, 52, 5],
+    ],
+  },
+  tavsan: {
+    n: "Tavşan",
+    cat: "hayvan",
+    s: [
+      ["e", 78, 46, 14, 40, -8],
+      ["e", 122, 46, 14, 40, 8],
+      ["e", 78, 46, 6, 30, -8],
+      ["e", 122, 46, 6, 30, 8],
+      ["c", 100, 112, 50],
+      ["c", 84, 104, 6],
+      ["c", 116, 104, 6],
+      ["e", 100, 122, 7, 5],
+      ["e", 100, 176, 40, 20],
+    ],
+  },
+  civciv: {
+    n: "Civciv",
+    cat: "hayvan",
+    s: [
+      ["e", 100, 130, 52, 46],
+      ["c", 100, 76, 34],
+      ["p", "M100 80 L120 88 L100 96 Z"],
+      ["c", 90, 70, 5],
+      ["e", 60, 128, 14, 22, -30],
+      ["r", 84, 172, 8, 18, 2],
+      ["r", 108, 172, 8, 18, 2],
+      ["p", "M88 44 Q100 30 104 44"],
+    ],
+  },
+  cicek: {
+    n: "Çiçek",
+    cat: "doga",
+    s: [
+      ["r", 96, 92, 8, 80, 4],
+      ["e", 78, 140, 22, 9, -25],
+      ["e", 122, 126, 22, 9, 25],
+      ["e", 100, 46, 14, 24],
+      ["e", 100, 94, 14, 24],
+      ["e", 76, 70, 24, 14],
+      ["e", 124, 70, 24, 14],
+      ["e", 83, 53, 14, 22, -45],
+      ["e", 117, 53, 14, 22, 45],
+      ["e", 83, 87, 14, 22, 45],
+      ["e", 117, 87, 14, 22, -45],
+      ["c", 100, 70, 16],
+      ["p", "M70 170 L130 170 L122 196 L78 196 Z"],
+    ],
+  },
+  agac: {
+    n: "Ağaç",
+    cat: "doga",
+    s: [
+      ["r", 88, 110, 24, 72, 4],
+      ["c", 70, 96, 32],
+      ["c", 130, 96, 32],
+      ["c", 100, 72, 48],
+      ["c", 84, 66, 7],
+      ["c", 120, 84, 7],
+      ["c", 98, 100, 7],
+      ["e", 100, 186, 70, 8],
+    ],
+  },
+  gunes: {
+    n: "Güneş ve Bulut",
+    cat: "doga",
+    sun: 1,
+    s: [
+      ["c", 72, 72, 32],
+      ["c", 122, 134, 26],
+      ["c", 150, 122, 30],
+      ["c", 176, 138, 22],
+      ["r", 112, 134, 82, 30, 14],
+    ],
+  },
+  gokkusagi: { n: "Gökkuşağı", cat: "doga", rb: 1, s: [] },
+  mantar: {
+    n: "Mantar",
+    cat: "doga",
+    s: [
+      ["r", 78, 100, 44, 74, 12],
+      ["p", "M28 104 Q100 6 172 104 Z"],
+      ["c", 70, 72, 11],
+      ["c", 108, 50, 13],
+      ["c", 140, 80, 9],
+      ["e", 100, 180, 70, 8],
+    ],
+  },
+  ev: {
+    n: "Ev",
+    cat: "doga",
+    s: [
+      ["r", 130, 40, 16, 32, 2],
+      ["r", 40, 90, 120, 90, 4],
+      ["p", "M30 94 L100 30 L170 94 Z"],
+      ["r", 88, 130, 26, 50, 4],
+      ["r", 52, 108, 26, 24, 3],
+      ["r", 124, 108, 26, 24, 3],
+      ["c", 26, 28, 16],
+    ],
+  },
+  kalp: {
+    n: "Kalp",
+    cat: "doga",
+    s: [
+      ["p", "M100 172 L36 110 Q6 78 38 48 Q70 24 100 60 Q130 24 162 48 Q194 78 164 110 Z"],
+      ["e", 62, 72, 10, 16, -35],
+    ],
+  },
+  yildiz: {
+    n: "Yıldız",
+    cat: "doga",
+    s: [
+      ["p", "M100 14 L124 74 L188 76 L138 116 L156 180 L100 142 L44 180 L62 116 L12 76 L76 74 Z"],
+      ["c", 100, 100, 22],
+    ],
+  },
+  dondurma: {
+    n: "Dondurma",
+    cat: "yemek",
+    s: [
+      ["p", "M70 102 L130 102 L100 190 Z"],
+      ["l", "M82 120 L114 150 M118 120 L92 160 M76 108 L122 108"],
+      ["c", 80, 66, 24],
+      ["c", 120, 66, 24],
+      ["c", 100, 88, 30],
+      ["c", 100, 36, 10],
+    ],
+  },
+  pasta: {
+    n: "Pasta",
+    cat: "yemek",
+    s: [
+      ["e", 100, 184, 82, 10],
+      ["r", 40, 120, 120, 60, 8],
+      ["r", 55, 82, 90, 40, 8],
+      ["r", 72, 54, 8, 28, 2],
+      ["r", 96, 50, 8, 32, 2],
+      ["r", 120, 54, 8, 28, 2],
+      ["e", 76, 46, 5, 8],
+      ["e", 100, 42, 5, 8],
+      ["e", 124, 46, 5, 8],
+      ["c", 70, 150, 6],
+      ["c", 100, 150, 6],
+      ["c", 130, 150, 6],
+    ],
+  },
+  balon: {
+    n: "Balonlar",
+    cat: "yemek",
+    s: [
+      ["l", "M70 100 Q74 140 100 190 M130 94 Q124 140 100 190 M100 140 L100 190"],
+      ["c", 70, 70, 32],
+      ["c", 130, 64, 30],
+      ["c", 100, 112, 30],
+    ],
+  },
+  top: {
+    n: "Top",
+    cat: "yemek",
+    s: [
+      ["c", 100, 100, 72],
+      ["p", "M100 28 Q70 100 100 172 Q130 100 100 28 Z"],
+      ["p", "M30 82 Q100 70 170 82 L172 96 Q100 84 28 96 Z"],
+      ["c", 100, 100, 12],
+    ],
+  },
+  meyve: {
+    n: "Elma ve Armut",
+    cat: "yemek",
+    s: [
+      ["c", 66, 120, 40],
+      ["l", "M66 80 Q64 66 74 58"],
+      ["e", 84, 64, 12, 6, -30],
+      ["e", 142, 134, 34, 40],
+      ["c", 142, 92, 22],
+      ["l", "M142 70 L146 56"],
+      ["e", 156, 58, 10, 5, 20],
+    ],
+  },
+};
+const BY_CATS = [
+  { k: "satranc", i: "♟️", n: "Satranç Taşları" },
+  { k: "robot", i: "🤖", n: "Robot ve Uzay" },
+  { k: "arac", i: "🚗", n: "Araçlar" },
+  { k: "hayvan", i: "🐴", n: "Hayvanlar" },
+  { k: "doga", i: "🌸", n: "Doğa" },
+  { k: "yemek", i: "🍦", n: "Tatlı ve Oyuncak" },
+  { k: "mandala", i: "🌀", n: "Mandala" },
+  { k: "piksel", i: "🟦", n: "Piksel Boya" },
+  { k: "sayi", i: "➕", n: "Sayıya Göre Boya" },
+  { k: "hece", i: "📕", n: "Heceye Göre Boya" },
+  { k: "harf", i: "🔤", n: "Hece ve Sayı Boya" },
+  { k: "serbest", i: "🖌️", n: "Serbest Çizim" },
+];
+/* ---- piksel resimler 12x12 (rakam = renk) ---- */
+const PX = {
+  at: {
+    n: "At",
+    c: { 1: "#92400e", 2: "#111827", 3: "#9ca3af", 4: "#facc15" },
+    g: [
+      "....11......",
+      "...1111.....",
+      "..1121111...",
+      "..11111111..",
+      ".111111111..",
+      ".1111..111..",
+      "..41........".replace(/\./g, "."),
+      "..411111....",
+      "..4111111...",
+      "...111111...",
+      "..33333333..",
+      ".3333333333.",
+    ],
+  },
+  robot: {
+    n: "Robot",
+    c: { 1: "#9ca3af", 2: "#ef4444", 3: "#3b82f6", 4: "#111827", 5: "#22c55e", 6: "#facc15" },
+    g: [
+      ".....2......",
+      ".....1......",
+      "..11111111..",
+      "..13311331..",
+      "..13311331..",
+      "..11111111..",
+      "..11444411..",
+      "..11111111..",
+      ".5555555555.",
+      ".5566666655.",
+      ".5555555555.",
+      "..22....22..",
+    ],
+  },
+  kalp: {
+    n: "Kalp",
+    c: { 1: "#ef4444", 2: "#ffffff", 3: "#be123c" },
+    g: [
+      "............",
+      "..11....11..",
+      ".1121..1111.",
+      ".1211111111.",
+      ".1111111111.",
+      ".1111111111.",
+      "..11111113..",
+      "...111113...",
+      "....11133...",
+      ".....133....",
+      "......3.....",
+      "............",
+    ],
+  },
+  mantar: {
+    n: "Mantar",
+    c: { 1: "#ef4444", 2: "#ffffff", 3: "#fcd9b6", 4: "#111827" },
+    g: [
+      "....1111....",
+      "..11222111..",
+      ".1122112211.",
+      ".1111111111.",
+      "121111112211",
+      "121111112211",
+      ".1111111111.",
+      "...333333...",
+      "...343343...",
+      "...333333...",
+      "...333333...",
+      "....3333....",
+    ],
+  },
+  yildiz: {
+    n: "Yıldız",
+    c: { 1: "#facc15", 2: "#f97316" },
+    g: [
+      ".....11.....",
+      ".....11.....",
+      "....1111....",
+      "111111111111",
+      ".1111111111.",
+      "..11111111..",
+      "...111111...",
+      "...112211...",
+      "..111..111..",
+      "..11....11..",
+      ".11......11.",
+      "............",
+    ],
+  },
+  araba: {
+    n: "Araba",
+    c: { 1: "#3b82f6", 2: "#7dd3fc", 3: "#111827", 4: "#facc15", 5: "#9ca3af" },
+    g: [
+      "............",
+      "............",
+      "...111111...",
+      "..12221221..",
+      ".1222212221.",
+      "111111111111",
+      "411111111114",
+      "111111111111",
+      ".33.....33..",
+      "3553...3553.",
+      ".33.....33..",
+      "............",
+    ],
+  },
+  ev: {
+    n: "Ev",
+    c: { 1: "#ef4444", 2: "#fcd9b6", 3: "#92400e", 4: "#7dd3fc" },
+    g: [
+      ".....11.....",
+      "....1111....",
+      "...111111...",
+      "..11111111..",
+      ".1111111111.",
+      "..22222222..",
+      "..24422442..",
+      "..24422442..",
+      "..22233222..",
+      "..22233222..",
+      "..22233222..",
+      "333333333333",
+    ],
+  },
+  roket: {
+    n: "Roket",
+    c: { 1: "#e5e7eb", 2: "#ef4444", 3: "#3b82f6", 4: "#f97316", 5: "#facc15" },
+    g: [
+      ".....22.....",
+      "....2222....",
+      "....1111....",
+      "....1331....",
+      "....1331....",
+      "....1111....",
+      "....1111....",
+      "...211112...",
+      "..22111122..",
+      "..2.1111.2..",
+      "....4554....",
+      ".....44.....",
+    ],
+  },
+  cicek: {
+    n: "Çiçek",
+    c: { 1: "#f472b6", 2: "#facc15", 3: "#22c55e", 4: "#92400e" },
+    g: [
+      "....11......",
+      "...1111.....",
+      ".11.11.11...",
+      "1111221111..",
+      ".11.22.11...",
+      "...1111.....",
+      "....11......",
+      "....33..33..",
+      "....3.333...",
+      "..333.3.....",
+      "....33......",
+      "...4444.....",
+    ],
+  },
+  balik: {
+    n: "Balık",
+    c: { 1: "#f97316", 2: "#ffffff", 3: "#111827", 4: "#3b82f6" },
+    g: [
+      "............",
+      "....111.....",
+      "..1111111..1",
+      ".121111111.1",
+      ".1311111111.",
+      "111111111111",
+      ".1111111111.",
+      "..1111111..1",
+      "...11111...1",
+      "............",
+      ".4.44.4.44..",
+      "4.4..4.4..4.",
+    ],
+  },
+  kedi: {
+    n: "Kedi",
+    c: { 1: "#f97316", 2: "#111827", 3: "#f472b6", 4: "#ffffff" },
+    g: [
+      ".1.......1..",
+      ".11.....11..",
+      ".111111111..",
+      ".111111111..",
+      ".121111121..",
+      ".111111111..",
+      ".111131111..",
+      "..1144411...",
+      "..1111111...",
+      ".111111111..",
+      ".111111111..",
+      ".11.111.11..",
+    ],
+  },
+  dondurma: {
+    n: "Dondurma",
+    c: { 1: "#f472b6", 2: "#ef4444", 3: "#facc15", 4: "#92400e" },
+    g: [
+      ".....2......",
+      "....111.....",
+      "...11111....",
+      "..1111111...",
+      "..1111111...",
+      "..3333333...",
+      "...33433....",
+      "...34333....",
+      "....333.....",
+      "....343.....",
+      ".....3......",
+      "............",
+    ],
+  },
+};
+/* ---- durum ---- */
+const BY = {
+  on: false,
+  key: null,
+  fills: {},
+  col: "#ef4444",
+  tool: "fill",
+  pat: null,
+  rb: 0,
+  hist: [],
+  br: [],
+  sticker: "⭐",
+  menu: null,
+};
+function byPageList(cat) {
+  if (["satranc", "robot", "arac", "hayvan", "doga", "yemek"].includes(cat))
+    return Object.entries(BYV)
+      .filter(([k, v]) => v.cat === cat)
+      .map(([k, v]) => ({ key: "v:" + k, n: v.n }));
+  if (cat === "mandala")
+    return Array.from({ length: 10 }, (_, i) => ({ key: "m:" + (i + 1), n: "Mandala " + (i + 1) }));
+  if (cat === "piksel") return Object.keys(PX).map((k) => ({ key: "p:" + k, n: PX[k].n }));
+  if (cat === "sayi") return Object.keys(PX).map((k) => ({ key: "ps:" + k, n: PX[k].n + " (+ −)" }));
+  if (cat === "hece") return Object.keys(PX).map((k) => ({ key: "ph:" + k, n: PX[k].n + " (hece)" }));
+  if (cat === "harf") {
+    const H = bsSyl();
+    return H.map((h) => ({ key: "h:" + h, n: h })).concat(
+      ["ba", "ab", "bo", "ob", "a", "o", "b"]
+        .filter((x) => !H.includes(x))
+        .map((h) => ({ key: "h:" + h, n: h })),
+      Array.from({ length: 21 }, (_, i) => ({ key: "h:" + i, n: String(i) })),
+    );
+  }
+  if (cat === "serbest")
+    return [
+      { key: "f:beyaz", n: "Boş sayfa" },
+      { key: "f:cizgili", n: "Çizgili sayfa" },
+      { key: "f:kareli", n: "Kareli sayfa" },
+    ];
+  return [];
+}
+function shapeSVG(s, i) {
+  const a = `data-i="${i}" fill="${BY.fills[i] || "#fff"}"`;
+  switch (s[0]) {
+    case "c":
+      return s[3] ? `<circle ${a} cx="${s[1]}" cy="${s[2]}" r="${s[3]}"/>` : "";
+    case "e":
+      return `<ellipse ${a} cx="${s[1]}" cy="${s[2]}" rx="${s[3]}" ry="${s[4]}"${s[5] ? ` transform="rotate(${s[5]} ${s[1]} ${s[2]})"` : ""}/>`;
+    case "r":
+      return `<rect ${a} x="${s[1]}" y="${s[2]}" width="${s[3]}" height="${s[4]}" rx="${s[5] || 0}"/>`;
+    case "p":
+      return `<path ${a} d="${s[1]}"/>`;
+    case "l":
+      return `<path d="${s[1]}" fill="none" class="ln"/>`;
+  }
+  return "";
+}
+function mandalaShapes(n) {
+  const o = [];
+  const R = [0, 22, 40, 58, 76, 92];
+  const sym = [6, 8, 10, 12, 6, 8, 10, 12, 16, 8][n % 10] || 8;
+  let i = 0;
+  o.push(["c", 100, 100, 96]);
+  for (let ring = 5; ring >= 1; ring--) {
+    const k = ring % 2 ? sym : sym * (n % 3 === 0 ? 2 : 1);
+    const rr = (R[ring] + R[ring - 1]) / 2;
+    for (let j = 0; j < k; j++) {
+      const ang = (360 / k) * j + (ring % 2 ? 0 : 180 / k);
+      const rad = (ang * Math.PI) / 180;
+      const cx = 100 + rr * Math.cos(rad),
+        cy = 100 + rr * Math.sin(rad);
+      const style = (n + ring) % 3;
+      if (style === 0)
+        o.push([
+          "e",
+          +cx.toFixed(1),
+          +cy.toFixed(1),
+          (R[ring] - R[ring - 1]) / 2,
+          Math.max(4, ((rr * Math.PI) / k) * 0.85),
+          ang,
+        ]);
+      else if (style === 1)
+        o.push([
+          "c",
+          +cx.toFixed(1),
+          +cy.toFixed(1),
+          Math.max(3, Math.min((R[ring] - R[ring - 1]) / 2, (rr * Math.PI) / k) * 0.9),
+        ]);
+      else {
+        const r1 = R[ring - 1],
+          r2 = R[ring],
+          a1 = ((ang - 180 / k) * Math.PI) / 180,
+          a2 = ((ang + 180 / k) * Math.PI) / 180,
+          am = rad;
+        const P = (r, a) => `${(100 + r * Math.cos(a)).toFixed(1)} ${(100 + r * Math.sin(a)).toFixed(1)}`;
+        o.push(["p", `M${P(r1, a1)} L${P(r2, am)} L${P(r1, a2)} Z`]);
+      }
+    }
+  }
+  o.push(["c", 100, 100, 14]);
+  o.push(["c", 100, 100, 6]);
+  return o;
+}
+function sunRays() {
+  const o = [];
+  for (let j = 0; j < 10; j++) {
+    const a = (j * 36 * Math.PI) / 180,
+      a1 = a - 0.16,
+      a2 = a + 0.16;
+    const P = (r, t) => `${(72 + r * Math.cos(t)).toFixed(1)} ${(72 + r * Math.sin(t)).toFixed(1)}`;
+    o.push(["p", `M${P(38, a1)} L${P(60, a)} L${P(38, a2)} Z`]);
+  }
+  return o;
+}
+function rbShapes() {
+  const o = [];
+  const cx = 100,
+    cy = 150;
+  for (let j = 0; j < 7; j++) {
+    const r1 = 90 - j * 10,
+      r2 = 80 - j * 10;
+    o.push([
+      "p",
+      `M${cx - r1} ${cy} A${r1} ${r1} 0 0 1 ${cx + r1} ${cy} L${cx + r2} ${cy} A${r2} ${r2} 0 0 0 ${cx - r2} ${cy} Z`,
+    ]);
+  }
+  o.push(
+    ["c", 22, 152, 18],
+    ["c", 44, 158, 16],
+    ["c", 178, 152, 18],
+    ["c", 156, 158, 16],
+    ["c", 160, 40, 16],
+  );
+  return o;
+}
+const MSYM = { "+": (a, b) => a + b, "-": (a, b) => a - b };
+function pxLabel(kind, d, seed) {
+  if (kind === "ps") {
+    const v = +d;
+    const r = ((seed * 9301 + 49297) % 233280) / 233280;
+    if (r < 0.5) {
+      const a = Math.floor(r * 2 * v);
+      return `${a}+${v - a}`;
+    }
+    const b = 1 + Math.floor(r * 4);
+    return `${v + b}−${b}`;
+  }
+  if (kind === "ph") {
+    return PHS()[(+d - 1) % PHS().length];
+  }
+  return "";
+}
+const PHS = () => {
+  const H = bsSyl().filter((h) => h.length >= 1);
+  const ex = ["ba", "ab", "bo", "ob", "a", "o", "ob", "bu"];
+  const o = [...new Set(H.concat(ex))];
+  return o.slice(0, 6);
+};
+function byBuild(key) {
+  const [kind, id] = key.split(":");
+  let vb = "0 0 200 200",
+    body = "",
+    legend = "",
+    title = "";
+  BY.cells = null;
+  if (kind === "v") {
+    const v = BYV[id];
+    title = v.n;
+    let S2 = v.s;
+    if (v.sun) S2 = sunRays().concat(S2);
+    if (v.rb) S2 = rbShapes();
+    body = S2.map((s, i) => shapeSVG(s, i)).join("");
+  } else if (kind === "m") {
+    title = "Mandala " + id;
+    body = mandalaShapes(+id)
+      .map((s, i) => shapeSVG(s, i))
+      .join("");
+  } else if (kind === "p" || kind === "ps" || kind === "ph") {
+    const P = PX[id];
+    title = P.n + (kind === "ps" ? " · Sayıya göre" : kind === "ph" ? " · Heceye göre" : "");
+    vb = "0 0 120 120";
+    const cells = [];
+    BY.cells = {};
+    P.g.forEach((row, y) =>
+      [...row].forEach((ch, x) => {
+        if (ch === ".") return;
+        const i = y * 12 + x;
+        cells.push(
+          `<rect data-i="${i}" x="${x * 10}" y="${y * 10}" width="10" height="10" fill="${BY.fills[i] || "#fff"}" class="px"/>`,
+        );
+        BY.cells[i] = P.c[ch];
+        if (kind !== "p") {
+          const lb = pxLabel(kind, ch, i + 1);
+          cells.push(
+            `<text x="${x * 10 + 5}" y="${y * 10 + 6.6}" class="pxl" style="font-size:${lb.length > 3 ? 2.6 : lb.length > 2 ? 3.2 : 4}px">${esc(lb)}</text>`,
+          );
+        }
+      }),
+    );
+    body = cells.join("");
+    if (kind !== "p")
+      legend = Object.entries(P.c)
+        .map(
+          ([d, c]) =>
+            `<span><i style="background:${c}"></i>${kind === "ps" ? d : esc(pxLabel("ph", d))}</span>`,
+        )
+        .join("");
+  } else if (kind === "h") {
+    title = id;
+    const fs = id.length > 2 ? 70 : id.length > 1 ? 96 : 130;
+    ((body = ["c", 30, 30, 18]),
+      (body =
+        [
+          ["c", 30, 32, 20],
+          ["c", 172, 36, 16],
+          ["c", 26, 170, 16],
+          ["c", 176, 166, 22],
+          ["p", "M150 92 L156 104 L170 106 L160 115 L162 129 L150 122 L138 129 L140 115 L130 106 L144 104 Z"],
+        ]
+          .map((s, i) => shapeSVG(s, i))
+          .join("") +
+        `<text data-i="99" x="100" y="${100 + fs * 0.36}" text-anchor="middle" class="bigt" style="font-size:${fs}px" fill="${BY.fills[99] || "#fff"}">${esc(id)}</text>`));
+  } else if (kind === "f") {
+    title = "Serbest çizim";
+    body =
+      `<rect data-i="0" x="0" y="0" width="200" height="200" fill="${BY.fills[0] || "#fff"}" stroke="none"/>` +
+      (id === "cizgili"
+        ? Array.from(
+            { length: 9 },
+            (_, i) => `<line x1="0" x2="200" y1="${20 + i * 20}" y2="${20 + i * 20}" class="gl"/>`,
+          ).join("")
+        : id === "kareli"
+          ? Array.from(
+              { length: 19 },
+              (_, i) =>
+                `<line x1="${10 + i * 10}" x2="${10 + i * 10}" y1="0" y2="200" class="gl"/><line y1="${10 + i * 10}" y2="${10 + i * 10}" x1="0" x2="200" class="gl"/>`,
+            ).join("")
+          : "");
+  }
+  return { vb, body, legend, title, kind };
+}
+function bySVG(key, thumb) {
+  const sv = BY.fills,
+    sc = BY.cells;
+  if (thumb) BY.fills = (S.byFills || {})[key] || {};
+  const b = byBuild(key);
+  BY.fills = sv;
+  if (thumb) BY.cells = sc;
+  return `<svg viewBox="${b.vb}" class="${thumb ? "byth" : "bysvg"} k-${b.kind}" xmlns="http://www.w3.org/2000/svg"><defs>${byDefs()}</defs><g class="byg">${b.body}</g></svg>`;
+}
+function byDefs() {
+  return BYC.slice(0, 10)
+    .map(
+      (c, i) =>
+        `<pattern id="pd${i}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#fff"/><circle cx="4" cy="4" r="2.2" fill="${c[0]}"/></pattern><pattern id="ps${i}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#fff"/><rect width="4" height="8" fill="${c[0]}"/></pattern><pattern id="pk${i}" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="${c[0]}"/><path d="M5 1 L6.2 3.8 L9 4 L6.8 5.8 L7.6 8.6 L5 7 L2.4 8.6 L3.2 5.8 L1 4 L3.8 3.8 Z" fill="#fff" opacity=".85"/></pattern>`,
+    )
+    .join("");
+}
+/* ---- menüler ---- */
+function byMenu(cat) {
+  BY.menu = cat || null;
+  let el = $("#boya");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "boya";
+    document.body.appendChild(el);
+  }
+  BY.on = false;
+  if (!cat) {
+    el.innerHTML = `<div class="byhd"><button class="kback" onclick="byClose()">⬅ Geri</button><b>🎨 Boyama Dünyası</b><span></span></div><div class="bycats">${BY_CATS.map((c) => `<button onclick="byMenu('${c.k}')"><span>${c.i}</span><b>${c.n}</b><small>${byPageList(c.k).length} resim</small></button>`).join("")}</div>`;
+    say("Ne boyamak istersin?");
+    return;
+  }
+  const C = BY_CATS.find((c) => c.k === cat);
+  const L = byPageList(cat);
+  el.innerHTML = `<div class="byhd"><button class="kback" onclick="byMenu()">⬅ Geri</button><b>${C.i} ${C.n}</b><span></span></div><div class="bygrid">${L.map((p) => `<button onclick="byOpen('${p.key}')">${bySVG(p.key, 1)}<b>${esc(p.n)}</b></button>`).join("")}</div>`;
+}
+function byClose() {
+  const e = $("#boya");
+  if (e) e.remove();
+  BY.on = false;
+  mrSend({ t: "byx" });
+}
+/* ---- boyama ekranı ---- */
+function byOpen(key, remote) {
+  BY.key = key;
+  BY.fills = (S.byFills = S.byFills || {})[key] ? Object.assign({}, S.byFills[key]) : {};
+  BY.hist = [];
+  BY.br = [];
+  BY.on = true;
+  byRender();
+  if (!remote) mrSend({ t: "byo", key, fills: BY.fills });
+  const b = byBuild(key);
+  say(
+    b.kind === "ps"
+      ? "Toplamayı yap, sonucun rengiyle boya!"
+      : b.kind === "ph"
+        ? "Heceyi oku, hecenin rengiyle boya!"
+        : `${b.title}. Hadi boyayalım!`,
+  );
+}
+function byRender() {
+  let el = $("#boya");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "boya";
+    document.body.appendChild(el);
+  }
+  const b = byBuild(BY.key);
+  const pal = BYC.map(
+    (c, i) =>
+      `<button class="bpc ${BY.col === c[0] && !BY.pat && BY.tool !== "rb" ? "on" : ""}" style="--k:${c[0]}" onclick="byCol(${i})" title="${c[1]}"></button>`,
+  ).join("");
+  const tools = [
+    ["fill", "🪣", "Doldur"],
+    ["brush", "🖌️", "Fırça"],
+    ["rb", "🌈", "Gökkuşağı"],
+    ["pat", "✨", "Desen"],
+    ["st", "⭐", "Çıkartma"],
+    ["er", "🧽", "Silgi"],
+  ];
+  el.innerHTML = `<div class="byhd"><button class="kback" onclick="byMenu(BY.menu)">⬅ Geri</button><b>🎨 ${esc(b.title)}</b><div class="bytop"><button onclick="byUndo()">↩️</button><button onclick="byClear()">🗑️</button><button onclick="bySave()">💾</button><button class="done" onclick="byDone()">✅ Bitti</button></div></div>
+ <div class="bywrap"><div class="bytools">${tools.map((t) => `<button class="${BY.tool === t[0] ? "on" : ""}" onclick="byTool('${t[0]}')"><span>${t[0] === "st" ? BY.sticker : t[1]}</span><small>${t[2]}</small></button>`).join("")}</div>
+ <div class="bystage"><div class="bybox">${bySVG(BY.key)}<canvas id="bybr"></canvas></div>${b.legend ? `<div class="byleg">${b.legend}<button onclick="byCheck()">🔍 Kontrol</button></div>` : ""}</div>
+ <div class="bypal">${pal}${BY.tool === "pat" ? `<div class="bypats">${["pd", "ps", "pk"].map((p) => `<button class="${BY.pat === p ? "on" : ""}" onclick="BY.pat='${p}';byRender()">${p === "pd" ? "⚪ Puantiye" : p === "ps" ? "〰️ Çizgili" : "⭐ Yıldızlı"}</button>`).join("")}</div>` : ""}${BY.tool === "st" ? `<div class="bypats">${["⭐", "❤️", "🌸", "🦋", "🚀", "⚽", "🎈", "👑", "🌈", "😀", "🐞", "💎"].map((s) => `<button class="st" onclick="BY.sticker='${s}';byRender()">${s}</button>`).join("")}</div>` : ""}</div></div>`;
+  byBind();
+}
+function byCol(i) {
+  BY.col = BYC[i][0];
+  if (BY.tool === "er" || BY.tool === "rb" || BY.tool === "st") BY.tool = "fill";
+  if (BY.tool !== "pat") BY.pat = null;
+  say(BYC[i][1]);
+  byRender();
+}
+function byTool(t) {
+  BY.tool = t;
+  if (t === "pat" && !BY.pat) BY.pat = "pd";
+  byRender();
+}
+function byFillVal() {
+  if (BY.tool === "er") return "#ffffff";
+  if (BY.tool === "rb") {
+    const c = RAINBOW[BY.rb % RAINBOW.length];
+    BY.rb++;
+    return c;
+  }
+  if (BY.tool === "pat") {
+    const i = Math.max(
+      0,
+      BYC.slice(0, 10).findIndex((c) => c[0] === BY.col),
+    );
+    return `url(#${BY.pat || "pd"}${i})`;
+  }
+  return BY.col;
+}
+function bySetFill(i, v, remote) {
+  const el = document.querySelector(`#boya .bysvg [data-i="${i}"]`);
+  if (!remote) BY.hist.push({ t: "f", i, prev: BY.fills[i] });
+  if (v === "#ffffff") {
+    delete BY.fills[i];
+  } else BY.fills[i] = v;
+  if (el) {
+    el.setAttribute("fill", v);
+    el.classList.remove("pop");
+    void el.getBBox;
+    el.classList.add("pop");
+  }
+  byStore();
+  if (!remote) {
+    mrSend({ t: "byf", i, v });
+    try {
+      tone(500 + Math.random() * 700, 0.07, 0, 0.18);
+    } catch (e) {}
+  }
+}
+function byStore() {
+  (S.byFills = S.byFills || {})[BY.key] = Object.assign({}, BY.fills);
+  clearTimeout(BY._sv);
+  BY._sv = setTimeout(save, 600);
+}
+function byBind() {
+  const svg = document.querySelector("#boya .bysvg");
+  const cv = $("#bybr");
+  if (!svg || !cv) return;
+  const box = cv.parentElement;
+  const fit = () => {
+    const r = svg.getBoundingClientRect();
+    cv.width = Math.round(r.width * Math.min(2, devicePixelRatio || 1));
+    cv.height = Math.round(r.height * Math.min(2, devicePixelRatio || 1));
+    cv.style.width = r.width + "px";
+    cv.style.height = r.height + "px";
+    brRedraw();
+  };
+  requestAnimationFrame(fit);
+  cv.style.pointerEvents = BY.tool === "brush" || BY.tool === "st" ? "auto" : "none";
+  svg.addEventListener("pointerdown", (e) => {
+    if (BY.tool === "brush" || BY.tool === "st") return;
+    const t = e.target.closest("[data-i]");
+    if (!t) return;
+    e.preventDefault();
+    bySetFill(t.getAttribute("data-i"), byFillVal());
+  });
+  let cur = null;
+  const pt = (e) => {
+    const r = cv.getBoundingClientRect();
+    return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height];
+  };
+  cv.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (BY.tool === "st") {
+      const s = { st: BY.sticker, p: pt(e) };
+      BY.br.push(s);
+      BY.hist.push({ t: "b" });
+      brRedraw();
+      mrSend({ t: "byb", s });
+      try {
+        tone(880, 0.08);
+        tone(1320, 0.1, 0.08);
+      } catch (x) {}
+      return;
+    }
+    try {
+      cv.setPointerCapture(e.pointerId);
+    } catch (x) {}
+    cur = { c: BY.col, w: 0.025, pts: [pt(e)] };
+    BY.br.push(cur);
+    BY.hist.push({ t: "b" });
+  });
+  cv.addEventListener("pointermove", (e) => {
+    if (!cur) return;
+    cur.pts.push(pt(e));
+    brRedraw();
+  });
+  const up = () => {
+    if (cur) {
+      mrSend({ t: "byb", s: cur });
+      cur = null;
+    }
+  };
+  cv.addEventListener("pointerup", up);
+  cv.addEventListener("pointercancel", up);
+}
+function brRedraw() {
+  const cv = $("#bybr");
+  if (!cv) return;
+  const g = cv.getContext("2d"),
+    W = cv.width,
+    H = cv.height;
+  g.clearRect(0, 0, W, H);
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  BY.br.forEach((s) => {
+    if (s.st) {
+      g.font = `${Math.round(W * 0.09)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText(s.st, s.p[0] * W, s.p[1] * H);
+      return;
+    }
+    g.strokeStyle = s.c;
+    g.lineWidth = s.w * W;
+    g.beginPath();
+    s.pts.forEach((p, i) => (i ? g.lineTo(p[0] * W, p[1] * H) : g.moveTo(p[0] * W, p[1] * H)));
+    if (s.pts.length === 1) g.lineTo(s.pts[0][0] * W + 0.1, s.pts[0][1] * H);
+    g.stroke();
+  });
+}
+function byUndo() {
+  const h = BY.hist.pop();
+  if (!h) return;
+  if (h.t === "f") {
+    const v = h.prev || "#ffffff";
+    if (h.prev) BY.fills[h.i] = h.prev;
+    else delete BY.fills[h.i];
+    const el = document.querySelector(`#boya .bysvg [data-i="${h.i}"]`);
+    if (el) el.setAttribute("fill", v);
+    byStore();
+    mrSend({ t: "byf", i: h.i, v });
+  } else {
+    BY.br.pop();
+    brRedraw();
+    mrSend({ t: "bybu" });
+  }
+}
+function byClear() {
+  if (!confirm("Boyamayı temizleyelim mi?")) return;
+  BY.fills = {};
+  BY.br = [];
+  BY.hist = [];
+  byStore();
+  byRender();
+  mrSend({ t: "byo", key: BY.key, fills: {} });
+}
+function byCheck() {
+  if (!BY.cells) return;
+  const ks = Object.keys(BY.cells);
+  let ok = 0,
+    wrong = 0,
+    empty = 0;
+  ks.forEach((i) => {
+    const f = BY.fills[i];
+    if (!f) empty++;
+    else if (f.toLowerCase() === BY.cells[i].toLowerCase()) ok++;
+    else wrong++;
+  });
+  document.querySelectorAll("#boya .bysvg rect.px").forEach((r) => {
+    const i = r.getAttribute("data-i");
+    const f = BY.fills[i];
+    r.classList.toggle("wrong", !!f && f.toLowerCase() !== BY.cells[i].toLowerCase());
+  });
+  if (!wrong && !empty) {
+    stCele("Harika! Hepsi doğru " + (S.settings.student || "Mete") + "!");
+    byDone(true);
+  } else
+    say(
+      `${ok} doğru${wrong ? ", " + wrong + " tanesini değiştirelim" : ""}${empty ? ", " + empty + " kare boş" : ""}.`,
+    );
+}
+async function byImage() {
+  const svg = document.querySelector("#boya .bysvg");
+  const cv = $("#bybr");
+  const W = 1000;
+  const vb = svg.viewBox.baseVal;
+  const H = Math.round((W * vb.height) / vb.width);
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, W, H);
+  const s = new XMLSerializer()
+    .serializeToString(svg)
+    .replace("<svg", '<svg width="' + W + '" height="' + H + '"');
+  const st = `<style>${BYCSS_SVG}</style>`;
+  const s2 = s.replace(/(<svg[^>]*>)/, "$1" + st);
+  const img = new Image();
+  await new Promise((r) => {
+    img.onload = r;
+    img.onerror = r;
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s2);
+  });
+  try {
+    g.drawImage(img, 0, 0, W, H);
+  } catch (e) {}
+  if (cv && cv.width) g.drawImage(cv, 0, 0, W, H);
+  return c;
+}
+async function bySave(quiet) {
+  try {
+    const c = await byImage();
+    const img = c.toDataURL("image/jpeg", 0.85);
+    const t = document.createElement("canvas");
+    t.width = 360;
+    t.height = Math.round((360 * c.height) / c.width);
+    t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
+    const id = uid();
+    await idbSet("work:" + id, { img, th: t.toDataURL("image/jpeg", 0.8) });
+    const ses = ensureSession();
+    S.works.unshift({
+      id,
+      date: new Date().toISOString(),
+      title: "🎨 " + byBuild(BY.key).title,
+      sid: ses.id,
+      kind: "boyama",
+    });
+    ses.works.push(id);
+    save();
+    if (!quiet) toast("💾 Boyama kaydedildi — veli raporuna eklenecek");
+  } catch (e) {
+    toast("Kaydedilemedi: " + e.message);
+  }
+}
+async function byDone(skipSave) {
+  if (!skipSave) await bySave(true);
+  mrSend({ t: "byd" });
+  byCelebrate();
+  if (child) {
+    addStar(2);
+    const c = ensureSession();
+    if (!c.done.includes("boya")) c.done.push("boya");
+    save();
+  }
+}
+function byCelebrate() {
+  stCele("Harika boyadın " + (S.settings.student || "Mete") + "! 🎨");
+  const el = $("#boya");
+  if (!el) return;
+  const cf = document.createElement("div");
+  cf.className = "byconf";
+  cf.innerHTML = Array.from(
+    { length: 40 },
+    (_, i) =>
+      `<i style="left:${Math.random() * 100}%;background:${RAINBOW[i % 7]};animation-delay:${Math.random() * 0.6}s;transform:rotate(${Math.random() * 360}deg)"></i>`,
+  ).join("");
+  el.appendChild(cf);
+  setTimeout(() => cf.remove(), 2600);
+}
+/* eşitleme */
+const _rmData12b = rmData;
+rmData = function (d) {
+  if (d && d.t === "byo") {
+    BY.menu = BY.menu || null;
+    BY.key = d.key;
+    BY.fills = d.fills || {};
+    BY.hist = [];
+    BY.br = [];
+    BY.on = true;
+    byRender();
+    return;
+  }
+  if (d && d.t === "byf") {
+    if (!BY.on) return;
+    if (d.v === "#ffffff") delete BY.fills[d.i];
+    else BY.fills[d.i] = d.v;
+    const el = document.querySelector(`#boya .bysvg [data-i="${d.i}"]`);
+    if (el) {
+      el.setAttribute("fill", d.v);
+      el.classList.remove("pop");
+      void el.getBBox;
+      el.classList.add("pop");
+    }
+    return;
+  }
+  if (d && d.t === "byb") {
+    if (BY.on) {
+      BY.br.push(d.s);
+      brRedraw();
+    }
+    return;
+  }
+  if (d && d.t === "bybu") {
+    BY.br.pop();
+    brRedraw();
+    return;
+  }
+  if (d && d.t === "byd") {
+    byCelebrate();
+    return;
+  }
+  if (d && d.t === "byx") {
+    const e = $("#boya");
+    if (e) e.remove();
+    BY.on = false;
+    return;
+  }
+  return _rmData12b(d);
+};
+const BYCSS_SVG =
+  'path,circle,ellipse,rect{stroke:#1e293b;stroke-width:2.6;stroke-linejoin:round}.ln{stroke:#1e293b;stroke-width:2.6;stroke-linecap:round}rect.px{stroke:#94a3b8;stroke-width:.4}.pxl{font-family:sans-serif;font-weight:700;fill:#334155;text-anchor:middle;pointer-events:none}.bigt{font-family:"Andika","Comic Sans MS",sans-serif;font-weight:900;stroke:#1e293b;stroke-width:3;paint-order:stroke}.gl{stroke:#cbd5e1;stroke-width:.6}';
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+#boya{position:fixed;inset:0;z-index:150;background:linear-gradient(160deg,#fdf2f8,#eff6ff);display:flex;flex-direction:column;overflow:hidden}
+.byhd{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}.byhd b{flex:1;font-size:clamp(17px,2.4vw,26px);text-align:center}.byhd .kback{margin:0}
+.bytop{display:flex;gap:6px}.bytop button{border:0;background:#fff;border-radius:14px;height:48px;min-width:48px;font-size:20px;box-shadow:0 3px 0 #e2e8f0;cursor:pointer}.bytop .done{background:#16a34a;color:#fff;font-weight:900;padding:0 14px;font-size:17px;box-shadow:0 3px 0 #15803d}
+.bycats,.bygrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:8px 14px 40px;align-content:start}
+.bycats button,.bygrid button{border:0;background:#fff;border-radius:22px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 #e2e8f0;cursor:pointer}.bycats span{font-size:52px}.bycats b,.bygrid b{font-size:16px}.bycats small{color:#64748b}
+.byth{width:100%;max-width:140px;aspect-ratio:1;pointer-events:none}
+.byth path,.byth circle,.byth ellipse,.byth rect,.bysvg path,.bysvg circle,.bysvg ellipse,.bysvg rect{stroke:#1e293b;stroke-width:2.6;stroke-linejoin:round}
+.ln{stroke:#1e293b;stroke-width:2.6;stroke-linecap:round}.byth rect.px,.bysvg rect.px{stroke:#94a3b8;stroke-width:.4}.pxl{font-family:sans-serif;font-weight:700;fill:#334155;text-anchor:middle;pointer-events:none}
+.bigt{font-family:"Andika","Comic Sans MS",sans-serif;font-weight:900;stroke:#1e293b;stroke-width:3;paint-order:stroke}.gl{stroke:#cbd5e1;stroke-width:.6;pointer-events:none}
+.bywrap{flex:1;display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:0 10px 10px;min-height:0}
+.bytools{display:flex;flex-direction:column;gap:6px;overflow-y:auto}.bytools button{border:0;background:#fff;border-radius:16px;width:68px;padding:8px 0;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 3px 0 #e2e8f0;cursor:pointer}.bytools span{font-size:26px}.bytools small{font-size:11px;font-weight:800}.bytools button.on{background:#4f46e5;color:#fff}
+.bystage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;gap:8px}.bybox{position:relative;height:100%;max-height:calc(100vh - 150px);aspect-ratio:1;max-width:100%;background:#fff;border-radius:22px;box-shadow:0 10px 30px #0f172a1f;padding:10px}
+.bysvg{width:100%;height:100%;display:block;touch-action:none;cursor:pointer}.bysvg [data-i]{transition:fill .15s}.bysvg .pop{animation:bypop .35s}@keyframes bypop{40%{transform-box:fill-box;transform-origin:center;transform:scale(1.06)}}
+.bysvg rect.px.wrong{stroke:#dc2626;stroke-width:1.6}
+#bybr{position:absolute;left:10px;top:10px;touch-action:none}
+.byleg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;background:#fff;border-radius:14px;padding:6px 10px}.byleg span{display:flex;align-items:center;gap:4px;font-weight:900;font-size:18px}.byleg i{width:22px;height:22px;border-radius:6px;border:1px solid #cbd5e1;display:inline-block}.byleg button{border:0;background:#fef3c7;border-radius:10px;padding:6px 10px;font-weight:800}
+.bypal{display:grid;grid-template-columns:repeat(2,52px);gap:6px;align-content:start;overflow-y:auto}.bypal .bpc{width:52px;height:52px;border-radius:50%;border:4px solid #fff;background:var(--k);box-shadow:0 2px 8px #0003;cursor:pointer}.bypal .bpc.on{transform:scale(1.15);border-color:#0f172a}
+.bypats{grid-column:span 2;display:flex;flex-direction:column;gap:4px}.bypats button{border:0;background:#fff;border-radius:10px;padding:6px;font-weight:700;font-size:12px}.bypats button.on{outline:2px solid #4f46e5}.bypats .st{font-size:26px}
+.byconf{position:absolute;inset:0;pointer-events:none;overflow:hidden}.byconf i{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:byfall 2.4s ease-in forwards}@keyframes byfall{to{top:110%;transform:rotate(720deg)}}
+@media (max-width:700px){.bywrap{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}.bytools{flex-direction:row;overflow-x:auto}.bytools button{width:60px;flex:none}.bypal{grid-template-columns:repeat(9,1fr);grid-auto-flow:row}.bypal .bpc{width:34px;height:34px}.bypats{grid-column:span 9;flex-direction:row;flex-wrap:wrap}.bybox{max-height:none;width:100%;height:auto}}`;
+  document.head.appendChild(s);
+})();
+
+/* ================== v12.0 OKUMA OYUNLARI (Okuyorum tarzı, Basara ağırlıklı) ==================
+   Her oyun 3 kipte: 📕 Hece (Basara) · 📗 Kelime · 🔢 Matematik (toplama-çıkarma) */
+const OG_LIST = [
+  { k: "fare", i: "🐭", n: "Fare Oyunu" },
+  { k: "futbol", i: "⚽", n: "Futbol" },
+  { k: "sut", i: "🥅", n: "Şut At" },
+  { k: "baloncuk", i: "🫧", n: "Baloncuk Patlat" },
+  { k: "duello", i: "⚔️", n: "Düello" },
+  { k: "tahmin", i: "🔍", n: "Kelime Tahmin" },
+  { k: "terazi", i: "⚖️", n: "Eşitlik Terazisi" },
+  { k: "dinleoku", i: "👂", n: "Dinle, Oku" },
+  { k: "ritim", i: "🥁", n: "Ritmik Okuma" },
+  { k: "resimdikte", i: "🖼️", n: "Resimli Dikte" },
+  { k: "cizgi", i: "✏️", n: "Çizgi Çalışmaları" },
+];
+const OG_NOMODE = {
+  terazi: "mat",
+  tahmin: "kelime",
+  dinleoku: "kelime",
+  ritim: "kelime",
+  resimdikte: "kelime",
+  cizgi: "-",
+};
+const SAYI = [
+  "sıfır",
+  "bir",
+  "iki",
+  "üç",
+  "dört",
+  "beş",
+  "altı",
+  "yedi",
+  "sekiz",
+  "dokuz",
+  "on",
+  "on bir",
+  "on iki",
+  "on üç",
+  "on dört",
+  "on beş",
+  "on altı",
+  "on yedi",
+  "on sekiz",
+  "on dokuz",
+  "yirmi",
+];
+function ogHece() {
+  const isAn = S.profile.method === "anetil";
+  if (isAn) {
+    const s = anSyl();
+    return s.open.concat(s.closed);
+  }
+  return mixSyl(5);
+}
+function ogWords() {
+  const isAn = S.profile.method === "anetil";
+  let W = (isAn ? anWords() : bsWords()).filter((w) => w.length > 1);
+  if (W.length < 4)
+    W = W.concat(
+      TRW.filter((x) => x.w.length <= 6)
+        .map((x) => x.w)
+        .slice(0, 40),
+    );
+  return [...new Set(W)];
+}
+function ogRound(mode) {
+  if (mode === "mat") {
+    const op = ri(2) ? "+" : "-";
+    let a, b;
+    if (op === "+") {
+      a = ri(9) + 1;
+      b = ri(10 - a) + 1;
+    } else {
+      a = ri(9) + 2;
+      b = ri(a - 1) + 1;
+    }
+    const r = op === "+" ? a + b : a - b;
+    const o = new Set([r]);
+    let g = 0;
+    while (o.size < 3 && g++ < 40) o.add(Math.max(0, r + ri(5) - 2));
+    return {
+      say: `${SAYI[a]} ${op === "+" ? "artı" : "eksi"} ${SAYI[b]} kaç eder?`,
+      show: `${a} ${op === "+" ? "+" : "−"} ${b}`,
+      t: String(r),
+      opts: shuffle([...o].map(String)),
+      after: `Evet! ${a} ${op === "+" ? "artı" : "eksi"} ${b}, ${SAYI[r]}.`,
+    };
+  }
+  const P = mode === "kelime" ? ogWords() : ogHece();
+  const t = P[ri(P.length)];
+  const o = new Set([t]);
+  let g = 0;
+  while (o.size < 3 && g++ < 60) o.add(P[ri(P.length)]);
+  if (o.size < 3) {
+    const nx = mode === "kelime" ? TRW.map((x) => x.w) : bsNext();
+    while (o.size < 3) o.add(nx[ri(nx.length)]);
+  }
+  return { say: `${t}. Hangisi ${t}?`, show: "🔊", t, opts: shuffle([...o]), after: `Evet, ${t}!` };
+}
+function ogStart(k) {
+  if (!child) {
+    startChild();
+    setTimeout(() => ogStart(k), 300);
+    return;
+  }
+  const m = OG_NOMODE[k];
+  child.act = "og";
+  child.og = k;
+  child.st = m ? { mode: m === "-" ? "hece" : m, r: 0, sc: 0 } : null;
+  child.topic = null;
+  render();
+}
+const _startAct12 = startAct;
+startAct = function (a) {
+  if (a && a.startsWith("og:")) return ogStart(a.slice(3));
+  return _startAct12(a);
+};
+const _renderChild12 = renderChild;
+renderChild = function () {
+  if (child && child.act === "og") return ogRender();
+  return _renderChild12();
+};
+const _actInfo12 = actInfo;
+actInfo = function (a) {
+  if (a && a.startsWith("og:")) {
+    const g = OG_LIST.find((x) => x.k === a.slice(3));
+    return g ? { i: g.i, n: g.n } : { i: "🎮", n: "Oyun" };
+  }
+  return _actInfo12(a);
+};
+function ogMode(m) {
+  child.st = { mode: m, r: 0, sc: 0 };
+  render();
+}
+function ogRender() {
+  const g = OG_LIST.find((x) => x.k === child.og);
+  const st = child.st;
+  if (!st)
+    return kid(
+      `<div class="ogpick"><div class="ogt">${g.i}</div><h2>${g.n}</h2><p>Ne ile oynayalım?</p><div class="ogmodes"><button onclick="ogMode('hece')"><span>📕</span>Heceler<small>${S.profile.method === "anetil" ? "ANETİL" : "Basara"}</small></button><button onclick="ogMode('kelime')"><span>📗</span>Kelimeler</button><button onclick="ogMode('mat')"><span>🔢</span>Toplama–Çıkarma</button></div></div>`,
+    );
+  return (OG_R[child.og] || OG_R.futbol)(st, g);
+}
+function ogWin(st, msg) {
+  addStar(3);
+  logIt("q", "og_" + child.og, true, { sub: "oyun" });
+  const c = ensureSession();
+  if (!c.done.includes("og:" + child.og)) c.done.push("og:" + child.og);
+  save();
+  celebrate(msg || "Harika oynadın!", "🏆");
+  st.end = 1;
+  render();
+}
+const ogEnd = (st, g) =>
+  kid(
+    `<div class="ogpick"><div class="ogt">🏆</div><h2>${g.n} bitti!</h2><p>Puan: ${st.sc}</p><div class="ogmodes"><button onclick="child.st={mode:'${st.mode}',r:0,sc:0};render()"><span>🔁</span>Yeniden</button><button onclick="child.st=null;render()"><span>🔀</span>Başka kip</button><button onclick="goHome()"><span>🏠</span>Ana ekran</button></div></div>`,
+  );
+const ogTxt = (s, mode) => `<span class="ogw ${mode === "mat" ? "m" : ""}">${esc(s)}</span>`;
+function ogNext(st) {
+  st.q = ogRound(st.mode);
+  st.lock = 0;
+  st.res = null;
+  const q = st.q;
+  setTimeout(() => {
+    if (child && child.st === st) say(q.say);
+  }, 350);
+}
+const OG_R = {
+  /* ⚽ Futbol: doğru kaleye şut */
+  futbol: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.q) ogNext(st);
+    const q = st.q;
+    return kid(
+      `<div class="kq"><button class="kbig" onclick="say(child.st.q.say)">🔊</button>${dots(st.r, 6)}<b class="ogsc">⚽ ${st.sc}</b></div>${st.mode === "mat" ? `<div class="ogq">${esc(q.show)}</div>` : ""}<div class="pitch"><div class="goals">${q.opts.map((o, i) => `<button class="goal ${st.res && st.res.i === i ? (st.res.ok ? "gol" : "miss") : ""}" onclick="ogFut(${i})"><span class="net"></span>${ogTxt(o, st.mode)}${st.res && st.res.i === i && !st.res.ok ? "<em>🧤</em>" : ""}</button>`).join("")}</div><div class="ball ${st.res ? "go g" + st.res.i : ""}">⚽</div><div class="kicker">🏃</div></div>${st.res && st.res.ok ? '<div class="ogbig">GOOOL! 🎉</div>' : ""}`,
+    );
+  },
+  sut: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.q) ogNext(st);
+    const q = st.q;
+    return kid(
+      `<div class="kq"><button class="kbig" onclick="say(child.st.q.say)">🔊</button>${dots(st.r, 6)}<b class="ogsc">🥅 ${st.sc}</b></div>${st.mode === "mat" ? `<div class="ogq">${esc(q.show)}</div>` : ""}<div class="pitch"><div class="goal1"><span class="net"></span><span class="keeper ${st.res ? (st.res.ok ? "dive" : "save") : ""}">🧤</span>${st.res && st.res.ok ? '<span class="inball">⚽</span>' : ""}</div><p class="ogh">Doğru topa dokun, şut çek!</p><div class="balls">${q.opts.map((o, i) => `<button class="sball ${st.res && st.res.i === i ? "shot" : ""}" onclick="ogFut(${i})"><span>⚽</span>${ogTxt(o, st.mode)}</button>`).join("")}</div></div>${st.res && st.res.ok ? '<div class="ogbig">GOOOL! 🎉</div>' : ""}`,
+    );
+  },
+  /* 🫧 Baloncuk */
+  baloncuk: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.q) {
+      ogNext(st);
+      const P = st.mode === "mat" ? null : st.mode === "kelime" ? ogWords() : ogHece();
+      st.bub = Array.from({ length: 10 }, (_, i) => {
+        let v;
+        if (st.mode === "mat") {
+          v = i < 4 ? st.q.t : String(Math.max(0, +st.q.t + ri(7) - 3));
+        } else v = i < 4 ? st.q.t : P[ri(P.length)];
+        return { v, x: 5 + ri(80), d: 6 + ri(6), dl: -(ri(60) / 10), p: 0 };
+      });
+    }
+    const q = st.q;
+    return kid(
+      `<div class="kq"><button class="kbig" onclick="say(child.st.q.say)">🔊</button><b class="ogsc">🫧 ${st.sc} / 8</b></div><div class="ogq">${st.mode === "mat" ? esc(q.show) + " = ?" : "Bul: " + esc(q.t)}</div><div class="bubbles">${st.bub.map((b, i) => (b.p ? "" : `<button class="bub" data-i="${i}" style="left:${b.x}%;animation-duration:${b.d}s;animation-delay:${b.dl}s" onclick="ogBub(${i})">${esc(b.v)}</button>`)).join("")}</div>`,
+    );
+  },
+  /* ⚔️ Düello */
+  duello: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.q) {
+      ogNext(st);
+      st.p = st.p || [0, 0];
+      st.o2 = shuffle(st.q.opts);
+    }
+    const q = st.q;
+    const side = (k, arr) =>
+      `<div class="dside s${k}"><div class="dwho">${k ? "👨‍🏫 Öğretmen" : "🤖 " + esc(S.settings.student || "Mete")}<b>${st.p[k]}</b></div>${arr.map((o, i) => `<button onclick="ogDu(${k},${i})" class="${st.win === k && o === q.t ? "ok" : ""}">${ogTxt(o, st.mode)}</button>`).join("")}</div>`;
+    return kid(
+      `<div class="kq"><button class="kbig" onclick="say(child.st.q.say)">🔊</button><b class="ogsc">İlk 5 puanı alan kazanır</b></div>${st.mode === "mat" ? `<div class="ogq">${esc(q.show)}</div>` : ""}<div class="duel">${side(0, q.opts)}<div class="dvs">⚔️</div>${side(1, st.o2)}</div>`,
+    );
+  },
+  /* 🐭 Fare oyunu: hızlı okuma */
+  fare: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.row) {
+      const P = st.mode === "kelime" ? ogWords() : st.mode === "mat" ? null : ogHece();
+      st.row = Array.from({ length: 8 }, () => {
+        if (!P) {
+          const a = ri(6),
+            b = ri(5);
+          return `${a}+${b}`;
+        }
+        return P[ri(P.length)];
+      });
+      st.i = -1;
+      st.sp = st.sp || 1600;
+    }
+    const cells =
+      st.row
+        .map(
+          (w, i) =>
+            `<div class="fc ${i === st.i ? "on" : ""} ${i < st.i ? "done" : ""}">${i === st.i ? '<span class="mouse">🐭</span>' : ""}${esc(w)}</div>`,
+        )
+        .join("") + `<div class="fc cheese">${st.i >= st.row.length ? "🐭" : ""}🧀</div>`;
+    return kid(
+      `<div class="kq"><b class="ogsc">🐭 Fareyle birlikte oku!</b></div><div class="frow">${cells}</div><div class="ogctl">${st.tm ? '<button onclick="ogFareStop()">⏸️ Dur</button>' : `<button class="go" onclick="ogFareGo()">▶️ Başla</button>`}${[
+        ["🐢 Yavaş", 2600],
+        ["🐇 Orta", 1600],
+        ["🚀 Hızlı", 1000],
+      ]
+        .map(
+          (s) =>
+            `<button class="${st.sp === s[1] ? "on" : ""}" onclick="child.st.sp=${s[1]};render()">${s[0]}</button>`,
+        )
+        .join("")}<button onclick="child.st.row=null;ogFareStop()">🔀 Yeni</button></div>`,
+    );
+  },
+  /* 🔍 Kelime tahmin: hece hece açılır */
+  tahmin: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.w) {
+      const pool = TRW.filter((x) => heceOf(x.w).length >= 2 && heceOf(x.w).length <= 4);
+      const opts = pickN(pool, 3);
+      st.w = opts[0];
+      st.opts = shuffle(opts);
+      st.k = 1;
+      st.res = null;
+      setTimeout(() => say("Heceleri oku. Bu kelime hangisi?"), 300);
+    }
+    const h = heceOf(st.w.w);
+    return kid(
+      `<div class="kq"><button class="kbig" onclick="say('${Q(heceOf(child.st.w.w).slice(0, child.st.k).join(" "))}')">🔊</button>${dots(st.r, 5)}<b class="ogsc">🔍 ${st.sc}</b></div><div class="tslots">${h.map((x, i) => `<span class="${i < st.k ? "on" : ""}">${i < st.k ? esc(x) : "?"}</span>`).join("")}</div><div class="kopts">${st.opts.map((o, i) => `<button class="kcard ${st.res && st.res.i === i ? (st.res.ok ? "hint" : "shake") : ""}" onclick="ogTah(${i})">${o.e}</button>`).join("")}</div>${st.k < h.length ? `<button class="ogmore" onclick="child.st.k++;render()">➕ Bir hece daha aç</button>` : ""}`,
+    );
+  },
+  /* ⚖️ Eşitlik terazisi */
+  terazi: (st, g) => {
+    if (st.end) return ogEnd(st, g);
+    if (!st.e) {
+      const op = ri(2) ? "+" : "-";
+      let a, b;
+      if (op === "+") {
+        a = ri(8) + 1;
+        b = ri(9 - a) + 1;
+      } else {
+        a = ri(8) + 3;
+        b = ri(a - 2) + 1;
+      }
+      st.e = { a, b, op, r: op === "+" ? a + b : a - b };
+      st.pick = null;
+      setTimeout(() => say(`${SAYI[a]} ${op === "+" ? "artı" : "eksi"} ${SAYI[b]}. Teraziyi dengele!`), 300);
+    }
+    const e = st.e;
+    const tilt = st.pick == null ? -10 : st.pick === e.r ? 0 : st.pick > e.r ? 12 : -12;
+    return kid(
+      `<div class="kq">${dots(st.r, 6)}<b class="ogsc">⚖️ ${st.sc}</b></div><div class="scale"><div class="beam" style="transform:rotate(${tilt}deg)"><div class="pan l"><b>${e.a} ${e.op === "+" ? "+" : "−"} ${e.b}</b><small>${"🍎".repeat(e.a)}${e.op === "+" ? " " + "🍐".repeat(e.b) : ""}</small></div><div class="pan r"><b>${st.pick == null ? "?" : st.pick}</b></div></div><div class="post"></div></div><div class="numpad">${Array.from({ length: 11 }, (_, i) => `<button class="${st.pick === i ? (i === e.r ? "ok" : "no") : ""}" onclick="ogTer(${i})">${i}</button>`).join("")}</div>`,
+    );
+  },
+  /* 👂 Dinle, oku */
+  dinleoku: (st, g) => {
+    if (!st.ws) {
+      st.ws = pickN(ogWords(), 8);
+      st.ok = {};
+    }
+    const n = Object.keys(st.ok).length;
+    return kid(
+      `<div class="kq"><b class="ogsc">👂 Önce kendin oku, sonra 🔊 ile dinle! · ${n}/${st.ws.length}</b></div><div class="dlgrid">${st.ws.map((w, i) => `<div class="dl ${st.ok[i] ? "ok" : ""}"><b>${esc(w)}</b>${picOf(w) ? `<i>${picOf(w)}</i>` : ""}<div><button onclick="say('${Q(w)}')">🔊</button><button onclick="child.st.ok[${i}]=1;addStar(1);try{tone(880,.1)}catch(e){};if(Object.keys(child.st.ok).length>=child.st.ws.length)celebrate('Hepsini okudun!','📚');render()">✅</button></div></div>`).join("")}</div><div class="ogctl"><button onclick="child.st.ws=null;render()">🔀 Yeni kelimeler</button></div>`,
+    );
+  },
+  /* 🥁 Ritmik okuma */
+  ritim: (st, g) => {
+    if (!st.ws) {
+      st.ws = pickN(
+        TRW.filter((x) => heceOf(x.w).length >= 2 && heceOf(x.w).length <= 4),
+        6,
+      );
+      st.i = 0;
+      st.h = -1;
+    }
+    const w = st.ws[st.i];
+    const h = heceOf(w.w);
+    return kid(
+      `<div class="kq">${dots(st.i, st.ws.length)}<b class="ogsc">🥁 Davulla birlikte hece hece oku</b></div><div class="qcard"><div class="qbig">${w.e}</div><div class="rhy">${h.map((x, i) => `<span class="${i === st.h ? "on" : ""} ${st.h >= h.length ? "all" : ""}">${esc(x)}</span>`).join("<i>·</i>")}</div></div><div class="ogctl"><button class="go" onclick="ogRitim()">🥁 Başlat</button><button onclick="if(child.st.i<child.st.ws.length-1){child.st.i++;child.st.h=-1;render()}else{addStar(2);celebrate('Ritimle okudun!','🥁')}">⏭️ Sonraki</button></div>`,
+    );
+  },
+  /* 🖼️ Resimli dikte */
+  resimdikte: (st, g) => {
+    if (!st.ws)
+      st.ws = pickN(
+        TRW.filter((x) => x.w.length <= 6),
+        8,
+      );
+    return kid(
+      `<div class="kq"><b class="ogsc">🖼️ Resme dokun, tahtada adını yaz</b></div><div class="dlgrid">${st.ws.map((w, i) => `<button class="dl pic" onclick="ogRDikte(${i})"><i>${w.e}</i></button>`).join("")}</div><div class="ogctl"><button onclick="child.st.ws=null;render()">🔀 Yeni resimler</button></div>`,
+    );
+  },
+  /* ✏️ Çizgi çalışmaları */
+  cizgi: (st, g) =>
+    kid(
+      `<div class="kq"><b class="ogsc">✏️ Hangi çizgiyi çalışalım?</b></div><div class="dlgrid">${CZ.map((c, i) => `<button class="dl pic" onclick="ogCizgi(${i})"><i>${c[1]}</i><b>${c[0]}</b></button>`).join("")}</div>`,
+    ),
+};
+function ogRes(st, i, ok, after) {
+  st.res = { i, ok };
+  st.lock = 1;
+  if (ok) {
+    st.sc++;
+    addStar(1);
+    try {
+      tone(660, 0.1);
+      tone(990, 0.15, 0.1);
+    } catch (e) {}
+    say(after || "Aferin!");
+  } else {
+    try {
+      tone(220, 0.2);
+    } catch (e) {}
+    say("Olmadı, bir daha dene.");
+  }
+  render();
+  setTimeout(
+    () => {
+      if (!child || child.st !== st) return;
+      if (ok) {
+        st.r++;
+        st.q = null;
+        if (st.r >= 6) return ogWin(st, "Harika! " + st.sc + " gol!");
+      } else {
+        st.res = null;
+        st.lock = 0;
+      }
+      render();
+    },
+    ok ? 1600 : 1100,
+  );
+}
+function ogFut(i) {
+  const st = child.st;
+  if (st.lock) return;
+  ogRes(st, i, st.q.opts[i] === st.q.t, st.q.after);
+}
+function ogBub(i) {
+  const st = child.st,
+    b = st.bub[i];
+  const el = document.querySelectorAll(".bub")[0] && document.querySelector(`.bub[data-i="${i}"]`);
+  if (b.v === st.q.t) {
+    b.p = 1;
+    st.sc++;
+    addStar(1);
+    try {
+      tone(900 + ri(400), 0.07);
+    } catch (e) {}
+    if (el) {
+      el.classList.add("popd");
+      setTimeout(() => el.remove(), 250);
+    }
+    const sc = document.querySelector(".ogsc");
+    if (sc) sc.textContent = `🫧 ${st.sc} / 8`;
+    if (st.sc >= 8) return ogWin(st, "Bütün baloncukları patlattın!");
+    if (!st.bub.some((x) => !x.p && x.v === st.q.t)) {
+      st.q = null;
+      setTimeout(() => {
+        if (child && child.st === st) render();
+      }, 400);
+    }
+  } else {
+    try {
+      tone(240, 0.12);
+    } catch (e) {}
+    if (el) {
+      el.classList.remove("wob");
+      void el.offsetWidth;
+      el.classList.add("wob");
+    }
+    say(st.mode === "mat" ? "Bu değil" : "Bu " + b.v);
+  }
+}
+function ogDu(k, i) {
+  const st = child.st;
+  if (st.lock) return;
+  const arr = k ? st.o2 : st.q.opts;
+  if (arr[i] !== st.q.t) {
+    try {
+      tone(220, 0.15);
+    } catch (e) {}
+    return;
+  }
+  st.lock = 1;
+  st.p[k]++;
+  st.win = k;
+  try {
+    tone(k ? 500 : 800, 0.12);
+    tone(k ? 650 : 1100, 0.15, 0.12);
+  } catch (e) {}
+  say((k ? "Öğretmen" : S.settings.student || "Mete") + " bildi! " + st.q.t);
+  render();
+  setTimeout(() => {
+    if (child.st !== st) return;
+    st.win = null;
+    if (st.p[k] >= 5) {
+      st.sc = st.p[0];
+      return ogWin(st, (k ? "Öğretmen" : S.settings.student || "Mete") + " kazandı! 🏆");
+    }
+    st.q = null;
+    render();
+  }, 1500);
+}
+function ogFareGo() {
+  const st = child.st;
+  clearInterval(st.tm);
+  st.i = -1;
+  const tick = () => {
+    if (!child || child.st !== st) {
+      clearInterval(st.tm);
+      return;
+    }
+    st.i++;
+    if (st.i >= st.row.length) {
+      clearInterval(st.tm);
+      st.tm = null;
+      st.sc = (st.sc || 0) + 1;
+      addStar(2);
+      celebrate("Fare peyniri buldu! 🧀", "🐭");
+      render();
+      return;
+    }
+    try {
+      tone(700, 0.05);
+    } catch (e) {}
+    render();
+  };
+  st.tm = setInterval(tick, st.sp);
+  tick();
+}
+function ogFareStop() {
+  const st = child.st;
+  clearInterval(st.tm);
+  st.tm = null;
+  render();
+}
+function ogTah(i) {
+  const st = child.st;
+  if (st.lock) return;
+  const ok = st.opts[i] === st.w;
+  st.res = { i, ok };
+  if (ok) {
+    st.lock = 1;
+    st.sc += Math.max(1, heceOf(st.w.w).length - st.k + 1);
+    addStar(1);
+    say("Evet! " + st.w.w);
+    render();
+    setTimeout(() => {
+      st.lock = 0;
+      st.r++;
+      st.w = null;
+      if (st.r >= 5) return ogWin(st, "Kelime dedektifi!");
+      render();
+    }, 1500);
+  } else {
+    say("Bir hece daha açalım.");
+    if (st.k < heceOf(st.w.w).length) st.k++;
+    render();
+  }
+}
+function ogTer(n) {
+  const st = child.st,
+    e = st.e;
+  st.pick = n;
+  if (n === e.r) {
+    st.sc++;
+    addStar(1);
+    try {
+      tone(660, 0.1);
+      tone(990, 0.15, 0.1);
+    } catch (x) {}
+    say(`Dengede! ${SAYI[e.a]} ${e.op === "+" ? "artı" : "eksi"} ${SAYI[e.b]}, ${SAYI[e.r]}.`);
+    render();
+    setTimeout(() => {
+      if (child.st !== st) return;
+      st.r++;
+      st.e = null;
+      if (st.r >= 6) return ogWin(st, "Terazi ustası!");
+      render();
+    }, 1700);
+  } else {
+    say(n > e.r ? "Çok ağır geldi, daha küçük bir sayı." : "Hafif kaldı, daha büyük bir sayı.");
+    render();
+  }
+}
+function ogRitim() {
+  const st = child.st;
+  const w = st.ws[st.i];
+  const h = heceOf(w.w);
+  let k = 0;
+  st.h = -1;
+  clearInterval(st.tm);
+  st.tm = setInterval(() => {
+    if (!child || child.st !== st) {
+      clearInterval(st.tm);
+      return;
+    }
+    if (k < h.length) {
+      st.h = k;
+      try {
+        tone(180, 0.12, 0, 0.5);
+      } catch (e) {}
+      say(h[k]);
+      k++;
+      render();
+    } else {
+      clearInterval(st.tm);
+      st.tm = null;
+      st.h = h.length;
+      say(w.w);
+      render();
+    }
+  }, 900);
+}
+function ogRDikte(i) {
+  const w = child.st.ws[i];
+  const c = document.createElement("canvas");
+  c.width = 1400;
+  c.height = 1000;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, 1400, 1000);
+  g.font = '300px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillText(w.e, 700, 260);
+  [560, 780].forEach((y) => lines4(g, 100, y, 1200, 170));
+  openBoard({
+    bg: c.toDataURL("image/jpeg", 0.9),
+    title: "Resimli dikte",
+    fromChild: true,
+    kind: "yazi",
+    extra: `<button onclick="say('${Q(w.w)}')" title="Dinle">🔊</button>`,
+  });
+  say("Bu resmin adını yaz.");
+}
+const CZ = [
+  ["Dikey çizgi", "⬇️", "v"],
+  ["Yatay çizgi", "➡️", "h"],
+  ["Eğik çizgi", "↘️", "d"],
+  ["Ters eğik", "↙️", "d2"],
+  ["Dalga", "〰️", "w"],
+  ["Zikzak", "⚡", "z"],
+  ["Kemer (köprü)", "🌉", "a"],
+  ["Halka", "⭕", "o"],
+  ["Spiral", "🌀", "s"],
+  ["İlmek", "➰", "l"],
+  ["Merdiven", "🪜", "st"],
+  ["Tepe", "⛰️", "m"],
+];
+function ogCizgi(i) {
+  const t = CZ[i][2];
+  const W = 1400,
+    H = 1000;
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, W, H);
+  g.font = '600 46px "Comic Sans MS",sans-serif';
+  g.fillStyle = "#4f46e5";
+  g.fillText("✏️ " + CZ[i][0], 60, 70);
+  for (let r = 0; r < 4; r++) {
+    const y0 = 140 + r * 215,
+      h = 170;
+    lines4(g, 60, y0, W - 120, h);
+    g.save();
+    g.setLineDash([3, 12]);
+    g.lineWidth = 7;
+    g.lineCap = "round";
+    g.strokeStyle = r < 2 ? "#94a3b8" : "#cbd5e1";
+    g.beginPath();
+    const top = y0 + h * 0.33,
+      bot = y0 + h * 0.66,
+      mid = (top + bot) / 2;
+    const x0 = 100,
+      x1 = W - 100;
+    if (t === "v")
+      for (let x = x0; x < x1; x += 90) {
+        g.moveTo(x, top);
+        g.lineTo(x, bot);
+      }
+    else if (t === "h")
+      for (let x = x0; x < x1 - 80; x += 200) {
+        g.moveTo(x, mid);
+        g.lineTo(x + 150, mid);
+      }
+    else if (t === "d")
+      for (let x = x0; x < x1 - 40; x += 90) {
+        g.moveTo(x, top);
+        g.lineTo(x + 50, bot);
+      }
+    else if (t === "d2")
+      for (let x = x0 + 50; x < x1; x += 90) {
+        g.moveTo(x, top);
+        g.lineTo(x - 50, bot);
+      }
+    else if (t === "w") {
+      g.moveTo(x0, mid);
+      for (let x = x0; x < x1; x += 4) g.lineTo(x, mid + (Math.sin((x - x0) / 40) * (bot - top)) / 2);
+    } else if (t === "z") {
+      g.moveTo(x0, bot);
+      let up = 1;
+      for (let x = x0 + 50; x <= x1; x += 50) {
+        g.lineTo(x, up ? top : bot);
+        up = !up;
+      }
+    } else if (t === "a") {
+      for (let x = x0; x < x1 - 80; x += 110) {
+        g.moveTo(x, bot);
+        g.quadraticCurveTo(x + 45, top - 40, x + 90, bot);
+      }
+    } else if (t === "m") {
+      for (let x = x0; x < x1 - 80; x += 110) {
+        g.moveTo(x, top);
+        g.quadraticCurveTo(x + 45, bot + 40, x + 90, top);
+      }
+    } else if (t === "o") {
+      for (let x = x0 + 40; x < x1; x += 110) {
+        g.moveTo(x + (bot - top) / 2, mid);
+        g.arc(x, mid, (bot - top) / 2, 0, Math.PI * 2);
+      }
+    } else if (t === "s") {
+      for (let x = x0 + 60; x < x1 - 40; x += 170) {
+        for (let a = 0; a < Math.PI * 6; a += 0.15) {
+          const rr = a * 3.4;
+          const px = x + Math.cos(a) * rr,
+            py = mid + Math.sin(a) * rr;
+          a ? g.lineTo(px, py) : g.moveTo(px, py);
+        }
+      }
+    } else if (t === "l") {
+      g.moveTo(x0, bot);
+      for (let x = x0; x < x1 - 60; x += 90) {
+        for (let a = 0; a <= Math.PI * 2; a += 0.2) {
+          g.lineTo(x + 40 + Math.sin(a) * 30, bot - ((1 - Math.cos(a)) * (bot - top)) / 2);
+        }
+      }
+    } else if (t === "st") {
+      let x = x0,
+        y = bot;
+      g.moveTo(x, y);
+      while (x < x1 - 60) {
+        g.lineTo(x, y - (bot - top));
+        y -= 0;
+        x += 60;
+        g.lineTo(x, y - (bot - top));
+        g.lineTo(x, y);
+        x += 60;
+        g.lineTo(x, y);
+      }
+    }
+    g.stroke();
+    g.restore();
+    g.fillStyle = "#16a34a";
+    g.beginPath();
+    g.arc(
+      x0,
+      t === "v" || t === "d" || t === "m"
+        ? top
+        : t === "h" || t === "w" || t === "o" || t === "s"
+          ? mid
+          : bot,
+      9,
+      0,
+      7,
+    );
+    g.fill();
+  }
+  openBoard({ bg: c.toDataURL("image/jpeg", 0.9), title: CZ[i][0], fromChild: true, kind: "cizgi" });
+  say(CZ[i][0] + ". Yeşil noktadan başla, noktaların üstünden git.");
+}
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+.ogpick{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4vh;text-align:center}.ogt{font-size:90px}.ogpick h2{margin:0;font-size:34px}.ogpick p{margin:0;font-size:20px;color:#475569}
+.ogmodes{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px}.ogmodes button{border:0;background:#fff;border-radius:24px;padding:18px 26px;font-size:22px;font-weight:900;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 5px 0 #dfe3f3;cursor:pointer;min-width:160px}.ogmodes span{font-size:48px}.ogmodes small{font-size:13px;color:#f97316}
+.ogsc{font-size:20px;background:#fff;border-radius:999px;padding:6px 14px;box-shadow:0 3px 0 #dfe3f3}
+.ogq{font-size:clamp(40px,8vw,90px);font-weight:900;text-align:center;color:#1e293b}.ogbig{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:clamp(48px,10vw,120px);font-weight:900;color:#16a34a;text-shadow:0 4px 0 #fff;animation:attn .4s;pointer-events:none;z-index:50}
+.ogw{font-size:clamp(28px,4.5vw,54px);font-weight:900;font-family:"Andika","Comic Sans MS",sans-serif}.ogw.m{font-family:inherit}
+.pitch{position:relative;width:min(96vw,900px);height:min(56vh,480px);background:repeating-linear-gradient(90deg,#4ade80 0 60px,#22c55e 60px 120px);border-radius:24px;overflow:hidden;margin:0 auto;box-shadow:inset 0 0 0 6px #fff}
+.goals{position:absolute;top:14px;left:0;right:0;display:flex;justify-content:space-around}.goal{position:relative;width:28%;height:120px;border:6px solid #fff;border-bottom:0;background:#ffffff33;border-radius:8px 8px 0 0;cursor:pointer;display:flex;align-items:center;justify-content:center}.goal .net{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#fff3 0 2px,transparent 2px 12px),repeating-linear-gradient(-45deg,#fff3 0 2px,transparent 2px 12px)}.goal .ogw{position:relative;background:#fff;border-radius:14px;padding:4px 14px}.goal.gol{background:#fde04799}.goal.miss{background:#fecaca99}.goal em{position:absolute;font-size:50px;font-style:normal;top:30px}
+.ball{position:absolute;left:50%;bottom:60px;font-size:54px;transform:translateX(-50%);transition:all .6s cubic-bezier(.2,.8,.3,1)}.ball.go.g0{left:16%;bottom:72%}.ball.go.g1{left:50%;bottom:72%}.ball.go.g2{left:84%;bottom:72%}.kicker{position:absolute;left:44%;bottom:10px;font-size:54px}
+.goal1{position:absolute;top:14px;left:20%;right:20%;height:150px;border:6px solid #fff;border-bottom:0;background:#ffffff33;display:flex;align-items:center;justify-content:center}.goal1 .net{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#fff3 0 2px,transparent 2px 12px)}.keeper{font-size:70px;position:relative;transition:transform .5s}.keeper.dive{transform:translateX(120%) rotate(60deg)}.keeper.save{transform:scale(1.3)}.inball{position:absolute;font-size:50px;left:20%;animation:attn .4s}
+.ogh{position:absolute;top:180px;left:0;right:0;text-align:center;color:#fff;font-weight:900;font-size:20px;text-shadow:0 2px 0 #0004}
+.balls{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:20px}.sball{border:0;background:#fff;border-radius:22px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;cursor:pointer;box-shadow:0 5px 0 #15803d}.sball span{font-size:40px}.sball.shot{transform:translateY(-200px) scale(.6);transition:all .6s;opacity:.3}
+.bubbles{position:relative;width:min(96vw,1000px);height:62vh;margin:0 auto;overflow:hidden;background:linear-gradient(#e0f2fe,#bae6fd);border-radius:24px}.bub{position:absolute;bottom:-120px;width:110px;height:110px;border-radius:50%;border:3px solid #fff;background:radial-gradient(circle at 30% 30%,#fff,#7dd3fc66 60%,#38bdf833);font-size:30px;font-weight:900;color:#0c4a6e;cursor:pointer;animation:bubup linear infinite;box-shadow:inset -6px -8px 16px #0ea5e955}  .bub.popd{transform:scale(1.6);opacity:0;transition:all .25s}.bub.wob{border-color:#ef4444;background:radial-gradient(circle at 30% 30%,#fff,#fecaca 70%)}@keyframes bubup{from{bottom:-120px}to{bottom:110%}}
+.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;width:min(98vw,1100px);margin:0 auto;align-items:start}.dvs{font-size:50px;align-self:center}.dside{background:#fff;border-radius:24px;padding:12px;display:flex;flex-direction:column;gap:10px}.dside.s0{border-top:8px solid #4f46e5}.dside.s1{border-top:8px solid #f97316}.dwho{display:flex;justify-content:space-between;font-weight:900;font-size:22px}.dwho b{background:#fef3c7;border-radius:12px;padding:0 12px}.dside button{border:0;background:#f8fafc;border-radius:18px;padding:16px;cursor:pointer;box-shadow:0 4px 0 #e2e8f0}.dside button.ok{background:#bbf7d0}
+.frow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:1100px;margin:20px auto}.fc{position:relative;background:#fff;border-radius:18px;padding:22px 20px;font-size:clamp(28px,4.5vw,52px);font-weight:900;min-width:100px;text-align:center;box-shadow:0 4px 0 #e2e8f0;font-family:"Andika","Comic Sans MS",sans-serif;transition:all .2s}.fc.on{background:#fef08a;transform:scale(1.12)}.fc.done{opacity:.45}.fc.cheese{background:#fffbeb}.mouse{position:absolute;top:-36px;left:50%;transform:translateX(-50%);font-size:40px}
+.ogctl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}.ogctl button{border:0;background:#fff;border-radius:16px;padding:12px 18px;font-size:18px;font-weight:800;box-shadow:0 4px 0 #dfe3f3;cursor:pointer}.ogctl .go{background:#22c55e;color:#fff;box-shadow:0 4px 0 #15803d}.ogctl button.on{outline:3px solid #4f46e5}
+.tslots{display:flex;gap:10px;justify-content:center;margin:20px 0}.tslots span{min-width:110px;padding:16px;border-radius:18px;background:#e2e8f0;font-size:48px;font-weight:900;text-align:center;color:#94a3b8;font-family:"Andika","Comic Sans MS",sans-serif}.tslots span.on{background:#fff;color:#0f172a;box-shadow:0 4px 0 #dfe3f3}.ogmore{display:block;margin:14px auto;border:0;background:#fef3c7;border-radius:16px;padding:12px 20px;font-weight:900;font-size:18px}
+.scale{position:relative;width:min(92vw,700px);height:260px;margin:10px auto}.beam{position:absolute;top:40px;left:5%;right:5%;height:12px;background:#92400e;border-radius:6px;transition:transform .6s;display:flex;justify-content:space-between}.pan{width:42%;margin-top:12px;background:#fde68a;border:4px solid #92400e;border-radius:0 0 60px 60px;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px}.pan b{font-size:44px}.pan small{font-size:18px;line-height:1.2;text-align:center}.post{position:absolute;left:50%;top:40px;width:14px;height:210px;background:#78350f;transform:translateX(-50%);border-radius:6px;z-index:-1}
+.numpad{display:grid;grid-template-columns:repeat(6,80px);gap:8px;justify-content:center}.numpad button{height:70px;border:0;background:#fff;border-radius:16px;font-size:32px;font-weight:900;box-shadow:0 4px 0 #dfe3f3}.numpad .ok{background:#bbf7d0}.numpad .no{background:#fecaca}
+.dlgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;max-width:1100px;margin:10px auto;width:100%}.dl{background:#fff;border-radius:20px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 #e2e8f0;border:0}.dl b{font-size:34px;font-family:"Andika","Comic Sans MS",sans-serif}.dl i{font-style:normal;font-size:56px}.dl div{display:flex;gap:6px}.dl div button{border:0;background:#eef2ff;border-radius:12px;width:54px;height:46px;font-size:22px}.dl.ok{background:#dcfce7}.dl.pic{cursor:pointer}.dl.pic b{font-size:18px;font-family:inherit}
+.rhy{display:flex;gap:8px;justify-content:center;align-items:center;font-size:clamp(40px,7vw,80px);font-weight:900;font-family:"Andika","Comic Sans MS",sans-serif}.rhy span{padding:4px 12px;border-radius:16px;transition:all .15s}.rhy span.on{background:#fde047;transform:scale(1.2)}.rhy span.all{color:#16a34a}.rhy i{font-style:normal;color:#cbd5e1}
+@media (max-width:700px){.duel{grid-template-columns:1fr}.dvs{display:none}.numpad{grid-template-columns:repeat(4,64px)}}`;
+  document.head.appendChild(s);
+})();
+
+/* ================== v12.0 YILLIK PROGRAM — BU HAFTA NE YAPACAĞIM? ==================
+   19 Ekim 2026 haftasından yıl sonuna haftalık plan: Türkçe (Basara + sınıfta ANETİL), Matematik, Hayat Bilgisi, Mete'ye özel.
+   Bu hafta sarı gösterilir; tatil haftası işaretlenince program kayar; her hafta düzenlenebilir ve işaretlenir. */
+const PL_START = "2026-10-19";
+const PL_HC = [
+  "b",
+  "s",
+  "r",
+  "k",
+  "l",
+  "m",
+  "n",
+  "t",
+  "d",
+  "y",
+  "z",
+  "ç",
+  "c",
+  "g",
+  "ş",
+  "p",
+  "h",
+  "v",
+  "f",
+  "j",
+];
+const PL_TR = [
+  ...PL_HC.map(
+    (c, i) =>
+      `Basara: "${c}" heceleri (${["a", "e", "ı", "i", "o", "ö", "u", "ü"].map((v) => c + v).join(", ")}) + kapalı heceler (${["a", "e", "o", "u"].map((v) => v + c).join(", ")}); bu hecelerle kelime ve kısa cümle okuma`,
+  ),
+  "Okuma akıcılığı: hece ve kelime kartları, okuma hızını kaydet",
+  "Cümle okuma + noktalama (nokta, soru işareti)",
+  "Kısa metin okuma + 5N1K soruları",
+  "Dikte: hece ve kelime dikte, büyük harf kullanımı",
+  "Metin okuma + resim–metin ilişkisi",
+  "Sesli ve sessiz okuma, vurgu ve tonlama",
+  "Kelime dağarcığı: eş anlamlı / zıt anlamlı",
+  "5N1K ile hikâye anlatma (resimden hikâye)",
+  "Kısa yazı: 2–3 cümle ile kendini anlat",
+  "Okuduğunu anlama: metin + soru",
+  "Tekerleme ve şiir okuma",
+  "Yıl sonu okuma değerlendirmesi",
+  "Yaz için okuma listesi ve tekrar",
+  "Tekrar ve kutlama haftası",
+  "Tekrar haftası",
+];
+const PL_AN = [
+  "1. grup: A N E T İ L",
+  "1. grup sonu: L sesi + cümleler",
+  "2. grup: O K U",
+  "2. grup: R I M",
+  "3. grup: Ü S Ö",
+  "3. grup: Y D Z",
+  "4. grup: Ç B G",
+  "4. grup: Ş C P",
+  "5. grup: H Ğ V",
+  "5. grup: F J — tüm sesler tamam",
+  "Okuma akıcılığı",
+];
+const PL_MAT = [
+  "0–10 arası sayılar: sayma, nesne–sayı eşleme",
+  "Çok mu, az mı? Karşılaştırma (büyük, küçük, eşit)",
+  "0–20 arası sayılar, sonra/önce gelen sayı",
+  "Sıra sayıları ve ritmik sayma (2'şer, 5'er)",
+  "10'a kadar toplama: nesnelerle, onluk çerçeveyle",
+  "Toplama: sayı doğrusunda ileri zıplama",
+  "10'a tamamlama (onluk dostlar)",
+  "Toplama problemleri (resimli)",
+  "10'a kadar çıkarma: eksiltme, sayı doğrusunda geri",
+  "Çıkarma problemleri",
+  "Toplama–çıkarma ilişkisi, eşitlik terazisi",
+  "Eksik sayıyı bul (3 + ? = 7)",
+  "20'ye kadar toplama",
+  "20'ye kadar çıkarma",
+  "Geometrik şekiller: üçgen, kare, daire, dikdörtgen",
+  "Geometrik cisimler ve örüntüler",
+  "Konum ve yön: sağ, sol, ön, arka, alt, üst (Kod Yolu)",
+  "Onluk ve birlik, 100'e kadar sayılar",
+  "10'ar ritmik sayma, sayı tablosu",
+  "Uzunluk ölçme: uzun–kısa, karış, adım",
+  "Kütle: ağır–hafif, terazi",
+  "Sıvı ölçme: çok–az, dolu–boş",
+  "Zaman: günler, aylar, mevsimler",
+  "Saat: tam ve yarım saatler",
+  "Paralarımız: kuruş ve lira",
+  "Veri: resim grafiği",
+  "Veri: tablo ve sayım çizelgesi",
+  "Bütün, yarım, çeyrek",
+  "Toplama–çıkarma problemleri (tekrar)",
+  "Zihinden toplama–çıkarma oyunları",
+  "Yıl sonu matematik değerlendirmesi",
+  "Matematik oyunları haftası",
+  "Tekrar haftası",
+  "Tekrar haftası",
+  "Tekrar haftası",
+];
+const PL_HB = [
+  "Ben ve Okulum: okul kuralları, sınıf arkadaşlarım",
+  "Ben ve Okulum: duygularım, kendimi tanıtma",
+  "Ben ve Okulum: okulumuzu tanıyalım",
+  "Sağlığım ve Güvenliğim: kişisel temizlik, el yıkama",
+  "Sağlığım ve Güvenliğim: dengeli beslenme",
+  "Sağlığım ve Güvenliğim: trafik ve güvenli yol",
+  "Sağlığım ve Güvenliğim: acil durumlar, 112",
+  "Sağlığım ve Güvenliğim: uyku, oyun, hareket",
+  "Sağlığım ve Güvenliğim: tekrar",
+  "Ailem ve Toplum: ailemi tanıtıyorum",
+  "Ailem ve Toplum: evdeki görevlerim",
+  "Ailem ve Toplum: saygı, paylaşma, yardımlaşma",
+  "Ailem ve Toplum: bayramlar ve gelenekler",
+  "Ailem ve Toplum: komşuluk",
+  "Ailem ve Toplum: tekrar",
+  "Yaşadığım Yer ve Ülkem: evim ve adresim",
+  "Yaşadığım Yer ve Ülkem: mahallem, meslekler",
+  "Yaşadığım Yer ve Ülkem: Türk bayrağı, İstiklal Marşı",
+  "Yaşadığım Yer ve Ülkem: Atatürk",
+  "Yaşadığım Yer ve Ülkem: millî bayramlar",
+  "Yaşadığım Yer ve Ülkem: tekrar",
+  "Doğa ve Çevre: bitkiler ve büyüme",
+  "Doğa ve Çevre: hayvanlar ve bakımları",
+  "Doğa ve Çevre: mevsimler ve hava durumu",
+  "Doğa ve Çevre: su ve enerji tasarrufu",
+  "Doğa ve Çevre: geri dönüşüm",
+  "Doğa ve Çevre: tekrar",
+  "Bilim, Teknoloji ve Sanat: teknolojik araçlar",
+  "Bilim, Teknoloji ve Sanat: güvenli ekran kullanımı",
+  "Bilim, Teknoloji ve Sanat: buluşlar ve mucitler",
+  "Bilim, Teknoloji ve Sanat: sanat ve müzik",
+  "Bilim, Teknoloji ve Sanat: tekrar",
+  "Yıl sonu: neler öğrendim?",
+  "Yaz tatili planım",
+  "Tekrar haftası",
+];
+const PL_SAT = [
+  "Satranç tahtası ve piyon",
+  "Kale",
+  "Fil",
+  "Vezir",
+  "Şah",
+  "At (L hareketi)",
+  "Taşları dizme",
+  "Şah çekme",
+  "Taş alma oyunu",
+  "Mini maç",
+];
+const PL_ROB = [
+  "Kod Yolu: sağ–sol",
+  "Kod Yolu: yukarı–aşağı",
+  "Kod Yolu: engelli yol",
+  "Algoritma: sıralama",
+  "Örüntü ve döngü",
+  "Minik Robotçular projesi",
+];
+const PL_BOY = [
+  "satranc",
+  "robot",
+  "arac",
+  "hayvan",
+  "doga",
+  "yemek",
+  "mandala",
+  "piksel",
+  "sayi",
+  "hece",
+  "harf",
+];
+const plMon = (d) => {
+  const x = new Date(d);
+  x.setHours(12, 0, 0, 0);
+  const w = (x.getDay() + 6) % 7;
+  x.setDate(x.getDate() - w);
+  return x;
+};
+const plKey = (d) => {
+  const x = plMon(d);
+  return (
+    x.getFullYear() +
+    "-" +
+    String(x.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(x.getDate()).padStart(2, "0")
+  );
+};
+const PLAN = () => S.profile.plan || (S.profile.plan = { tatil: [], done: {}, note: {} });
+const OZEL = [
+  ["10-29", "🇹🇷 29 Ekim Cumhuriyet Bayramı"],
+  ["11-10", "🖤 10 Kasım Atatürk'ü Anma"],
+  ["11-24", "🍎 24 Kasım Öğretmenler Günü"],
+  ["12-31", "🎆 Yılbaşı"],
+  ["03-12", "🎼 12 Mart İstiklal Marşı'nın kabulü"],
+  ["03-18", "🎖️ 18 Mart Çanakkale Zaferi"],
+  ["03-21", "🌳 Orman Haftası"],
+  ["04-23", "🎈 23 Nisan Ulusal Egemenlik ve Çocuk Bayramı"],
+  ["05-19", "🏃 19 Mayıs Atatürk'ü Anma, Gençlik ve Spor Bayramı"],
+];
+function plWeeks() {
+  const P = PLAN();
+  const out = [];
+  const s = plMon(PL_START + "T12:00:00");
+  let k = 0;
+  for (let i = 0; i < 36; i++) {
+    const d = new Date(s);
+    d.setDate(s.getDate() + i * 7);
+    const key = plKey(d);
+    const e = new Date(d);
+    e.setDate(d.getDate() + 6);
+    if (e > new Date("2027-06-20T12:00:00")) break;
+    const tatil = P.tatil.includes(key);
+    const oz = OZEL.filter(([md]) => {
+      for (let j = 0; j < 7; j++) {
+        const x = new Date(d);
+        x.setDate(d.getDate() + j);
+        if (String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0") === md)
+          return true;
+      }
+      return false;
+    }).map((o) => o[1]);
+    out.push({ i, key, d, e, tatil, oz, k: tatil ? -1 : k });
+    if (!tatil) k++;
+  }
+  return out;
+}
+function plContent(k) {
+  if (k < 0) return null;
+  const ed = PLAN().note;
+  return {
+    tr: PL_TR[Math.min(k, PL_TR.length - 1)],
+    an: PL_AN[Math.min(Math.floor(k / 2), PL_AN.length - 1)],
+    mat: PL_MAT[Math.min(k, PL_MAT.length - 1)],
+    hb: PL_HB[Math.min(k, PL_HB.length - 1)],
+    sat: PL_SAT[k % PL_SAT.length],
+    rob: PL_ROB[k % PL_ROB.length],
+    boy: PL_BOY[k % PL_BOY.length],
+    hc: PL_HC[Math.min(k, PL_HC.length - 1)],
+  };
+}
+function plThis() {
+  const W = plWeeks();
+  const now = plKey(new Date());
+  return W.find((w) => w.key === now) || W[0];
+}
+const plFmtD = (d) => d.toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+function plRow(lbl, ic, txt, key, wk, act) {
+  const P = PLAN();
+  const dk = wk + ":" + key;
+  const done = !!P.done[dk];
+  return `<div class="plr ${done ? "done" : ""}"><button class="plck" onclick="plTog('${dk}')">${done ? "✅" : "⬜"}</button><div><small>${ic} ${lbl}</small><p>${esc(P.note[dk] || txt)}</p></div>${act ? `<button class="plgo" onclick="${act}">▶️</button>` : ""}</div>`;
+}
+function plWeekHTML(w, open) {
+  const c = plContent(w.k);
+  const P = PLAN();
+  const isNow = w.key === plKey(new Date());
+  if (!c)
+    return `<div class="plw tatil" id="pw_${w.key}"><div class="plh"><b>🏖️ Tatil haftası</b><span>${plFmtD(w.d)} – ${plFmtD(w.e)}</span><button onclick="plTatil('${w.key}')">Tatili kaldır</button></div></div>`;
+  const rows = [
+    plRow("Türkçe (Basara)", "📕", c.tr, "tr", w.key, `plGo('tr','${c.hc}')`),
+    plRow("Sınıfta ANETİL", "🔤", c.an, "an", w.key, "anOpen()"),
+    plRow("Matematik", "🔢", c.mat, "mat", w.key, "plGo('mat')"),
+    plRow("Hayat Bilgisi", "🌍", c.hb, "hb", w.key, "plGo('hb')"),
+    plRow("Satranç", "♟️", c.sat, "sat", w.key, "plGo('sat')"),
+    plRow("Robotik kodlama", "🤖", c.rob, "rob", w.key, "plGo('rob')"),
+    plRow(
+      "Boyama",
+      "🎨",
+      (BY_CATS.find((x) => x.k === c.boy) || { n: "" }).n + " boyama",
+      "boy",
+      w.key,
+      `plGo('boy','${c.boy}')`,
+    ),
+  ];
+  const n = ["tr", "an", "mat", "hb", "sat", "rob", "boy"].filter((k) => P.done[w.key + ":" + k]).length;
+  return `<div class="plw ${isNow ? "now" : ""} ${w.key < plKey(new Date()) ? "past" : ""}" id="pw_${w.key}"><div class="plh" onclick="plOpen('${w.key}')"><b>${isNow ? "⭐ BU HAFTA · " : ""}${w.k + 1}. hafta</b><span>${plFmtD(w.d)} – ${plFmtD(w.e)}</span><em>${n}/7</em></div>${w.oz.length ? `<div class="ploz">${w.oz.join(" · ")}</div>` : ""}${open ? `<div class="plb">${rows.join("")}<div class="plact"><button onclick="plTatil('${w.key}')">🏖️ Bu hafta tatil (program kayar)</button><button onclick="plEdit('${w.key}')">✏️ Düzenle</button></div></div>` : `<div class="plmini">📕 ${esc(c.tr.split(";")[0])}<br>🔢 ${esc(c.mat)}<br>🌍 ${esc(c.hb)}</div>`}</div>`;
+}
+const PLS = { open: null };
+function plOpen(k) {
+  PLS.open = PLS.open === k ? null : k;
+  plRender();
+}
+function plPanel() {
+  PLS.open = plThis().key;
+  plRender();
+  setTimeout(() => {
+    const e = document.getElementById("pw_" + PLS.open);
+    if (e) e.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, 120);
+}
+function plRender() {
+  let el = $("#plp");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "plp";
+    document.body.appendChild(el);
+  }
+  const W = plWeeks();
+  const P = PLAN();
+  const tot = W.filter((w) => !w.tatil).length * 7,
+    dn = Object.values(P.done).filter(Boolean).length;
+  el.innerHTML = `<div class="anin"><div class="anhd"><b>📅 Yıllık Program · ${esc(S.settings.student || "Mete")}</b><button class="x" onclick="$('#plp').remove();render()">✕</button></div><div class="plbar"><i style="width:${Math.round((dn * 100) / Math.max(1, tot))}%"></i><span>Yıl ilerlemesi: ${dn}/${tot}</span></div><p class="mut">Bu hafta sarı. Bir haftaya dokun, ayrıntıyı aç. ✅ ile işaretle, ▶️ ile ilgili çalışmayı aç. Tatil haftası seçersen program bir hafta kayar.</p>${W.map((w) => plWeekHTML(w, PLS.open === w.key)).join("")}</div>`;
+}
+function plTog(dk) {
+  const P = PLAN();
+  P.done[dk] = !P.done[dk];
+  save();
+  if ($("#plp")) plRender();
+  else render();
+}
+function plTatil(k) {
+  const P = PLAN();
+  const i = P.tatil.indexOf(k);
+  if (i >= 0) P.tatil.splice(i, 1);
+  else P.tatil.push(k);
+  save();
+  plRender();
+}
+function plEdit(k) {
+  const w = plWeeks().find((x) => x.key === k);
+  const c = plContent(w.k);
+  const P = PLAN();
+  const f = [
+    ["tr", "📕 Türkçe"],
+    ["an", "🔤 ANETİL"],
+    ["mat", "🔢 Matematik"],
+    ["hb", "🌍 Hayat Bilgisi"],
+    ["sat", "♟️ Satranç"],
+    ["rob", "🤖 Robotik"],
+  ];
+  modal(
+    `<h3>✏️ ${w.k + 1}. hafta</h3>${f.map(([x, l]) => `<label class="mut">${l}</label><textarea id="pe_${x}" rows="2">${esc(P.note[k + ":" + x] || c[x])}</textarea>`).join("")}<div class="mbtns"><button class="btn" onclick="plSaveEdit('${k}')">Kaydet</button><button class="btn ghost" onclick="closeModal()">Vazgeç</button></div>`,
+  );
+}
+function plSaveEdit(k) {
+  const P = PLAN();
+  ["tr", "an", "mat", "hb", "sat", "rob"].forEach((x) => {
+    const v = $("#pe_" + x).value.trim();
+    if (v) P.note[k + ":" + x] = v;
+  });
+  save();
+  closeModal();
+  plRender();
+}
+function plGo(kind, arg) {
+  const close = () => {
+    const e = $("#plp");
+    if (e) e.remove();
+  };
+  close();
+  if (kind === "boy") {
+    startChild();
+    return setTimeout(() => byMenu(arg), 300);
+  }
+  if (kind === "tr") {
+    if (arg && S.profile.method !== "anetil") {
+      const H = new Set(learnedSyl());
+      const add = ["a", "e", "ı", "i", "o", "ö", "u", "ü"].map((v) => arg + v);
+      if (
+        add.some((h) => !H.has(h)) &&
+        confirm(`Bu haftanın heceleri (${add.join(", ")}) Mete'nin öğrendiği hecelere eklensin mi?`)
+      ) {
+        S.profile.hece = [...new Set([...learnedSyl(), ...add])];
+        save();
+      }
+    }
+    startChild();
+    return setTimeout(() => {
+      child.act = "sub";
+      child.sub = "bs";
+      child.fromHub = false;
+      render();
+    }, 300);
+  }
+  const sub = { mat: "mat", hb: "hb", sat: "sat", rob: "kod" }[kind];
+  startChild();
+  setTimeout(() => {
+    child.act = "sub";
+    child.sub = sub;
+    child.fromHub = false;
+    render();
+  }, 300);
+}
+function plCard() {
+  const w = plThis();
+  if (!w) return "";
+  const c = plContent(w.k);
+  if (!c)
+    return `<section class="card plcard" onclick="plPanel()"><h3>📅 Bu hafta tatil 🏖️</h3><p class="mut">${plFmtD(w.d)} – ${plFmtD(w.e)} · Programı görmek için dokun</p></section>`;
+  const P = PLAN();
+  const dn = ["tr", "an", "mat", "hb", "sat", "rob", "boy"].filter((k) => P.done[w.key + ":" + k]).length;
+  return `<section class="card plcard"><div class="plch" onclick="plPanel()"><h3>📅 BU HAFTA · ${w.k + 1}. hafta</h3><span>${plFmtD(w.d)} – ${plFmtD(w.e)} · ${dn}/7 ✅ ›</span></div>${w.oz.length ? `<div class="ploz">${w.oz.join(" · ")}</div>` : ""}${plRow("Türkçe (Basara)", "📕", c.tr, "tr", w.key, `plGo('tr','${c.hc}')`)}${plRow("Matematik", "🔢", c.mat, "mat", w.key, "plGo('mat')")}${plRow("Hayat Bilgisi", "🌍", c.hb, "hb", w.key, "plGo('hb')")}<button class="btn ghost" style="width:100%;margin-top:6px" onclick="plPanel()">📅 Tüm yıllık program ve bu haftanın ayrıntısı</button></section>`;
+}
+const _vAna12 = vAna;
+vAna = function () {
+  const h = _vAna12();
+  const i = h.indexOf("<section");
+  return i >= 0 ? h.slice(0, i) + plCard() + h.slice(i) : plCard() + h;
+};
+const _vDers12 = vDers;
+vDers = function () {
+  return plCard() + _vDers12();
+};
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `
+#plp{position:fixed;inset:0;z-index:112;background:#f8fafc;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.plbar{position:relative;height:30px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:6px 0}.plbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#facc15,#22c55e)}.plbar span{position:relative;display:block;text-align:center;line-height:30px;font-weight:800;font-size:14px}
+.plw{background:#fff;border-radius:18px;margin:8px 0;box-shadow:0 2px 10px #0f172a0f;overflow:hidden;border:2px solid transparent}.plw.now{background:#fef9c3;border-color:#facc15;box-shadow:0 6px 22px #facc1555}.plw.past{opacity:.82}.plw.tatil{background:#ecfeff}
+.plh{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}.plh b{font-size:17px}.plh span{color:#64748b;font-size:14px;flex:1}.plh em{font-style:normal;font-weight:800;background:#fff;border-radius:999px;padding:2px 10px;font-size:13px}.plh button{border:0;background:#fff;border-radius:10px;padding:6px 10px}
+.ploz{margin:0 14px 8px;background:#fee2e2;color:#991b1b;border-radius:10px;padding:6px 10px;font-weight:700;font-size:14px}
+.plmini{padding:0 14px 12px;font-size:14px;color:#334155;line-height:1.5}.plb{padding:0 10px 10px}
+.plr{display:flex;align-items:flex-start;gap:8px;background:#ffffffcc;border-radius:12px;padding:8px;margin:5px 0}.plr small{font-weight:800;color:#64748b}.plr p{margin:2px 0 0;font-size:15px}.plr>div{flex:1}.plr.done p{text-decoration:line-through;opacity:.6}
+.plck{border:0;background:none;font-size:22px;cursor:pointer;padding:0}.plgo{border:0;background:#eef2ff;border-radius:10px;width:44px;height:40px;font-size:18px;cursor:pointer}
+.plact{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.plact button{border:0;background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;box-shadow:0 1px 4px #0f172a1a}
+.plcard{background:linear-gradient(135deg,#fef9c3,#fffbeb)!important;border:2px solid #facc15}.plch{cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px}.plch h3{margin:0;color:#854d0e}.plch span{color:#a16207;font-weight:700;font-size:14px}.plcard .plr{background:#ffffffb3}`;
+  document.head.appendChild(s);
+})();
+/* Erkek Türkçe ses tercihi (Windows: Microsoft Tolga; varsa Cem vb.) */
+pickVoice = function () {
+  try {
+    const vs = speechSynthesis.getVoices().filter((v) => /^tr/i.test(v.lang));
+    trVoice = vs.find((v) => /tolga|cem|ahmet|emre|mehmet|erkek|male/i.test(v.name)) || vs[0] || null;
+  } catch (e) {}
+};
+if ("speechSynthesis" in window) {
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
 
 /* ================== BAŞLAT ================== */
 (function boot() {
