@@ -7788,11 +7788,16 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "13.0",
+const APP_VER = "13.1",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 18803,
-  APP_KB = 1103;
+  APP_LINES = 18989,
+  APP_KB = 1111;
 const CHANGELOG = [
+  [
+    "13.1",
+    "24 Ekim 2026",
+    "Basara renkli heceler: çocuk ekranındaki tüm okuma yazıları hece hece siyah–kırmızı (ayarlanabilir); yeni Basara oyunları (Dinle-Kelimeyi Bul, Kısa Cümle Oku, Okuma Kartları); Basara oyunları 8 tur; okuma kartları Basara hece ve kelimeleriyle",
+  ],
   [
     "13.0",
     "24 Ekim 2026",
@@ -18783,6 +18788,187 @@ vAna = function () {
 @media (max-width:600px){.plpill{grid-template-columns:1fr auto auto}.plb2{grid-column:1/-1;grid-row:2;white-space:normal}.khero{grid-template-columns:1fr 1fr 1fr;gap:6px}.khero small{display:none}}`;
   document.head.appendChild(s);
 })();
+
+/* ================== v13.1 BASARA RENKLİ HECELER + DAHA ÇOK BASARA ÇALIŞMASI ==================
+   Çocuk ekranındaki tüm okuma yazıları hece hece renklenir: 1. hece siyah, 2. hece kırmızı, 3. siyah…  (ba·ba, a·ba, o·ba) */
+const HR_COL = () =>
+  S.settings.heceRenk === "mavi"
+    ? ["#1e3a8a", "#dc2626"]
+    : S.settings.heceRenk === "kapali"
+      ? null
+      : ["#111827", "#dc2626"];
+function hrWord(w) {
+  const C = HR_COL();
+  if (!C) return esc(w);
+  const m = w.match(/^([^\p{L}]*)([\p{L}]+)([^\p{L}]*)$/u);
+  if (!m) return esc(w);
+  const core = m[2];
+  let h;
+  try {
+    h = heceOf(core.toLocaleLowerCase("tr"));
+  } catch (e) {
+    h = [core];
+  }
+  if (!h || h.join("").length !== core.length) return esc(w);
+  let i = 0;
+  const parts = h.map((s, k) => {
+    const o = core.slice(i, i + s.length);
+    i += s.length;
+    return `<span class="hr" style="color:${C[k % 2]}">${esc(o)}</span>`;
+  });
+  return esc(m[1]) + parts.join("") + esc(m[3]);
+}
+const hrHTML = (t) =>
+  t
+    .split(/(\s+)/)
+    .map((x) => (/\s+/.test(x) ? x : hrWord(x)))
+    .join("");
+const HR_SKIP =
+  "h1,h2,h3,.kbar,.khero,.kws,.ktile,.ktn,.ogsc,.byhd,small,label,.dwho,.kback,.khome,.kq,.ogmodes,.ogctl,.akt,.akb,.byleg,.bytools,.ogh,.ogmore,.plw,.kworld h2,.qhint,.mouse,.plr,em,.khello";
+function hrScan() {
+  if (!HR_COL()) return;
+  const roots = document.querySelectorAll(".kmain,#ankart");
+  roots.forEach((r) =>
+    r.querySelectorAll("*").forEach((el) => {
+      if (el.children.length || el.dataset.hr || el.classList.contains("hr") || el.closest("[data-hr]"))
+        return;
+      const t = el.textContent;
+      if (!t || t.length > 80) return;
+      const s = t.trim();
+      if (!s || !/^[\p{L}\s,.!?'’"-]+$/u.test(s) || !/[aeıioöuüâî]/i.test(s)) return;
+      if (el.closest(HR_SKIP)) return;
+      if (/^(\p{L})\1$/iu.test(s)) return;
+      const fs = parseFloat(getComputedStyle(el).fontSize) || 0;
+      if (fs < 22) return;
+      el.dataset.hr = 1;
+      el.innerHTML = hrHTML(t);
+    }),
+  );
+}
+let _hrT = 0;
+new MutationObserver(() => {
+  cancelAnimationFrame(_hrT);
+  _hrT = requestAnimationFrame(hrScan);
+}).observe(document.body, { childList: true, subtree: true });
+function heceRenkAyar() {
+  const v = S.settings.heceRenk || "kirmizi";
+  modal(
+    `<h3>🎨 Hece renkleri</h3><p class="mut">Çocuk ekranındaki kelimeler hece hece renklenir (Basara yöntemi).</p><div class="hrprev">${["kirmizi", "mavi", "kapali"].map((k) => `<button class="${v === k ? "on" : ""}" onclick="S.settings.heceRenk='${k}';save();closeModal();toast('Kaydedildi')"><b>${k === "kapali" ? "baba" : `<span style="color:${k === "mavi" ? "#1e3a8a" : "#111827"}">ba</span><span style="color:#dc2626">ba</span>`}</b><small>${k === "kirmizi" ? "Siyah–kırmızı" : k === "mavi" ? "Lacivert–kırmızı" : "Renksiz"}</small></button>`).join("")}</div>`,
+  );
+}
+/* ---- Okuma kartları Basara'da Basara heceleri/kelimeleriyle ---- */
+const _akStart131 = akStart;
+akStart = function (kind) {
+  if (S.profile.method === "anetil") return _akStart131(kind);
+  const H = bsSyl(),
+    W = bsWords().concat(TRW.filter((x) => bsSet().has(heceOf(anLow(x.w))[0])).map((x) => x.w));
+  let items =
+    kind === "hece"
+      ? shuffle(mixSyl(Math.max(8, H.length))).slice(0, 20)
+      : kind === "kelime"
+        ? shuffle([...new Set(W)]).slice(0, 20)
+        : shuffle(bsPhrases()).slice(0, 10);
+  if (!items.length) return toast("Henüz yeterli içerik yok");
+  AK = { on: 1, kind, items, i: 0, res: {}, t0: Date.now(), cur: "", end: 0 };
+  akRender();
+  akSend();
+};
+function bsPhrases() {
+  const W = bsWords();
+  const P = [];
+  const A = AN_CUM.split(/[|\n]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const H = bsSet();
+  A.forEach((s) => {
+    const ws = s.replace(/[.,!?]/g, "").split(/\s+/);
+    if (ws.every((w) => heceOf(anLow(w)).every((h) => H.has(h)))) P.push(s);
+  });
+  const W2 = W.filter((w) => w.length > 1),
+    Wp = W2.filter((w) => picOf(w));
+  for (let i = 0; i < 12 && W2.length && Wp.length; i++) {
+    const a = W2[ri(W2.length)],
+      b = Wp[ri(Wp.length)];
+    if (a !== b) P.push(`${a[0].toLocaleUpperCase("tr") + a.slice(1)}, ${b}.`);
+  }
+  return [...new Set(P)];
+}
+/* ---- Yeni Basara oyunları ---- */
+topic("bs_dinlebul", "bs", "Dinle, Kelimeyi Bul", "🎧", () => {
+  let W = bsWords();
+  if (W.length < 3) W = W.concat(TRW.filter((x) => bsSet().has(heceOf(anLow(x.w))[0])).map((x) => x.w));
+  W = [...new Set(W)];
+  const opts = pickN(W, 3);
+  const t = opts[0];
+  return {
+    say: `${t}. Hangisi ${t}?`,
+    show: big("🎧"),
+    opts: shuffle(opts).map((o) => T(`<span class="qtxt">${esc(o)}</span>`, o === t, o)),
+    wide: true,
+    after: `Evet, ${t}!`,
+  };
+});
+topic("bs_cumle", "bs", "Kısa Cümle Oku", "📜", () => {
+  const P = bsPhrases();
+  const s = P.length ? P[ri(P.length)] : "Baba, aba.";
+  const last = anLow(
+    s
+      .replace(/[.,!?]/g, "")
+      .split(/\s+/)
+      .pop(),
+  );
+  const x = TRW.find((y) => y.w === last);
+  const pool = TRW.filter((y) => y.w !== last);
+  const opts = x ? shuffle([x, ...pickN(pool, 2)]) : pickN(TRW, 3);
+  const ans = x || opts[0];
+  return {
+    say: "Cümleyi oku. Son kelime hangi resim?",
+    sayBtn: s,
+    show: `<div class="qword" style="font-size:clamp(30px,6vw,66px)">${esc(s)}</div>`,
+    opts: opts.map((o) => T(o.e, o === ans, o.w)),
+    after: `Harika okudun! ${s}`,
+  };
+});
+topic("bs_kart", "bs", "Okuma Kartları", "🃏", null, { type: "tool" });
+["bs_dinle", "bs_ilk", "bs_resim", "bs_kelime", "bs_eksik", "bs_say", "bs_dinlebul", "bs_cumle"].forEach(
+  (k) => {
+    if (TOP[k]) TOP[k].rounds = 8;
+  },
+);
+const _stt131 = startTopic;
+startTopic = function (k) {
+  if (k === "bs_kart") {
+    child.topic = null;
+    return akStart("kelime");
+  }
+  return _stt131(k);
+};
+/* teacher shortcut: hece renk ayarı Basara kartında */
+const _vDers131 = vDers;
+vDers = function () {
+  return (
+    _vDers131().replace("🔤 ANETİL Okuma-Yazma Merkezi</h3>", "🔤 ANETİL Okuma-Yazma Merkezi</h3>") +
+    `<section class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="heceRenkAyar()"><b style="font-size:34px"><span style="color:#111827">ba</span><span style="color:#dc2626">ba</span></b><div><h3 style="margin:0">🎨 Hece renkleri (Basara)</h3><p class="mut" style="margin:2px 0 0">Çocuk ekranında heceler siyah–kırmızı renklenir · değiştirmek için dokun</p></div></section>`
+  );
+};
+(function () {
+  const s = document.createElement("style");
+  s.textContent = `.hr{font-weight:inherit}.hrprev{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.hrprev button{border:2px solid #e2e8f0;background:#fff;border-radius:16px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:4px}.hrprev button.on{border-color:#4f46e5;background:#eef2ff}.hrprev b{font-size:36px;font-family:"Andika","Comic Sans MS",sans-serif}`;
+  document.head.appendChild(s);
+})();
+ogWords = function () {
+  if (S.profile.method === "anetil") {
+    let W = anWords().filter((w) => w.length > 1);
+    if (W.length < 4) W = W.concat(TRW.slice(0, 30).map((x) => x.w));
+    return [...new Set(W)];
+  }
+  const H = bsSet();
+  let W = bsWords().filter((w) => w.length > 1);
+  if (W.length < 6)
+    W = W.concat(TRW.filter((x) => H.has(heceOf(anLow(x.w))[0]) && heceOf(x.w).length <= 3).map((x) => x.w));
+  if (W.length < 4) W = W.concat(TRW.slice(0, 20).map((x) => x.w));
+  return [...new Set(W)];
+};
 
 /* ================== BAŞLAT ================== */
 (function boot() {
