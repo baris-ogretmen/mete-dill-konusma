@@ -7788,11 +7788,12 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "13.1",
+const APP_VER = "14.0",
   APP_DATE = "10 Ekim 2026",
-  APP_LINES = 18989,
+  APP_LINES = 19120,
   APP_KB = 1111;
 const CHANGELOG = [
+  ["14.0","1 Kasım 2026","Çalışma Kağıdı Merkezi: tüm çalışmalar (Basara, ANETİL, toplama-çıkarma, çizgi, bütün boyama sayfaları, Mete'nin çalışmaları, haftalık paket) A4 çalışma kağıdı olarak yazdırılır ya da PDF olarak paylaşılır; her sayfada \"Mete Öztürk için özel hazırlanmıştır\" etiketi; cevap anahtarı seçeneği; yazıcıya hızlı bağlanma rehberi; tahta ve boyama ekranlarında 🖨️ düğmesi"],
   [
     "13.1",
     "24 Ekim 2026",
@@ -18971,6 +18972,137 @@ ogWords = function () {
 };
 
 /* ================== BAŞLAT ================== */
+/* ================== v14.0 ÇALIŞMA KAĞIDI MERKEZİ — YAZDIR / PDF / VELİYE GÖNDER ==================
+   Tüm çalışmalar A4 çalışma kağıdı olur; her sayfanın altında "Mete Öztürk için özel hazırlanmıştır" etiketi.
+   Yazdır (AirPrint / Windows yazıcısı / PDF olarak kaydet) ya da tek dokunuşla PDF paylaş (WhatsApp, e-posta). */
+const PR={cap:null,sel:{},ans:false};
+if(!S.settings.prName)S.settings.prName='Mete Öztürk';
+const prName=()=>S.settings.prName||'Mete Öztürk';
+const prLabel=()=>`${prName()} için özel hazırlanmıştır`;
+const PRF='"Baloo 2",Nunito,"Segoe UI",sans-serif';
+const prWait=()=>new Promise(r=>setTimeout(r,0));
+const prImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
+/* ---- yakalama: sayfa üreticileri tahtayı açmak yerine resmi bize verir ---- */
+const _openBoard29=openBoard;openBoard=async function(o){if(PR.cap){const k=(o&&o.key)||'';PR.cap.push({bg:o.bg,title:o.title||'',ans:k.startsWith('ann:ws:')?(WSANS[k.slice(7)]||null):null});return}return _openBoard29(o)};
+async function prCapture(fn){const snd=S.settings.sound;S.settings.sound=false;PR.cap=[];try{await fn()}catch(e){console.warn(e)}const out=PR.cap;PR.cap=null;S.settings.sound=snd;return out}
+/* ---- A4 sayfa: başlık bandı + içerik + renkli etiket ---- */
+async function prCompose(src,title,n,N){const W=1240,H=1754;const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);
+ const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,'#6366f1');gr.addColorStop(1,'#ec4899');g.fillStyle=gr;g.fillRect(0,0,W,14);
+ g.fillStyle='#334155';g.font=`700 26px ${PRF}`;g.textBaseline='middle';g.textAlign='left';g.fillText(`👤 ${prName()}`,48,52);g.textAlign='center';g.fillStyle='#4f46e5';g.font=`800 28px ${PRF}`;g.fillText(title||'Çalışma Kağıdı',W/2,52);g.textAlign='right';g.fillStyle='#64748b';g.font=`600 24px ${PRF}`;g.fillText(new Date().toLocaleDateString('tr-TR'),W-48,52);
+ g.strokeStyle='#e2e8f0';g.lineWidth=2;g.beginPath();g.moveTo(48,84);g.lineTo(W-48,84);g.stroke();
+ const img=typeof src==='string'?await prImg(src):src;const top=96,bot=H-150,aw=W-80,ah=bot-top;if(img){const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;const s=Math.min(aw/iw,ah/ih);const w=iw*s,h=ih*s;g.drawImage(img,(W-w)/2,top+(ah-h)/2,w,h)}
+ const fy=H-118,fw=W-120,fx=60,fh=72;const fg=g.createLinearGradient(fx,0,fx+fw,0);['#ef4444','#f97316','#facc15','#22c55e','#3b82f6','#a855f7'].forEach((c2,i,a)=>fg.addColorStop(i/(a.length-1),c2));
+ g.fillStyle=fg;prRR(g,fx,fy,fw,fh,36);g.fill();g.fillStyle='#fff';prRR(g,fx+5,fy+5,fw-10,fh-10,31);g.fill();
+ g.fillStyle='#1e293b';g.textAlign='center';g.font=`800 30px ${PRF}`;g.fillText(`⭐ ${prLabel()} ⭐`,W/2,fy+fh/2+2);
+ g.fillStyle='#94a3b8';g.font=`600 20px ${PRF}`;g.fillText(`${esc2(S.settings.teacher||'Barış Öğretmen')} · Dil, Konuşma ve Okuma Programı${N>1?` · Sayfa ${n}/${N}`:''}`,W/2,H-22);
+ return c.toDataURL('image/jpeg',.9)}
+const esc2=s=>String(s||'');
+function prRR(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+/* cevap anahtarı sayfası */
+async function prAnsImg(bg,ans){const img=await prImg(bg);if(!img)return null;const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const g=c.getContext('2d');g.drawImage(img,0,0);g.fillStyle='#16a34a';g.textAlign='center';g.textBaseline='middle';g.font=`900 ${Math.round(c.width*.05)}px ${PRF}`;ans.forEach(a=>{g.strokeStyle='#fff';g.lineWidth=8;g.strokeText(a[2],a[0]*c.width,a[1]*c.height);g.fillText(a[2],a[0]*c.width,a[1]*c.height)});return c}
+/* ---- boyama sayfası resmi ---- */
+async function prBoyaImg(key,colored){const sv=BY.fills,sc=BY.cells;BY.fills=colored?Object.assign({},(S.byFills||{})[key]||{}):{};const b=byBuild(key);BY.fills=sv;BY.cells=sc;const S2=1100;
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${b.vb}" width="${S2}" height="${S2}"><defs>${byDefs()}</defs><style>${BYCSS_SVG}</style><g>${b.body}</g></svg>`;const im=await prImg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg));
+ const c=document.createElement('canvas');c.width=1200;c.height=1500;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,1200,1500);g.fillStyle='#ec4899';g.textAlign='center';g.textBaseline='middle';g.font=`900 64px ${PRF}`;g.fillText(`🎨 ${b.title}`,600,70);
+ g.fillStyle='#64748b';g.font=`600 32px ${PRF}`;g.fillText(b.kind==='ps'?'Toplamayı / çıkarmayı yap, sonucun rengiyle boya!':b.kind==='ph'?'Heceyi oku, hecenin rengiyle boya!':'En sevdiğin renklerle boya!',600,130);
+ if(im)g.drawImage(im,50,170,1100,1100);
+ if((b.kind==='ps'||b.kind==='ph')&&PX[key.split(':')[1]]){const P=PX[key.split(':')[1]];const ent=Object.entries(P.c);const bw=1100/ent.length;ent.forEach(([d,col],i)=>{const x=50+i*bw+bw/2;g.fillStyle=col;prRR(g,x-80,1320,60,60,12);g.fill();g.strokeStyle='#94a3b8';g.lineWidth=2;g.stroke();g.fillStyle='#1e293b';g.textAlign='left';g.font=`900 44px ${PRF}`;g.fillText(b.kind==='ps'?d:pxLabel('ph',d),x-8,1352)})}
+ return c}
+/* ---- Basara çalışma kağıtları ---- */
+const HRC=['#111827','#dc2626'];
+function prHece(g,w,x,y,align){const h=heceOf(anLow(w));let i=0;const parts=h.map(s=>{const o=w.slice(i,i+s.length);i+=s.length;return o});const tot=g.measureText(w).width;let xx=align==='center'?x-tot/2:x;const ta=g.textAlign;g.textAlign='left';parts.forEach((p,k)=>{g.fillStyle=HRC[k%2];g.fillText(p,xx,y);xx+=g.measureText(p).width});g.textAlign=ta}
+function bsPool(){const H=bsSet();let W=bsWords().filter(w=>w.length>1);TRW.forEach(x=>{const h=heceOf(anLow(x.w));if(h.length<=3&&H.has(h[0]))W.push(x.w)});return [...new Set(W)]}
+function bsPgOku(){const W=shuffle(bsPool()).slice(0,18);const P=anPage('Basara · Hece hece okuyalım');const {g,W:PW}=P;g.textBaseline='middle';
+ W.forEach((w,i)=>{const cx=250+(i%3)*450,cy=280+Math.floor(i/3)*170;g.fillStyle=i%2?'#f8fafc':'#fff7ed';prRR(g,cx-205,cy-70,410,140,26);g.fill();const e=picOf(w);g.font=`700 ${w.length>7?56:70}px ${ANTF}`;prHece(g,w,cx+(e?30:0),cy,'center');if(e){g.font=`60px ${ANEF}`;g.textAlign='center';g.fillText(e,cx-150,cy);}});
+ const Ph=shuffle(bsPhrases()).slice(0,4);let y=1330;g.textAlign='left';g.font=`800 40px ${ANTF}`;g.fillStyle='#f97316';g.fillText('📜 Cümleler',90,y);y+=80;g.font=`700 54px ${ANTF}`;Ph.forEach(s=>{let x=110;s.split(' ').forEach(w=>{prHece(g,w,x,y);x+=g.measureText(w+' ').width});y+=90});anShow(P,'Basara okuma')}
+function bsPgTablo(){const L=bsSyl();const nx=bsNext().slice(0,Math.max(0,24-L.length));const P=anPage('Basara · Öğrendiğim heceler');const {g}=P;g.textBaseline='middle';g.textAlign='center';
+ L.concat(nx).forEach((h,i)=>{const cx=180+(i%6)*210,cy=290+Math.floor(i/6)*220;const known=i<L.length;g.fillStyle=known?['#fee2e2','#fef3c7','#dcfce7','#dbeafe','#f3e8ff','#fce7f3'][i%6]:'#f8fafc';prRR(g,cx-90,cy-85,180,170,30);g.fill();if(!known){g.setLineDash([10,8]);g.strokeStyle='#cbd5e1';g.lineWidth=3;g.stroke();g.setLineDash([])}g.font=`900 90px ${ANTF}`;g.fillStyle=known?HRC[i%2]:'#cbd5e1';g.fillText(h,cx,cy)});
+ g.fillStyle='#64748b';g.font=`600 34px ${ANTF}`;g.fillText('Renkli kutular öğrendiğim heceler · kesik çizgililer sıradakiler',700,1880);anShow(P,'Basara hece tablosu')}
+function bsPgYaz(){const L=bsSyl().slice(-7);const P=anPage('Basara · Heceleri yazalım');const {g,W}=P;g.textBaseline='alphabetic';
+ L.forEach((h,r)=>{const y=210+r*245,hh=170;lines4(g,70,y,W-140,hh);g.font=`700 ${hh}px ${ANTF}`;g.fillStyle=HRC[r%2];g.fillText(h,100,y+hh*.66);for(let k=0;k<3;k++)dotted(g,h,420+k*300,y+hh*.66,hh)});anShow(P,'Basara hece yazma')}
+function bsPgEsle(){const pool=TRW.filter(x=>bsSet().has(heceOf(anLow(x.w))[0]));const seen=new Set();const it=shuffle(pool.length>=4?pool:TRW).filter(x=>!seen.has(x.e)&&seen.add(x.e)).slice(0,6);const rt=shuffle(it.slice());const P=anPage('Basara · Kelimeyi resmiyle eşleştir');const {g,H}=P;const ans=[];g.textBaseline='middle';
+ it.forEach((x,i)=>{const y=330+i*260;g.font=`700 72px ${ANTF}`;g.textAlign='left';prHece(g,x.w,120,y);g.fillStyle='#6366f1';g.beginPath();g.arc(600,y,16,0,7);g.fill();ans.push([.45,+(y/H).toFixed(3),'→'+(rt.indexOf(x)+1)])});
+ rt.forEach((x,i)=>{const y=330+i*260;g.fillStyle='#6366f1';g.beginPath();g.arc(860,y,16,0,7);g.fill();g.font=`170px ${ANEF}`;g.textAlign='center';g.fillText(x.e,1100,y);g.font=`700 36px ${ANTF}`;g.fillStyle='#94a3b8';g.fillText(String(i+1),1290,y-80)});anShow(P,'Basara eşleştirme',ans)}
+/* ---- katalog ---- */
+function wsMake(t,r,v){const d=document.createElement('div');d.style.display='none';d.innerHTML=[['wsT',t],['wsR',r],['wsV',v]].map(([id,val])=>`<div id="${id}"><button class="on" data-v="${val}"></button></div>`).join('');document.body.appendChild(d);try{wsGo()}finally{d.remove()}}
+const PR_CAT=()=>[
+ {k:'paket',i:'📦',n:'Bu haftanın paketi',c:'#facc15',items:[{id:'pk',n:'Haftalık paket (Basara + matematik + çizgi + boyama)',f:prWeekPack}]},
+ {k:'basara',i:'📕',n:'Basara okuma-yazma',c:'#f97316',items:[{id:'bsoku',n:'Hece hece okuma',f:bsPgOku},{id:'bstab',n:'Öğrendiğim heceler',f:bsPgTablo},{id:'bsyaz',n:'Hece yazma',f:bsPgYaz},{id:'bsesle',n:'Kelime–resim eşleştirme',f:bsPgEsle}]},
+ {k:'anetil',i:'🔤',n:'ANETİL (sınıfla birlikte)',c:'#e11d48',items:[['anPgSes','Ses kartı'],['anPgBul','Sesi bul'],['anPgHece','Hece tablosu'],['anPgHeceYaz','Hece yazma'],['anPgYazma','Harf yazma'],['anPgKelime','Kelime okuma'],['anPgPiramit','Okuma piramidi'],['anPgEksik','Eksik harf'],['anPgEsle','Eşleştirme'],['anPgCumle','Cümle okuma'],['anPgMetin','Metin + 5N1K'],['anPgDikte','Dikte']].map(([f,n])=>({id:f,n,f:()=>window[f]&&window[f]()}))},
+ {k:'mat',i:'🔢',n:'Toplama–çıkarma',c:'#3b82f6',items:[{id:'m1',n:'Resimli toplama (10)',f:()=>wsMake('top',10,'res')},{id:'m2',n:'Resimli çıkarma (10)',f:()=>wsMake('cik',10,'res')},{id:'m3',n:'Toplama (10)',f:()=>wsMake('top',10,'say')},{id:'m4',n:'Çıkarma (10)',f:()=>wsMake('cik',10,'say')},{id:'m5',n:'Karışık (10)',f:()=>wsMake('kar',10,'say')},{id:'m6',n:'Eksik sayı (10)',f:()=>wsMake('kar',10,'eks')},{id:'m7',n:'Toplama (20)',f:()=>wsMake('top',20,'say')},{id:'m8',n:'Karışık (20)',f:()=>wsMake('kar',20,'say')},{id:'m9',n:'Resimli toplama (5)',f:()=>wsMake('top',5,'res')}]},
+ {k:'cizgi',i:'✏️',n:'Çizgi çalışmaları',c:'#8b5cf6',items:CZ.map((z,i)=>({id:'cz'+i,n:z[0],f:()=>ogCizgi(i)}))},
+ ...BY_CATS.filter(c=>c.k!=='serbest').map(c=>({k:'by_'+c.k,i:c.i,n:'Boyama · '+c.n,c:'#ec4899',boya:1,items:byPageList(c.k).map(p=>({id:'by:'+p.key,n:p.n,key:p.key}))})),
+ {k:'eser',i:'🖼️',n:'Mete\'nin yaptıkları',c:'#16a34a',items:(S.works||[]).slice(0,24).map(w=>({id:'w:'+w.id,n:(w.title||'Çalışma')+' · '+new Date(w.date).toLocaleDateString('tr-TR'),work:w.id}))}];
+async function prWeekPack(){const w=plThis();const c=w?plContent(w.k):null;bsPgOku();bsPgYaz();const m=c&&/çıkarma/i.test(c.mat)?'cik':'top';wsMake(m,10,'res');ogCizgi(w?w.k%CZ.length:0);const cat=c?c.boy:'hayvan';const L=byPageList(cat).slice(0,2);for(const p of L){const im=await prBoyaImg(p.key,false);PR.cap.push({bg:im.toDataURL('image/jpeg',.9),title:'Boyama · '+p.n})}}
+/* ---- üretim ---- */
+async function prBuild(items){busy('Çalışma kağıtları hazırlanıyor…');const pages=[];try{for(const it of items){await prWait();
+  if(it.key){const c=await prBoyaImg(it.key,!!it.colored);pages.push({src:c,title:'Boyama · '+it.n});if(it.both){pages.push({src:await prBoyaImg(it.key,true),title:'Boyama · '+it.n+' (Mete boyadı)'})}continue}
+  if(it.work){try{const d=await idbGet('work:'+it.work);if(d&&d.img)pages.push({src:d.img,title:it.n})}catch(e){}continue}
+  if(it.src){pages.push(it);continue}
+  const cap=await prCapture(it.f);for(const p of cap){pages.push({src:p.bg,title:p.title||it.n});if(PR.ans&&p.ans&&p.ans.length){const a=await prAnsImg(p.bg,p.ans);if(a)pages.push({src:a,title:(p.title||it.n)+' · Cevap anahtarı'})}}}
+ const out=[];for(let i=0;i<pages.length;i++){busy(`Sayfa ${i+1}/${pages.length} hazırlanıyor…`);await prWait();out.push({img:await prCompose(pages[i].src,pages[i].title,i+1,pages.length),title:pages[i].title})}return out}finally{busy(false)}}
+async function prRun(items){if(!items.length)return toast('Önce bir çalışma seç');const pages=await prBuild(items);if(!pages.length)return toast('Sayfa oluşturulamadı');prShow(pages)}
+/* ---- önizleme + yazdır + PDF ---- */
+let PRV=[];
+function prShow(pages){PRV=pages;let el=$('#prv');if(!el){el=document.createElement('div');el.id='prv';document.body.appendChild(el)}
+ el.innerHTML=`<div class="prbar"><button class="x" onclick="prClose()">✕</button><b>🖨️ ${pages.length} sayfa hazır</b><button class="p1" onclick="prPrint()">🖨️ Yazdır</button><button class="p2" onclick="prPdf()">📄 PDF paylaş / indir</button><button class="p3" onclick="prHelp()">❓ Yazıcı bağla</button></div><div class="prpages">${pages.map((p,i)=>`<figure><img src="${p.img}" alt=""><figcaption>${i+1}. ${esc(p.title)}</figcaption></figure>`).join('')}</div>`}
+function prClose(){const e=$('#prv');if(e)e.remove()}
+function prPrint(){document.body.classList.add('printing');setTimeout(()=>{try{window.print()}catch(e){toast('Yazdırma açılamadı')}setTimeout(()=>document.body.classList.remove('printing'),800)},120)}
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
+async function prPdf(){if(!PRV.length)return;busy('PDF hazırlanıyor…');try{if(!window.jspdf)await loadJs('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');const doc=new jspdf.jsPDF({unit:'mm',format:'a4',compress:true});PRV.forEach((p,i)=>{if(i)doc.addPage();doc.addImage(p.img,'JPEG',0,0,210,297,undefined,'FAST')});
+ const name=`${prName().replace(/\s+/g,'_')}_Calisma_Kagitlari_${new Date().toISOString().slice(0,10)}.pdf`;const blob=doc.output('blob');busy(false);const file=new File([blob],name,{type:'application/pdf'});
+ if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:name,text:`${prLabel()} çalışma kağıtları 📚`});return}catch(e){if(e&&e.name==='AbortError')return}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('📄 PDF indirildi')}catch(e){busy(false);modal(`<h3>📄 PDF</h3><p>PDF aracı yüklenemedi (internet yok olabilir). Yine de PDF alabilirsin: <b>🖨️ Yazdır</b>'a bas, yazıcı yerine <b>"PDF olarak kaydet"</b> seç.</p><button class="btn" onclick="closeModal();prPrint()">🖨️ Yazdır / PDF olarak kaydet</button>`)}}
+function prHelp(){const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);modal(`<h3>🖨️ Yazıcıya hızlı bağlan</h3>
+ <div class="prh"><b>📱 iPhone / iPad (AirPrint)</b><ol class="steps"><li>Telefon ve yazıcı <b>aynı Wi-Fi</b>'da olsun (yazıcının Wi-Fi ışığı yanıyor olmalı).</li><li><b>🖨️ Yazdır</b>'a bas → <b>Yazıcı</b> satırına dokun → yazıcın listede çıkar, seç.</li><li>Kopya sayısını seç → sağ üstte <b>Yazdır</b>. Bir kez seçince iPhone yazıcıyı hatırlar.</li><li>Yazıcı çıkmazsa: yazıcıyı kapatıp aç, ya da yazıcının uygulamasını (HP Smart, Canon PRINT, Epson Smart Panel) kurup bağla.</li></ol></div>
+ <div class="prh"><b>💻 Tahta / bilgisayar (Windows)</b><ol class="steps"><li><b>🖨️ Yazdır</b>'a bas → <b>Hedef</b> listesinden yazıcını seç.</li><li>Listede yoksa: Başlat › Ayarlar › Bluetooth ve cihazlar › <b>Yazıcılar ve tarayıcılar › Cihaz ekle</b>. USB kablolu yazıcı takınca kendiliğinden eklenir.</li><li>Kağıt boyutu <b>A4</b>, kenar boşluğu <b>Yok</b>, <b>Arka plan grafikleri</b> açık olsun.</li></ol></div>
+ <div class="prh"><b>📄 Yazıcı yoksa — PDF</b><p>Hedef olarak <b>"PDF olarak kaydet"</b> seç ya da <b>📄 PDF paylaş</b>'a bas; WhatsApp'tan Sinan Bey'e gönderebilirsin.</p></div>
+ <button class="btn" style="width:100%" onclick="closeModal();prPrint()">🖨️ Şimdi yazdır</button>`);if(ios){}}
+/* ---- Çalışma Kağıdı Merkezi ---- */
+function prMerkez(){let el=$('#prm');if(!el){el=document.createElement('div');el.id='prm';document.body.appendChild(el)}const cats=PR_CAT();const n=Object.values(PR.sel).filter(Boolean).length;
+ el.innerHTML=`<div class="anin"><div class="anhd"><b>🖨️ Çalışma Kağıdı Merkezi</b><button class="x" onclick="$('#prm').remove()">✕</button></div>
+ <div class="prlab"><span>🏷️ Etiket:</span><b>⭐ ${esc(prLabel())} ⭐</b><button onclick="prNameEdit()">✏️</button></div>
+ <p class="mut">Seçtiğin çalışmalar A4 çalışma kağıdı olur. Yazdırabilir ya da PDF olarak veliye gönderebilirsin. Her seferinde kelimeler ve sorular yeniden karışır.</p>
+ ${cats.filter(c=>c.items.length).map(c=>`<section class="prc" style="--c:${c.c}"><div class="prch"><b>${c.i} ${esc(c.n)}</b><button onclick="prAll('${c.k}')">${c.items.every(it=>PR.sel[it.id])?'Hiçbiri':'Hepsi'}</button><button class="go" onclick="prCat('${c.k}')">🖨️ Hemen</button></div><div class="prit">${c.items.map(it=>`<button class="${PR.sel[it.id]?'on':''}" onclick="prTog('${Q(it.id)}')">${PR.sel[it.id]?'✅':'⬜'} ${esc(it.n)}</button>`).join('')}</div></section>`).join('')}
+ <label class="prans"><input type="checkbox" ${PR.ans?'checked':''} onchange="PR.ans=this.checked"> ✅ Cevap anahtarı sayfalarını da ekle (öğretmen için)</label>
+ <label class="prans"><input type="checkbox" ${PR.colored?'checked':''} onchange="PR.colored=this.checked"> 🎨 Boyamalarda Mete'nin boyadığı hâlini de ekle</label>
+ </div><div class="prfoot"><span>${n} çalışma seçildi</span><button onclick="PR.sel={};prMerkez()">Temizle</button><button class="go" onclick="prSelRun()">🖨️ Hazırla · Yazdır / PDF</button></div>`}
+function prFind(id){for(const c of PR_CAT())for(const it of c.items)if(it.id===id)return it}
+function prTog(id){PR.sel[id]=!PR.sel[id];const sc=$('#prm .anin')?$('#prm .anin').scrollTop:0;const y=$('#prm').scrollTop;prMerkez();$('#prm').scrollTop=y}
+function prAll(k){const c=PR_CAT().find(x=>x.k===k);const all=c.items.every(it=>PR.sel[it.id]);c.items.forEach(it=>PR.sel[it.id]=!all);const y=$('#prm').scrollTop;prMerkez();$('#prm').scrollTop=y}
+function prItem(it){return it.key?Object.assign({},it,{both:!!PR.colored&&!!(S.byFills||{})[it.key]}):it}
+function prCat(k){const c=PR_CAT().find(x=>x.k===k);prRun(c.items.map(prItem))}
+function prSelRun(){const its=[];PR_CAT().forEach(c=>c.items.forEach(it=>{if(PR.sel[it.id])its.push(prItem(it))}));prRun(its)}
+function prNameEdit(){modal(`<h3>🏷️ Etiketteki isim</h3><input id="prN" value="${esc(prName())}"><p class="mut">Çıktıda: "<b>[isim] için özel hazırlanmıştır</b>"</p><button class="btn" style="width:100%" onclick="S.settings.prName=$('#prN').value.trim()||'Mete Öztürk';save();closeModal();prMerkez()">Kaydet</button>`)}
+/* ---- her ekrana yazdır düğmesi ---- */
+async function prBoard(){if(!B.on)return;busy('Hazırlanıyor…');try{const c=await bComposite(1400);busy(false);const pages=[{src:c,title:B.title||'Çalışma'}];const k=B.key||'';if(PR.ans&&k.startsWith('ann:ws:')&&WSANS[k.slice(7)]){const a=await prAnsImg(c.toDataURL('image/jpeg',.9),WSANS[k.slice(7)]);if(a)pages.push({src:a,title:(B.title||'')+' · Cevap anahtarı'})}const out=[];for(let i=0;i<pages.length;i++)out.push({img:await prCompose(pages[i].src,pages[i].title,i+1,pages.length),title:pages[i].title});prShow(out)}catch(e){busy(false);toast(e.message)}}
+const _bUI29=bUI;bUI=function(){_bUI29();const t=document.querySelector('#board .btool');if(!t||B.guest||t.querySelector('.prb'))return;const sv=t.querySelector('.save');const b=document.createElement('button');b.className='prb';b.title='Yazdır / PDF';b.textContent='🖨️';b.onclick=prBoard;sv?t.insertBefore(b,sv):t.appendChild(b)};
+function prBoya(){const key=BY.key;const has=Object.keys(BY.fills||{}).length;modal(`<h3>🖨️ Boyamayı yazdır</h3><div class="mbtns" style="flex-direction:column"><button class="btn" onclick="closeModal();prRun([{key:'${Q(key)}',n:'${Q(byBuild(key).title)}'}])">⬜ Boş hâli (kağıtta boyasın)</button>${has?`<button class="btn ghost" onclick="closeModal();prRun([{key:'${Q(key)}',n:'${Q(byBuild(key).title)}',colored:1}])">🎨 Mete'nin boyadığı hâli</button><button class="btn ghost" onclick="closeModal();prRun([{key:'${Q(key)}',n:'${Q(byBuild(key).title)}',both:1}])">⬜🎨 İkisi birden</button>`:''}</div>`)}
+const _byRender29=byRender;byRender=function(){_byRender29();const t=document.querySelector('#boya .bytop');if(t&&!t.querySelector('.prb'))t.insertAdjacentHTML('afterbegin','<button class="prb" onclick="prBoya()" title="Yazdır / PDF">🖨️</button>')};
+const _byMenu29=byMenu;byMenu=function(cat){_byMenu29(cat);const s=document.querySelector('#boya .byhd > span:last-child');if(s&&cat&&cat!=='serbest')s.innerHTML=`<button class="prhb" onclick="prRun(byPageList('${cat}').map(p=>({key:p.key,n:p.n})))">🖨️ Hepsini yazdır</button>`};
+const _anSayfa29=AN_BODY.sayfa;AN_BODY.sayfa=()=>_anSayfa29()+`<div class="anact"><button class="btn" onclick="PR.sel={};PR_CAT().find(c=>c.k==='anetil').items.forEach(i=>PR.sel[i.id]=1);anClose();prMerkez()">🖨️ Sayfaları yazdır / PDF</button></div>`;
+quickRow=function(){return `<div class="qrow q5"><button onclick="startChild();setTimeout(()=>byMenu(),300)" class="q1"><span>🎨</span>Boyama</button><button onclick="startChild()" class="q2"><span>🎮</span>Oyunlar</button><button onclick="anOpen()" class="q3"><span>🔤</span>ANETİL</button><button onclick="plPanel()" class="q4"><span>📅</span>Program</button><button onclick="prMerkez()" class="q6"><span>🖨️</span>Yazdır</button></div>`};
+const _vRapor29=vRapor;vRapor=function(){const h=_vRapor29();return `<section class="card prcard" onclick="PR.sel={pk:1};prMerkez()"><div class="prico">🖨️</div><div><h3>Çalışma kağıtlarını veliye gönder</h3><p class="mut">Bu haftanın paketi ya da istediğin çalışmalar · PDF olarak WhatsApp'tan</p></div><span class="go">›</span></section>`+h};
+const _rmUI29=rmUI;rmUI=function(){_rmUI29();const r=document.querySelector('#remote .rman');if(r&&!r.querySelector('.prq'))r.insertAdjacentHTML('beforeend','<button class="prq" onclick="prMerkez()">🖨️ Yazdır</button>')};
+(function(){const s=document.createElement('style');s.textContent=`
+#prm{position:fixed;inset:0;z-index:113;background:#f8fafc;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:90px}
+.prlab{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:linear-gradient(90deg,#fee2e2,#fef3c7,#dcfce7,#dbeafe,#f3e8ff);border-radius:16px;padding:10px 14px;margin-bottom:6px}.prlab b{flex:1;font-size:17px}.prlab button{border:0;background:#fff;border-radius:10px;padding:6px 10px}
+.prc{background:#fff;border-radius:18px;padding:10px 12px;margin:10px 0;border-left:6px solid var(--c);box-shadow:0 2px 10px #0f172a0f}.prch{display:flex;align-items:center;gap:8px}.prch b{flex:1;font-size:17px}.prch button{border:0;background:#f1f5f9;border-radius:10px;padding:7px 12px;font-weight:700}.prch .go{background:var(--c);color:#fff}
+.prit{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.prit button{border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:8px 10px;font-size:14px;font-weight:600;cursor:pointer}.prit button.on{background:#eef2ff;border-color:#6366f1}
+.prans{display:block;background:#fff;border-radius:12px;padding:10px 12px;margin:6px 0;font-weight:700}
+.prfoot{position:fixed;left:0;right:0;bottom:0;z-index:114;display:flex;align-items:center;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#fff;box-shadow:0 -6px 20px #0f172a1a}.prfoot span{flex:1;font-weight:800}.prfoot button{border:0;background:#f1f5f9;border-radius:12px;padding:12px 14px;font-weight:800}.prfoot .go{background:linear-gradient(135deg,#6366f1,#ec4899);color:#fff;font-size:16px}
+#prv{position:fixed;inset:0;z-index:400;background:#e2e8f0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.prbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;background:#fff;box-shadow:0 4px 14px #0f172a1a}.prbar b{flex:1;font-size:18px}.prbar button{border:0;border-radius:12px;padding:11px 14px;font-weight:800;font-size:15px;cursor:pointer}.prbar .x{background:#f1f5f9}.prbar .p1{background:#16a34a;color:#fff}.prbar .p2{background:#4f46e5;color:#fff}.prbar .p3{background:#fef3c7}
+.prpages{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:16px}.prpages figure{margin:0;width:min(92vw,420px)}.prpages img{width:100%;aspect-ratio:210/297;background:#fff;box-shadow:0 8px 24px #0f172a33;border-radius:6px;display:block}.prpages figcaption{text-align:center;font-weight:700;color:#475569;margin-top:6px;font-size:14px}
+.prh{background:#f8fafc;border-radius:14px;padding:10px 12px;margin:8px 0}.prh p{margin:4px 0}
+.prb,.prhb{cursor:pointer}.prhb{border:0;background:#fff;border-radius:14px;padding:10px 14px;font-weight:800;box-shadow:0 3px 0 #e2e8f0}
+.qrow.q5{grid-template-columns:repeat(5,1fr)}.q6{background:linear-gradient(135deg,#16a34a,#0ea5e9)}
+.prcard{display:flex;align-items:center;gap:12px;cursor:pointer;background:linear-gradient(135deg,#ecfdf5,#eff6ff)!important;border:2px solid #86efac}.prcard h3{margin:0}.prcard p{margin:2px 0 0}.prico{font-size:40px}.prcard .go{margin-left:auto;font-size:26px;color:#16a34a}
+@media print{@page{size:A4;margin:0}html,body{background:#fff!important;padding:0!important;margin:0!important}body.printing>*:not(#prv){display:none!important}body.printing #prv{position:static!important;display:block!important;background:#fff;overflow:visible}body.printing .prbar,body.printing figcaption{display:none!important}body.printing .prpages{display:block;padding:0}body.printing .prpages figure{width:210mm;height:297mm;margin:0;page-break-after:always;break-after:page}body.printing .prpages img{width:210mm;height:297mm;box-shadow:none;border-radius:0}}
+@media (max-width:600px){.qrow.q5{grid-template-columns:repeat(3,1fr)}}`;document.head.appendChild(s)})();
+/* satranç Fil'i geri (hayvan Fil ile çakışmıştı) */
+BYV.fils={n:'Fil',cat:'satranc',s:[...BASE,['p','M72 150 Q78 116 90 106 L110 106 Q122 116 128 150 Z'],['e',100,104,27,7],['p','M100 30 Q132 56 122 82 Q112 98 100 98 Q88 98 78 82 Q68 56 100 30 Z'],['c',100,24,8],['l','M104 50 L116 72']]};
+(function(){const o={};['piyon','kale','at','fils','vezir','sah'].forEach(k=>{if(BYV[k]){o[k]=BYV[k];delete BYV[k]}});Object.assign(BYV,o)})();
 (function boot() {
   const q = new URLSearchParams(location.search);
   const t = q.get("tahta");
