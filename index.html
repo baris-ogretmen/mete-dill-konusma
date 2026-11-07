@@ -7794,11 +7794,12 @@ function worksSummary(list) {
 }
 
 /* ================== v5: SÜRÜM BİLGİSİ ================== */
-const APP_VER = "18.0",
-  APP_DATE = "3 Kasım 2026",
-  APP_LINES = 19401,
-  APP_KB = 1458;
+const APP_VER = "19.0",
+  APP_DATE = "7 Kasım 2026",
+  APP_LINES = 19547,
+  APP_KB = 1485;
 const CHANGELOG = [
+  ["19.0","7 Kasım 2026","Boyama: resmin etrafı (arka plan) da boyanıyor, beyaz kalmıyor; Görsel İşlem Atölyesi: toplama (nesneler, onluk çerçeve, sayı doğrusu, onluk-birlik blokları, şerit) ve çıkarma (balonlar, onluk çerçeve, geri zıplama, onluk bozma, karşılaştırma) 10 animasyonlu model, Oynat / Adım adım / Sen bul, telefonla kumanda; 4 yeni görsel toplama-çıkarma çalışma kağıdı"],
   ["18.0","3 Kasım 2026","Basara okuma kitapçıkları: her hikâyeye renkli kapak (İsa ile Sara çizimi, kitap numarası yıldızı, kitaptaki heceler, Mete'ye özel etiket); iç sayfalar gerçek kitap düzeninde (tam genişlik resim, başlıklı metin kutusu, köşede hece etiketi, yıldızlı sayfa numarası Bir-İki-Üç-Dört); kitaplıkta kapaklar, okuma kapakla başlıyor; PDF 150 sayfa"],
   ["17.0","3 Kasım 2026","Üzerinden Geç (iz sürme) eklendi: Mete'nin defterindeki gibi 4 çizgili satırda açık gri noktalı harfler ve yeşil başlangıç noktası; Basara 25 dersin her biri için 3 sayfa (hece + kelime, hikâyeden cümleler, hikâye sorularının cevapları) = 75 sayfa; tahtada parmakla/kalemle yazma, Çalışma Kağıdı Merkezi'nde 2 yeni bölüm, haftalık pakete eklendi; Andika okul yazısı çevrimdışı gömüldü"],
   ["16.0","2 Kasım 2026","Basara Hikâye Kitapları yenilendi: 25 resimli kitap, her biri 4 sayfa × 4 satır (toplam 400 satır), her satır yalnızca o derse kadar öğrenilen hecelerle; sahneli resimler (ev, mutfak, pazar, deniz, gece, orman, mağara…), kitap sayfası düzeninde baskı (renkli başlık bandı, büyük resim, başlık, renkli heceli satırlar, sayfa numarası) + soru sayfası; okuma ekranında satıra dokununca sesli okuma"],
@@ -19384,6 +19385,151 @@ const _hkRender33=hkRender;hkRender=function(){if(HK.pg===-1){const s=BS_HIKAYE.
 const _hkOpen33=hkOpen;hkOpen=function(d,pg,remote){_hkOpen33(d,pg==null?-1:pg,remote)};
 const _hkGo33=hkGo;hkGo=function(n){if(HK.pg===-1&&n<0)return;if(HK.pg===-1){HK.pg=0;hkRender();mrSend({t:'hk',d:HK.d,pg:0});return}if(HK.pg===0&&n<0){HK.pg=-1;hkRender();mrSend({t:'hk',d:HK.d,pg:-1});return}_hkGo33(n)};
 (function(){const s=document.createElement('style');s.textContent=`.hkbook img.cv{aspect-ratio:1200/1640;object-fit:cover}.hkcv{height:min(74vh,120vw);max-width:94vw;border-radius:18px;box-shadow:0 12px 30px #0003;cursor:pointer;animation:attn .35s}`;document.head.appendChild(s)})();
+/* ================== v19.0 · BOYAMA: arka plan da boyanır · GÖRSEL İŞLEM ATÖLYESİ (toplama–çıkarma, 10 animasyonlu model) ================== */
+/* ---- Boyama: resmin etrafı (arka plan) da tıklayınca boyanır, beyaz kalmaz ---- */
+const _byBuild34=byBuild;byBuild=function(key){const b=_byBuild34(key);if(b.kind!=='f'){const v=b.vb.split(' ');b.body=`<rect data-i="bg" x="${v[0]}" y="${v[1]}" width="${v[2]}" height="${v[3]}" fill="${BY.fills.bg||'#fff'}" style="stroke:none"/>`+b.body}return b};
+(function(){const s=document.createElement('style');s.textContent=`.bybox{padding:0!important;overflow:hidden}`;document.head.appendChild(s)})();
+
+/* ---- Görsel İşlem Atölyesi ---- */
+const GI={op:'top',m:'nes',a:3,b:4,k:0,steps:[],busy:false,tok:0,find:false,auto:false};
+const GI_M={top:[['nes','🧺','Nesneler'],['cer','🔟','Onluk çerçeve'],['dog','🐸','Sayı doğrusu'],['blk','🟦','Onluk–birlik'],['sek','📊','Şerit']],
+ cik:[['bal','🎈','Balonlar'],['cer','🔟','Onluk çerçeve'],['dog','🐰','Geri zıpla'],['blk','🟦','Onluk bozma'],['sek','📊','Karşılaştır']]};
+const GI_E=['🍎','🍓','🍊','🐥','⭐','🚗','⚽','🍪','🐟','🎁'];
+const GSV='http://www.w3.org/2000/svg';
+function gE(tag,at,par){const e=document.createElementNS(GSV,tag);for(const k in at)e.setAttribute(k,at[k]);if(par)par.appendChild(e);return e}
+function gT(par,txt,x,y,fs,fill,cls){const t=gE('text',{x,y,'font-size':fs,'text-anchor':'middle','dominant-baseline':'central',fill:fill||'#1e293b','font-weight':900},par);if(cls)t.setAttribute('class',cls);t.textContent=txt;return t}
+function gG(par,x,y,s,o){const g=gE('g',{class:'gi-it'},par);gTr(g,x,y,s==null?0:s);if(o!=null)g.style.opacity=o;return g}
+function gTr(g,x,y,s,r){g._x=x;g._y=y;g.style.transform=`translate(${x}px,${y}px) scale(${s==null?1:s})${r?` rotate(${r}deg)`:''}`}
+function gEm(par,e,fs){return gT(par,e,0,0,fs||56,'#000','gi-em')}
+function gBadge(par,n,col,dy){const g=gE('g',{transform:`translate(0,${dy||-48})`},par);gE('circle',{r:17,fill:col||'#1e293b'},g);gT(g,String(n),0,1,20,'#fff');return g}
+function gNum(n){return NUMW[n]||String(n)}
+function gCnt(n){try{tone(520+n*40,.06,0,.12)}catch(e){}say(gNum(n))}
+function giR(){return GI.op==='top'?GI.a+GI.b:GI.a-GI.b}
+/* --- modeller: (svg,a,b) → adımlar [{t, f:async w=>{}}] --- */
+const GI_B={
+ /* 🧺 Nesneler: iki sepet → birleştir */
+ top_nes(S2,a,b){const e=GI.e,items=[],cx=[270,730];
+  const bask=(x,y,w)=>{const g=gE('g',{class:'gi-fade'},S2);gE('path',{d:`M${x-w/2} ${y} L${x+w/2} ${y} L${x+w/2-30} ${y+90} L${x-w/2+30} ${y+90} Z`,fill:'#d97706',stroke:'#92400e','stroke-width':5},g);for(let i=1;i<4;i++)gE('line',{x1:x-w/2+20*i/1.2,y1:y+22*i,x2:x+w/2-20*i/1.2,y2:y+22*i,stroke:'#92400e','stroke-width':3,opacity:.5},g);return g};
+  const b1=bask(cx[0],330,320),b2=bask(cx[1],330,320);
+  const pos=(i,n,x)=>{const per=5,rows=Math.ceil(n/per),r=Math.floor(i/per),c=i%per,inRow=Math.min(per,n-r*per);return [x-(inRow-1)*72/2+c*72,300-(rows-r)*78+20]};
+  for(let i=0;i<a+b;i++){const L=i<a;const [x,y]=L?pos(i,a,cx[0]):pos(i-a,b,cx[1]);const g=gG(S2,x,y,0);gE('circle',{r:34,fill:L?'#fee2e2':'#dbeafe'},g);gEm(g,e,52);items.push(g)}
+  const show=async(w,from,n)=>{for(let i=0;i<n;i++){const g=items[from+i];gTr(g,g._x,g._y,1);g._b=gBadge(g,i+1,from?'#2563eb':'#dc2626');gCnt(i+1);await w(650)}};
+  return [{t:`Burada ${a} tane var. Sayalım!`,f:async w=>{await w(900);await show(w,0,a)}},
+   {t:`Şurada ${b} tane var. Sayalım!`,f:async w=>{await w(900);await show(w,a,b)}},
+   {t:'Hepsini bir sepete koyalım ve sayalım!',f:async w=>{items.forEach(g=>{if(g._b){g._b.remove();g._b=null}});b1.style.opacity=0;b2.style.opacity=0;const B=bask(500,380,a+b>10?900:560);B.style.opacity=0;await w(900);B.style.opacity=1;
+     const n=a+b,per=10;for(let i=0;i<n;i++){const r=Math.floor(i/per),c=i%per,inRow=Math.min(per,n-r*per);const x=500-(inRow-1)*80/2+c*80,y=(n>10?200:290)+r*86;gTr(items[i],x,y,1);items[i]._b=gBadge(items[i],i+1,'#16a34a');gCnt(i+1);await w(560)}}}]},
+ /* 🔟 Onluk çerçeve */
+ _frames(S2,n2){const F=[];const two=n2>10;const ox=two?[70,530]:[310];ox.forEach((x,k)=>{const g=gE('g',{},S2);gT(g,`${k+1}. onluk`,x+190,130,26,'#64748b');const fr=gE('rect',{x:x-6,y:154,width:392,height:164,rx:18,fill:'#fff',stroke:'#334155','stroke-width':5},g);for(let i=0;i<10;i++){gE('rect',{x:x+(i%5)*76+4,y:162+Math.floor(i/5)*76+2,width:72,height:72,rx:10,fill:'#f8fafc',stroke:'#cbd5e1','stroke-width':3},g)}F.push({x,fr})});
+  const cell=i=>{const f=F[Math.floor(i/10)],j=i%10;return [f.x+(j%5)*76+40,162+Math.floor(j/5)*76+38]};return {F,cell}},
+ top_cer(S2,a,b){const {F,cell}=GI_B._frames(S2,a+b);const cs=[];
+  const put=async(w,i,col,n)=>{const [x,y]=cell(i);const g=gG(S2,x,y,0);gE('circle',{r:29,fill:col,stroke:'#0003','stroke-width':3},g);gT(g,String(i+1),0,1,22,'#fff');cs.push(g);await w(30);gTr(g,x,y,1);gCnt(n);if(i===9){F[0].fr.setAttribute('stroke','#16a34a');F[0].fr.setAttribute('stroke-width',10);await w(500);say('On! Bir onluk doldu!');await w(1300)}await w(620)};
+  return [{t:`Önce ${a} tane kırmızı koyalım.`,f:async w=>{await w(900);for(let i=0;i<a;i++)await put(w,i,'#ef4444',i+1)}},
+   {t:`Şimdi ${b} tane mavi ekleyelim.`,f:async w=>{await w(900);for(let i=0;i<b;i++)await put(w,a+i,'#3b82f6',a+i+1)}},
+   ...(a+b>=10?[{t:a+b===10?'Tam bir onluk: 10!':`Bir onluk ve ${a+b-10} tane daha: ${a+b}!`,f:async w=>{await w(1200)}}]:[])]},
+ cik_cer(S2,a,b){const {F,cell}=GI_B._frames(S2,a);const cs=[];
+  return [{t:`${a} tane var. Sayalım!`,f:async w=>{await w(800);for(let i=0;i<a;i++){const [x,y]=cell(i);const g=gG(S2,x,y,0);gE('circle',{r:29,fill:'#ef4444',stroke:'#0003','stroke-width':3},g);cs.push(g);await w(30);gTr(g,x,y,1);gCnt(i+1);await w(560)}}},
+   {t:`${b} tanesini çıkaralım.`,f:async w=>{await w(900);for(let i=0;i<b;i++){const g=cs[a-1-i];const x=gE('path',{d:'M-24 -24 L24 24 M24 -24 L-24 24',stroke:'#1e293b','stroke-width':9,'stroke-linecap':'round'},g);g.style.opacity=.28;gCnt(i+1);await w(650)}}},
+   {t:'Kalanları sayalım.',f:async w=>{await w(800);for(let i=0;i<a-b;i++){const g=cs[i];gTr(g,g._x,g._y,1.18);g._b=gBadge(g,i+1,'#16a34a',-40);gCnt(i+1);await w(600)}}}]},
+ /* 🐸 / 🐰 Sayı doğrusu */
+ _line(S2,mx){const x0=70,x1=930,st=(x1-x0)/mx;gE('line',{x1:x0-20,y1:380,x2:x1+20,y2:380,stroke:'#334155','stroke-width':6,'stroke-linecap':'round'},S2);const lab=[];for(let i=0;i<=mx;i++){const x=x0+i*st;gE('line',{x1:x,y1:366,x2:x,y2:394,stroke:'#334155','stroke-width':4},S2);lab.push(gT(S2,String(i),x,425,mx>10?26:34,'#334155'))}return {X:i=>x0+i*st,lab}},
+ _jump(S2,a,b,dir,em){const mx=dir>0?(a+b>10?20:10):(a>10?20:10);const {X,lab}=GI_B._line(S2,mx);const an=gG(S2,X(a),330,0);gEm(an,em,64);
+  const mark=(i,col)=>{lab[i].setAttribute('fill',col);lab[i].setAttribute('font-size',mx>10?36:46)};
+  return [{t:`${a} sayısından başlıyoruz.`,f:async w=>{await w(700);gTr(an,X(a),330,1);mark(a,'#dc2626');say(gNum(a));await w(900)}},
+   {t:`${b} kere ${dir>0?'ileri':'geri'} zıplayalım.`,f:async w=>{await w(1000);let p=a;for(let i=0;i<b;i++){const q=p+dir,xa=X(p),xb=X(q),xm=(xa+xb)/2;const path=gE('path',{d:`M${xa} 352 Q${xm} ${mx>10?250:220} ${xb} 352`,fill:'none',stroke:dir>0?'#16a34a':'#ea580c','stroke-width':5,'stroke-dasharray':'400','stroke-dashoffset':'400',class:'gi-arc'},S2);requestAnimationFrame(()=>path.setAttribute('stroke-dashoffset','0'));
+     gT(S2,dir>0?'+1':'−1',xm,mx>10?262:236,24,dir>0?'#16a34a':'#ea580c');gTr(an,xm,mx>10?240:210,1);await w(260);gTr(an,xb,330,1);p=q;gCnt(i+1);await w(560)}mark(p,'#16a34a')}},
+   {t:`Nereye geldik?`,f:async w=>{await w(700);gTr(an,X(dir>0?a+b:a-b),330,1.3);await w(600)}}]},
+ top_dog(S2,a,b){return GI_B._jump(S2,a,b,1,'🐸')},
+ cik_dog(S2,a,b){return GI_B._jump(S2,a,b,-1,'🐰')},
+ /* 🟦 Onluk–birlik blokları */
+ _cube(S2,x,y,col){const g=gG(S2,x,y,0);gE('rect',{x:-17,y:-17,width:34,height:34,rx:5,fill:col,stroke:'#0004','stroke-width':3},g);gE('rect',{x:-11,y:-13,width:12,height:6,rx:3,fill:'#fff6'},g);return g},
+ _recol(g,col){g.querySelector('rect').setAttribute('fill',col)},
+ top_blk(S2,a,b){const C=[];for(let i=0;i<a;i++)C.push(GI_B._cube(S2,140+i*42,160,'#f59e0b'));for(let i=0;i<b;i++)C.push(GI_B._cube(S2,140+i*42,270,'#3b82f6'));const r=a+b;
+  const L1=gT(S2,'',70,160,34,'#b45309'),L2=gT(S2,'',70,270,34,'#1d4ed8');
+  const st=[{t:`${a} tane küp.`,f:async w=>{await w(700);for(let i=0;i<a;i++){gTr(C[i],C[i]._x,C[i]._y,1);gCnt(i+1);await w(450)}L1.textContent=a}},
+   {t:`${b} tane küp daha.`,f:async w=>{await w(700);for(let i=0;i<b;i++){const g=C[a+i];gTr(g,g._x,g._y,1);gCnt(i+1);await w(450)}L2.textContent=b}},
+   {t:'Hepsini yan yana dizelim.',f:async w=>{L1.textContent='';L2.textContent='';await w(500);for(let i=0;i<r;i++){gTr(C[i],80+i*44,440,1);gCnt(i+1);await w(380)}}}];
+  if(r>=10)st.push({t:'On küp bir onluk olur!',f:async w=>{await w(900);for(let j=0;j<10;j++){gTr(C[j],120,110+j*34,1);GI_B._recol(C[j],'#16a34a');await w(140)}const lb=gT(S2,'1 onluk',120,470,30,'#16a34a');await w(700);for(let k=10;k<r;k++){gTr(C[k],260+(k-10)*44,416,1)}if(r>10)gT(S2,`${r-10} birlik`,260+(r-11)*22,470,30,'#b45309');try{tone(660,.1);tone(990,.14,.1)}catch(e){}await w(1300)}});
+  return st},
+ cik_blk(S2,a,b){const T=Math.floor(a/10),O=a%10;const C=[];for(let j=0;j<T*10;j++){const g=GI_B._cube(S2,140,90+j*34,'#16a34a');g._rod=1;C.push(g)}for(let k=0;k<O;k++)C.push(GI_B._cube(S2,300+k*44,400,'#f59e0b'));
+  const st=[{t:T?`${a}: 1 onluk ve ${O} birlik.`:`${a} tane küp.`,f:async w=>{await w(800);C.forEach(g=>gTr(g,g._x,g._y,1));await w(900)}}];
+  if(T&&b>O)st.push({t:`${b} tane çıkaramıyoruz, onluğu bozalım!`,f:async w=>{await w(1200);const rod=C.filter(g=>g._rod);for(let j=0;j<10;j++){const g=rod[j],i=O+j;GI_B._recol(g,'#f59e0b');g._rod=0;await w(120)}
+     const ord=C.slice(10).concat(rod);C.splice(0,C.length,...ord);ord.forEach((g,i)=>gTr(g,140+(i%10)*48,240+Math.floor(i/10)*60,1));try{tone(300,.2)}catch(e){}await w(1000)}});
+  st.push({t:`${b} tane küpü çıkaralım.`,f:async w=>{await w(900);const vis=C.filter(g=>!g._rod);for(let i=0;i<b;i++){const g=vis[vis.length-1-i];gE('path',{d:'M-15 -15 L15 15 M15 -15 L-15 15',stroke:'#dc2626','stroke-width':7,'stroke-linecap':'round'},g);g.style.opacity=.25;gTr(g,g._x,g._y+60,1);gCnt(i+1);await w(600)}}});
+  st.push({t:'Kalanları sayalım.',f:async w=>{await w(800);let n=0;C.filter(g=>g._rod).forEach(g=>gTr(g,g._x,g._y,1.08));const rest=C.filter(g=>!g._rod&&g.style.opacity!=='0.25');if(T&&C.some(g=>g._rod)){n=10;say('on');await w(700)}for(const g of rest){n++;gTr(g,g._x,g._y,1.2);gCnt(n);await w(500)}}});
+  return st},
+ /* 📊 Şerit / karşılaştırma */
+ top_sek(S2,a,b){const r=a+b,bw=Math.min(44,860/r),x0=500-r*bw/2;const B=[];for(let i=0;i<r;i++){const g=gG(S2,x0+i*bw+bw/2,250,0);gE('rect',{x:-bw/2,y:-36,width:bw,height:72,fill:i<a?'#f87171':'#60a5fa',stroke:'#fff','stroke-width':3},g);B.push(g)}
+  const brace=(xa,xb,y,txt,col,up)=>{const g=gE('g',{},S2);gE('path',{d:`M${xa} ${y} Q${xa} ${y+(up?-22:22)} ${xa+20} ${y+(up?-22:22)} L${(xa+xb)/2-14} ${y+(up?-22:22)} L${(xa+xb)/2} ${y+(up?-40:40)} L${(xa+xb)/2+14} ${y+(up?-22:22)} L${xb-20} ${y+(up?-22:22)} Q${xb} ${y+(up?-22:22)} ${xb} ${y}`,fill:'none',stroke:col,'stroke-width':5},g);return gT(g,txt,(xa+xb)/2,y+(up?-70:72),48,col)};
+  return [{t:`${a} parça kırmızı.`,f:async w=>{await w(700);for(let i=0;i<a;i++){gTr(B[i],B[i]._x,B[i]._y,1);await w(110)}brace(x0,x0+a*bw,206,String(a),'#dc2626',1);say(gNum(a));await w(700)}},
+   {t:`${b} parça mavi.`,f:async w=>{await w(700);for(let i=a;i<r;i++){gTr(B[i],B[i]._x,B[i]._y,1);await w(110)}brace(x0+a*bw,x0+r*bw,206,String(b),'#2563eb',1);say(gNum(b));await w(700)}},
+   {t:'Hepsi birlikte kaç parça? Sayalım.',f:async w=>{const q=brace(x0,x0+r*bw,294,'?','#16a34a');await w(900);for(let i=0;i<r;i++){gT(B[i],String(i+1),0,0,bw>36?24:18,'#fff');gCnt(i+1);await w(420)}q.textContent=r}}]},
+ cik_sek(S2,a,b){const bw=Math.min(52,820/a),x0=500-a*bw/2;const A=[],Bb=[];for(let i=0;i<a;i++){const g=gG(S2,x0+i*bw+bw/2,170,0);gE('rect',{x:-bw/2,y:-34,width:bw,height:68,fill:'#f87171',stroke:'#fff','stroke-width':3},g);A.push(g)}for(let i=0;i<b;i++){const g=gG(S2,x0+i*bw+bw/2,300,0);gE('rect',{x:-bw/2,y:-34,width:bw,height:68,fill:'#60a5fa',stroke:'#fff','stroke-width':3},g);Bb.push(g)}
+  gT(S2,'',0,0,1);const lA=gT(S2,'',x0-50,170,44,'#dc2626'),lB=gT(S2,'',x0-50,300,44,'#2563eb');
+  return [{t:`Üstte ${a} parça var.`,f:async w=>{await w(700);A.forEach(g=>gTr(g,g._x,g._y,1));lA.textContent=a;say(gNum(a));await w(700)}},
+   {t:`Altta ${b} parça var.`,f:async w=>{await w(700);Bb.forEach(g=>gTr(g,g._x,g._y,1));lB.textContent=b;say(gNum(b));await w(700)}},
+   {t:'Üstteki fazla parçaları sayalım. Fark ne kadar?',f:async w=>{await w(900);for(let i=b;i<a;i++){A[i].querySelector('rect').setAttribute('fill','#facc15');gTr(A[i],A[i]._x,A[i]._y,1.12);gT(A[i],String(i-b+1),0,0,bw>36?26:18,'#713f12');gCnt(i-b+1);await w(560)}if(a>b){gE('path',{d:`M${x0+b*bw} 230 L${x0+a*bw} 230`,stroke:'#ca8a04','stroke-width':6,'stroke-dasharray':'10 8'},S2);gT(S2,'fark',x0+(a+b)*bw/2,262,30,'#ca8a04')}}}]},
+ /* 🎈 Balonlar */
+ cik_bal(S2,a,b){const cols=['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899'];const sp=Math.min(76,840/a);const Bs=[];gT(S2,'🧒',500,470,80,'#000');
+  for(let i=0;i<a;i++){const x=500-(a-1)*sp/2+i*sp,y=170+(i%2)*40;const str=gE('path',{d:`M${x} ${y+40} Q${x+(500-x)*.3} ${y+170} 500 432`,fill:'none',stroke:'#64748b','stroke-width':2.5},S2);str.style.opacity=0;str.setAttribute('class','gi-fade');const g=gG(S2,x,y,0);gE('ellipse',{rx:Math.min(30,sp/2-3),ry:Math.min(38,sp/2+4),fill:cols[i%6],stroke:'#0003','stroke-width':3},g);gE('ellipse',{rx:7,ry:11,cx:-9,cy:-14,fill:'#fff8'},g);gE('path',{d:'M-5 38 L5 38 L0 30 Z',fill:cols[i%6]},g);g.str=str;Bs.push(g)}
+  return [{t:`${a} tane balon var. Sayalım!`,f:async w=>{await w(800);for(let i=0;i<a;i++){gTr(Bs[i],Bs[i]._x,Bs[i]._y,1);Bs[i].str.style.opacity=1;gCnt(i+1);await w(520)}}},
+   {t:`Rüzgâr esti, ${b} balon uçtu!`,f:async w=>{await w(1000);for(let i=0;i<b;i++){const g=Bs[a-1-i];g.str.style.opacity=0;g.style.transition='transform 1.6s ease-in,opacity 1.6s';gTr(g,g._x+60-Math.random()*120,-160,1,(Math.random()-.5)*40);g.style.opacity=0;gCnt(i+1);await w(700)}}},
+   {t:'Kaç balon kaldı? Sayalım.',f:async w=>{await w(900);for(let i=0;i<a-b;i++){gTr(Bs[i],Bs[i]._x,Bs[i]._y,1.15);gBadge(Bs[i],i+1,'#16a34a',-62);gCnt(i+1);await w(560)}}}]}
+};
+function giLim(){const m=GI.m,top=GI.op==='top';if(top)return {a:[0,10],b:[0,10]};const mx=m==='bal'?12:20;return {a:[1,mx],b:[0,Math.min(GI.a,mx)]}}
+function giFix(){const L=giLim();GI.a=Math.max(L.a[0],Math.min(L.a[1],GI.a));const L2=giLim();GI.b=Math.max(L2.b[0],Math.min(L2.b[1],GI.b))}
+function giRand(){const M=Math.min(20,Math.max(10,mmax()));if(GI.op==='top'){GI.a=1+ri(M>10?9:6);GI.b=1+ri(Math.max(1,Math.min(M>10?9:9-GI.a+1,M-GI.a)));}else{const mx=GI.m==='bal'?12:M;GI.a=3+ri(mx-2);GI.b=1+ri(GI.a-1)}giFix()}
+function giOpen(op,m){if(op)GI.op=op;if(m)GI.m=m;if(!GI_M[GI.op].some(x=>x[0]===GI.m))GI.m=GI_M[GI.op][0][0];let el=$('#gia');if(!el){el=document.createElement('div');el.id='gia';document.body.appendChild(el)}giFix();giUI();giReset()}
+function giClose(remote){GI.tok++;const e=$('#gia');if(e)e.remove();if(!remote)mrSend({t:'gix'})}
+function giUI(){const el=$('#gia');const sym=GI.op==='top'?'+':'−';
+ el.innerHTML=`<div class="gihd"><button class="kback" onclick="giClose()">⬅ Geri</button><div class="giops"><button class="${GI.op==='top'?'on':''}" onclick="giSet({op:'top'})">➕ Toplama</button><button class="${GI.op==='cik'?'on':''}" onclick="giSet({op:'cik'})">➖ Çıkarma</button></div><span></span></div>
+ <div class="gims">${GI_M[GI.op].map(x=>`<button class="${GI.m===x[0]?'on':''}" onclick="giSet({m:'${x[0]}'})"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div>
+ <div class="gistage"><svg id="gisvg" viewBox="0 0 1000 520"></svg><div class="gicap" id="gicap"></div></div>
+ <div class="gibar"><div class="gieq"><span class="ginum"><button onclick="giSet({a:GI.a-1})">−</button><b>${GI.a}</b><button onclick="giSet({a:GI.a+1})">+</button></span><i>${sym}</i><span class="ginum"><button onclick="giSet({b:GI.b-1})">−</button><b>${GI.b}</b><button onclick="giSet({b:GI.b+1})">+</button></span><i>=</i><span class="gires" id="gires">?</span></div>
+ <div class="gibtn"><button onclick="giSet({rnd:1})">🎲</button><button class="play" onclick="giPlay()">▶ Oynat</button><button onclick="giStep()">👆 Adım ⏭</button><button class="find ${GI.find?'on':''}" onclick="giSet({find:!GI.find})">🙋 Sen bul</button><button onclick="giSet({})">🔄</button></div></div><div class="giopt" id="giopt"></div>`}
+function giSet(o,remote){if(o.op&&o.op!==GI.op){GI.op=o.op;GI.m=GI_M[GI.op][0][0];if(GI.op==='cik'&&GI.a<GI.b)GI.a=GI.b}if(o.m)GI.m=o.m;if(o.a!=null)GI.a=o.a;if(o.b!=null)GI.b=o.b;if(o.find!=null)GI.find=o.find;if(o.rnd){if(o.ra!=null){GI.a=o.ra;GI.b=o.rb}else giRand()}giFix();
+ if(!remote)mrSend({t:'gi',op:GI.op,m:GI.m,a:GI.a,b:GI.b,find:GI.find,rnd:o.rnd?1:0,ra:GI.a,rb:GI.b});if(!$('#gia'))return giOpen();giUI();giReset()}
+function giReset(){GI.tok++;GI.busy=false;GI.auto=false;const S2=$('#gisvg');if(!S2)return;S2.innerHTML='';GI.e=GI_E[(GI.a*3+GI.b)%GI_E.length];const fn=GI_B[GI.op+'_'+GI.m];const a=GI.a,b=GI.b,r=giR();
+ GI.steps=fn(S2,a,b).concat([{t:'',fin:1,f:async w=>{const res=$('#gires');res.textContent=r;res.classList.add('pop');try{tone(523,.1);tone(659,.1,.1);tone(784,.18,.2)}catch(e){}say(GI.op==='top'?`${gNum(a)} artı ${gNum(b)}, ${gNum(r)} eder!`:`${gNum(a)} eksi ${gNum(b)}, ${gNum(r)} kalır!`);$('#gicap').textContent=`${a} ${GI.op==='top'?'+':'−'} ${b} = ${r} 🎉`;addStar(1);await w(400)}}]);
+ GI.k=0;$('#gicap').textContent='▶ Oynat\'a ya da 👆 Adım\'a bas';$('#giopt').innerHTML='';say(GI.op==='top'?`${gNum(a)} artı ${gNum(b)} kaç eder?`:`${gNum(a)} eksi ${gNum(b)} kaç kalır?`)}
+async function giStep(remote){if(GI.busy||GI.k>=GI.steps.length)return false;if(!remote)mrSend({t:'gis'});const s=GI.steps[GI.k];if(s.fin&&GI.find){giAsk();return false}GI.k++;GI.busy=true;const tok=GI.tok;const w=ms=>new Promise(r=>setTimeout(r,ms)).then(()=>{if(tok!==GI.tok)throw 'stop'});if(s.t){$('#gicap').textContent=s.t;say(s.t)}try{await s.f(w)}catch(e){if(e!=='stop')console.error(e);return false}if(tok===GI.tok)GI.busy=false;return true}
+async function giPlay(remote){if(GI.busy)return;if(!remote)mrSend({t:'gip'});if(GI.k>=GI.steps.length){giReset();await new Promise(r=>setTimeout(r,600))}const tok=GI.tok;GI.auto=true;while(GI.k<GI.steps.length&&tok===GI.tok){const ok=await giStep(true);if(!ok)break;await new Promise(r=>setTimeout(r,700))}}
+function giAsk(){const r=giR();const o=new Set([r]);let t=0;while(o.size<3&&t++<50){const v=r+(ri(5)-2);if(v>=0&&v<=20)o.add(v)}const arr=[...o].sort(()=>Math.random()-.5);$('#gicap').textContent='Kaç? Doğru sayıya dokun!';say(GI.op==='top'?'Hepsi kaç oldu?':'Kaç kaldı?');
+ $('#giopt').innerHTML=arr.map(v=>`<button onclick="giAns(${v},this)">${v}</button>`).join('')}
+function giAns(v,btn){const r=giR();if(v===r){$('#giopt').innerHTML='';GI.find=false;giStep(true).then(()=>{GI.find=true;stCele('Harika! '+r+' 🎉')})}else{btn.classList.add('no');say('Bir daha sayalım.')}}
+/* telefon ↔ tahta */
+const _rmData34=rmData;rmData=function(d){if(d&&d.t==='gi'){if(!$('#gia')){GI.op=d.op;GI.m=d.m;GI.a=d.a;GI.b=d.b;GI.find=d.find;return giOpen()}giSet({op:d.op,m:d.m,a:d.a,b:d.b,find:d.find,rnd:d.rnd,ra:d.ra,rb:d.rb},true);return}if(d&&d.t==='gis'){giStep(true);return}if(d&&d.t==='gip'){giPlay(true);return}if(d&&d.t==='gix'){giClose(true);return}return _rmData34(d)};
+/* girişler */
+const _vDers34=vDers;vDers=function(){return _vDers34().replace('<div class="grid2"><button class="btn" onclick="wsPick()">','<button class="btn gibig" onclick="giOpen()">🎬 Görsel İşlem Atölyesi · 10 animasyonlu model</button><div class="grid2"><button class="btn" onclick="wsPick()">')};
+const _childHome34=childHome;childHome=function(){_childHome34();const g=document.querySelector('.ktile[onclick="startAct(\'hub\')"]');if(g&&!document.querySelector('.ktile.gik'))g.insertAdjacentHTML('beforebegin','<button class="ktile gik" onclick="giOpen()"><span class="kti">🧮</span><span class="ktn">Toplama Çıkarma</span></button>')};
+const _rmUI34=rmUI;rmUI=function(){_rmUI34();const r=document.querySelector('#remote .rman');if(r&&!r.querySelector('.giq'))r.insertAdjacentHTML('beforeend','<button class="giq" onclick="giOpen()">🧮 İşlem</button>')};
+/* ---- çalışma kağıdı: görsel toplama–çıkarma ---- */
+function giPage(op,kind){const W=1200,H=1640;const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);const col=op==='top'?'#2563eb':'#ea580c';
+ g.fillStyle=col;prRR(g,40,30,W-80,110,30);g.fill();g.fillStyle='#fff';g.font=`900 50px ${PRF}`;g.textAlign='center';g.textBaseline='middle';g.fillText(`${op==='top'?'➕ Toplama':'➖ Çıkarma'} · ${kind==='cer'?'Onluk çerçeve':'Sayı doğrusu'}`,W/2,86);
+ g.fillStyle='#475569';g.font=`700 30px ${PRF}`;g.fillText(kind==='cer'?(op==='top'?'Kırmızıları ve mavileri say, sonucu yaz.':'Çarpı olanlar gitti. Kalanları say, yaz.'):(op==='top'?'Kurbağa zıpladı. Nereye geldi? Yaz.':'Tavşan geri zıpladı. Nereye geldi? Yaz.'),W/2,180);
+ for(let k=0;k<6;k++){const bx=60+(k%2)*560,by=230+Math.floor(k/2)*460;let a,b;if(op==='top'){a=1+ri(7);b=1+ri(Math.max(1,(kind==='cer'?10:10)-a))}else{a=3+ri(8);b=1+ri(a-1)}
+  g.strokeStyle='#e2e8f0';g.lineWidth=4;prRR(g,bx,by,520,420,26);g.stroke();
+  if(kind==='cer'){const n=op==='top'?a+b:a;const cs=82,fx=bx+55,fy=by+50;g.strokeStyle='#334155';g.lineWidth=5;prRR(g,fx-6,fy-6,5*cs+12,2*cs+12,14);g.stroke();for(let i=0;i<10;i++){const x=fx+(i%5)*cs,y=fy+Math.floor(i/5)*cs;g.strokeStyle='#cbd5e1';g.lineWidth=3;g.strokeRect(x+3,y+3,cs-6,cs-6);if(i<n){g.fillStyle=op==='top'?(i<a?'#ef4444':'#3b82f6'):'#ef4444';g.beginPath();g.arc(x+cs/2,y+cs/2,30,0,7);g.fill();if(op==='cik'&&i>=a-b){g.strokeStyle='#1e293b';g.lineWidth=8;g.beginPath();g.moveTo(x+18,y+18);g.lineTo(x+cs-18,y+cs-18);g.moveTo(x+cs-18,y+18);g.lineTo(x+18,y+cs-18);g.stroke()}}}}
+  else{const x0=bx+40,x1=bx+480,st=(x1-x0)/10,ly=by+190;g.strokeStyle='#334155';g.lineWidth=5;g.beginPath();g.moveTo(x0-10,ly);g.lineTo(x1+10,ly);g.stroke();g.fillStyle='#334155';g.font=`800 26px ${PRF}`;for(let i=0;i<=10;i++){const x=x0+i*st;g.beginPath();g.moveTo(x,ly-12);g.lineTo(x,ly+12);g.stroke();g.fillText(i,x,ly+36)}
+   const d=op==='top'?1:-1;let p=a;g.strokeStyle=op==='top'?'#16a34a':'#ea580c';g.lineWidth=4;for(let i=0;i<b;i++){const xa=x0+p*st,xb=x0+(p+d)*st;g.beginPath();g.moveTo(xa,ly-14);g.quadraticCurveTo((xa+xb)/2,ly-90,xb,ly-14);g.stroke();p+=d}g.font=`52px ${ANEF}`;g.fillStyle='#000';g.fillText(op==='top'?'🐸':'🐰',x0+a*st,ly-110)}
+  g.fillStyle='#1e293b';g.font=`700 64px ${ANTF}`;g.textAlign='center';g.fillText(`${a} ${op==='top'?'+':'−'} ${b} =`,bx+220,by+345);g.strokeStyle='#94a3b8';g.lineWidth=4;prRR(g,bx+345,by+300,110,90,16);g.stroke();g.textAlign='center'}
+ const url=c.toDataURL('image/jpeg',.9),title=`🧮 ${op==='top'?'Toplama':'Çıkarma'} · ${kind==='cer'?'onluk çerçeve':'sayı doğrusu'}`;if(PR.cap)PR.cap.push({bg:url,title});else openBoard({bg:url,title,key:'gi:'+op+kind})}
+const _PR_CAT34=PR_CAT;PR_CAT=function(){const a=_PR_CAT34();const m=a.find(x=>x.k==='mat');if(m)m.items.push({id:'gi1',n:'Görsel toplama · onluk çerçeve',f:()=>giPage('top','cer')},{id:'gi2',n:'Görsel toplama · sayı doğrusu',f:()=>giPage('top','dog')},{id:'gi3',n:'Görsel çıkarma · onluk çerçeve',f:()=>giPage('cik','cer')},{id:'gi4',n:'Görsel çıkarma · sayı doğrusu',f:()=>giPage('cik','dog')});return a};
+(function(){const s=document.createElement('style');s.textContent=`
+#gia{position:fixed;inset:0;z-index:165;background:linear-gradient(160deg,#eef2ff,#f0fdf4);display:flex;flex-direction:column;overflow:hidden}
+.gihd{display:grid;grid-template-columns:120px 1fr 120px;align-items:center;padding:10px 14px}.giops{display:flex;gap:8px;justify-content:center}.giops button{border:0;border-radius:16px;padding:10px 20px;font-weight:900;font-size:20px;background:#fff;box-shadow:0 3px 0 #cbd5e1}.giops button.on{background:#4f46e5;color:#fff;box-shadow:0 3px 0 #3730a3}
+.gims{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 10px}.gims button{border:2px solid #e2e8f0;background:#fff;border-radius:14px;padding:6px 14px;font-weight:800;font-size:16px;display:flex;align-items:center;gap:6px}.gims button span{font-size:24px}.gims button.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3}
+.gistage{flex:1;min-height:0;position:relative;margin:8px 14px;background:#fff;border-radius:24px;box-shadow:0 8px 24px #0f172a14;display:flex;align-items:center;justify-content:center}
+#gisvg{width:100%;height:100%;max-height:100%}.gi-it{transition:transform .55s cubic-bezier(.3,1.35,.5,1),opacity .5s}.gi-fade{transition:opacity .6s}.gi-arc{transition:stroke-dashoffset .45s ease-out}
+.gi-em{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400}#gisvg text{font-family:"Baloo 2","Nunito",sans-serif}
+.gicap{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#1e293bdd;color:#fff;font-weight:800;font-size:clamp(16px,2.2vw,26px);padding:8px 20px;border-radius:999px;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+.gibar{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:4px 12px 12px}
+.gieq{display:flex;align-items:center;gap:10px;background:#fff;border-radius:22px;padding:6px 14px;box-shadow:0 4px 14px #0001}.gieq i{font-style:normal;font-weight:900;font-size:44px;color:#4f46e5}
+.ginum{display:flex;align-items:center;gap:4px}.ginum b{font-size:48px;min-width:56px;text-align:center}.ginum button{width:38px;height:38px;border-radius:50%;border:0;background:#e0e7ff;font-size:24px;font-weight:900;color:#3730a3}
+.gires{font-size:48px;font-weight:900;min-width:80px;text-align:center;background:#fef3c7;border-radius:16px;color:#b45309}.gires.pop{animation:attn .5s;background:#dcfce7;color:#15803d}
+.gibtn{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.gibtn button{border:0;border-radius:16px;padding:12px 16px;font-weight:900;font-size:18px;background:#fff;box-shadow:0 3px 0 #cbd5e1}.gibtn .play{background:#16a34a;color:#fff;box-shadow:0 3px 0 #15803d;font-size:20px}.gibtn .find.on{background:#f59e0b;color:#fff}
+.giopt{position:absolute;left:0;right:0;bottom:150px;display:flex;justify-content:center;gap:18px;pointer-events:none}.giopt button{pointer-events:auto;width:110px;height:110px;border-radius:28px;border:0;background:#fff;font-size:56px;font-weight:900;box-shadow:0 8px 0 #c7d2fe,0 10px 24px #0002}.giopt button.no{opacity:.35;transform:scale(.9)}
+.gibig{width:100%;margin-bottom:8px;background:linear-gradient(135deg,#4f46e5,#16a34a)!important;color:#fff!important}
+@media (max-width:700px){.gibar{gap:8px}.ginum b{font-size:34px;min-width:40px}.gieq i,.gires{font-size:34px}.gibtn button{padding:10px 12px;font-size:15px}.gims button{font-size:13px;padding:5px 9px}}`;document.head.appendChild(s)})();
 (function boot() {
   const q = new URLSearchParams(location.search);
   const t = q.get("tahta");
